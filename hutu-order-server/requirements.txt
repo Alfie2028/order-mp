@@ -5,4 +5,5 @@ bcrypt
 PyJWT
 httpx
 pydantic
+email-validator
 python-multipart

@@ -1,5 +1,6 @@
 {
   "setting": {
+    "urlCheck": false,
     "es6": true,
     "postcss": true,
     "minified": true,
@@ -19,6 +20,6 @@
     "ignore": [],
     "include": []
   },
-  "appid": "touristappid",
+  "appid": "wxada16b53d3e76b6e",
   "editorSetting": {}
 }

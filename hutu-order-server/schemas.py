@@ -2,24 +2,36 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 # ---- 认证 ----
+class SendCodeRequest(BaseModel):
+    email: EmailStr
+    purpose: str = Field(default="register", pattern="^(register|login)$")
+
+
 class UserRegister(BaseModel):
-    username: str
-    password: str
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+    password: str = Field(min_length=6, max_length=128)
 
 
 class UserLogin(BaseModel):
-    username: str
+    email: EmailStr
     password: str
+
+
+class LoginByCodeRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
 
 
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     username: str
+    email: str = ""
     role: str
     points: int
     avatar: str = ""

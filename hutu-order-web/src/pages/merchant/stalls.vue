@@ -36,7 +36,6 @@ function back() { uni.navigateBack() }
   <view class="page-shell merchant-sub">
     <view class="sub-header">
       <button class="top-back" @click="back">‹</button>
-      <text class="eyebrow">STALL MANAGEMENT</text>
       <text class="title">档口管理</text>
       <text class="subtitle">档口上架后，用户端点单页可见</text>
     </view>
@@ -44,7 +43,6 @@ function back() { uni.navigateBack() }
     <view class="list">
       <view v-for="s in stalls" :key="s.id" class="stall-card card" :class="{ off: !s.isActive }">
         <view class="head">
-          <text class="code">{{ s.code }}</text>
           <text class="name">{{ s.name }}</text>
           <text class="tag" :class="{ off: !s.isActive }">{{ s.isActive ? '营业中' : '已下架' }}</text>
         </view>
@@ -56,7 +54,7 @@ function back() { uni.navigateBack() }
       </view>
     </view>
 
-    <view class="fab" @click="add">＋ 新增档口</view>
+    <view class="fab" hover-class="hover-dim" @click="add">＋ 新增档口</view>
 
     <view v-if="editing" class="mask" @click="cancel">
       <view class="sheet card" @click.stop>
@@ -66,7 +64,7 @@ function back() { uni.navigateBack() }
         <view class="sheet-field"><text>描述</text><input v-model="form.description" placeholder="如 现点现炒，荤素搭配" maxlength="40" /></view>
         <view class="sheet-actions">
           <button class="sheet-btn" @click="cancel">取消</button>
-          <button class="sheet-btn primary" @click="save">保存</button>
+          <button class="sheet-btn primary last" @click="save">保存</button>
         </view>
       </view>
     </view>
@@ -76,7 +74,7 @@ function back() { uni.navigateBack() }
 <style scoped lang="scss">
 .merchant-sub { padding-bottom: 140rpx; }
 .sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; padding-bottom: 8rpx; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
 .eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
 .title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
@@ -84,23 +82,23 @@ function back() { uni.navigateBack() }
 .list { padding: 24rpx 28rpx; }
 .stall-card { margin-bottom: 18rpx; padding: 24rpx; }
 .stall-card.off { opacity: .55; }
-.head { display: flex; align-items: center; gap: 14rpx; }
-.code { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--brand-soft); color: var(--brand-700); font-size: 24rpx; font-weight: 800; }
-.name { flex: 1; font-size: 28rpx; font-weight: 750; }
+.head { display: flex; align-items: center; }
+.name { flex: 1; margin-right: 14rpx; font-size: 28rpx; font-weight: 700; }
 .tag { padding: 4rpx 14rpx; border-radius: 12rpx; background: #e3eee4; color: var(--green); font-size: 20rpx; }
 .tag.off { background: #eee9e4; color: var(--muted); }
 .desc { display: block; margin-top: 14rpx; font-size: 21rpx; color: var(--muted); }
-.actions { display: flex; justify-content: flex-end; gap: 12rpx; margin-top: 18rpx; }
-.act { min-width: 108rpx; height: 56rpx; border-radius: 28rpx; background: var(--oat-100); color: var(--brand-700); font-size: 22rpx; }
+.actions { display: flex; justify-content: flex-end; margin-top: 18rpx; }
+.act { display: flex; align-items: center; justify-content: center; min-width: 108rpx; height: 56rpx; margin-right: 12rpx; border-radius: 28rpx; background: var(--oat-100); color: var(--brand-700); font-size: 22rpx; }
 .act.warn { background: #f7ead7; color: #98642f; }
-.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; font-size: 28rpx; font-weight: 750; box-shadow: 0 12rpx 26rpx rgba(6,55,201,.3); }
+.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; font-size: 28rpx; font-weight: 700; box-shadow: 0 12rpx 26rpx rgba(6,55,201,.3); }
 .mask { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: flex-end; }
 .sheet { width: 100%; border-radius: 32rpx 32rpx 0 0; padding: 32rpx 30rpx calc(30rpx + env(safe-area-inset-bottom)); }
 .sheet-title { display: block; font-size: 32rpx; font-weight: 800; margin-bottom: 10rpx; }
-.sheet-field { display: flex; align-items: center; gap: 16rpx; min-height: 92rpx; border-bottom: 1rpx solid var(--line); }
-.sheet-field text { width: 110rpx; font-size: 24rpx; font-weight: 650; }
+.sheet-field { display: flex; align-items: center; min-height: 92rpx; border-bottom: 1rpx solid var(--line); }
+.sheet-field text { width: 110rpx; margin-right: 16rpx; font-size: 24rpx; font-weight: 600; }
 .sheet-field input { flex: 1; font-size: 24rpx; }
-.sheet-actions { display: flex; gap: 20rpx; margin-top: 30rpx; }
-.sheet-btn { flex: 1; height: 84rpx; border-radius: 42rpx; background: var(--oat-100); color: var(--ink); font-size: 27rpx; font-weight: 700; }
+.sheet-actions { display: flex; margin-top: 30rpx; }
+.sheet-btn { display: flex; align-items: center; justify-content: center; flex: 1; height: 84rpx; margin-right: 20rpx; border-radius: 42rpx; background: var(--oat-100); color: var(--ink); font-size: 27rpx; font-weight: 700; }
+.sheet-btn.last { margin-right: 0; }
 .sheet-btn.primary { background: var(--brand); color: #fff; }
 </style>

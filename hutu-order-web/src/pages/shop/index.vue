@@ -14,6 +14,8 @@ const windowHeight = uni.getSystemInfoSync().windowHeight
 const minMapHeight = Math.round(windowHeight * 0.22)
 const maxMapHeight = Math.round(windowHeight * 0.72)
 const mapHeightPx = ref(Math.round(windowHeight * 0.45))
+// scroll-view 在微信端需显式高度才能纵向滚动
+const listHeight = computed(() => Math.max(140, windowHeight - mapHeightPx.value - 213))
 let dragStartY = 0
 let dragStartHeight = 0
 
@@ -102,7 +104,7 @@ function renderPins(left, top) {
     if (isCampus || selected) {
       const label = document.createElement('div')
       label.textContent = p.title
-      label.style.cssText = `position:absolute;left:${px}px;top:${py - size / 2 - 20}px;transform:translateX(-50%);white-space:nowrap;background:rgba(255,255,255,.95);color:#35231b;font-size:11px;line-height:1;padding:3px 6px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.2)`
+      label.style.cssText = `position:absolute;left:${px}px;top:${py - size / 2 - 20}px;transform:translateX(-50%);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(255,255,255,.95);color:#35231b;font-size:11px;line-height:1;padding:3px 6px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.2)`
       pinsEl.appendChild(label)
     }
   })
@@ -221,7 +223,7 @@ function select(store) {
 }
 
 function handleMarkerTap(event) {
-  const markerId = Number(event.detail?.markerId ?? event.markerId)
+  const markerId = Number(event.detail && event.detail.markerId != null ? event.detail.markerId : event.markerId)
   if (markerId === 0) return recenterCampus()
   const store = state.stores[markerId - 1]
   if (store) select(store)
@@ -236,6 +238,13 @@ function recenterCampus() {
 }
 
 function goOrder() { uni.switchTab({ url: '/pages/order/index' }) }
+
+function enterStore(store) {
+  const apply = () => { setStore(store.id); goOrder() }
+  if (state.cart.length && state.currentStoreId !== store.id) {
+    uni.showModal({ title: '切换餐厅', content: '切换餐厅将清空当前购物车，是否继续？', success: ({ confirm }) => confirm && apply() })
+  } else apply()
+}
 </script>
 
 <template>
@@ -269,12 +278,12 @@ function goOrder() { uni.switchTab({ url: '/pages/order/index' }) }
         <view class="sheet-handle" />
       </view>
       <view class="sheet-heading">
-        <view><text class="sheet-kicker">DINING LOCATIONS</text><text class="sheet-title">选择就餐地点</text></view>
+        <view><text class="sheet-title">选择就餐地点</text></view>
         <view class="service-status"><text class="status-dot"></text><text>营业中</text></view>
       </view>
       <view class="search-box"><text class="search-symbol">⌕</text><input v-model="keyword" placeholder="搜索餐厅名称或地址" confirm-type="search" /><text v-if="keyword" class="clear" @click="keyword = ''">×</text></view>
       <view class="result-title"><text>附近餐厅</text><text class="result-count">{{ filteredStores.length }} 家</text></view>
-      <scroll-view scroll-y class="store-list">
+      <scroll-view scroll-y class="store-list" :style="{ height: listHeight + 'px' }">
         <view v-for="store in filteredStores" :key="store.id" class="store-item card" :class="{ selected: store.id === state.currentStoreId }" @click="select(store)">
           <image class="store-cover" :src="store.image" mode="aspectFill" />
           <view class="store-main">
@@ -282,12 +291,14 @@ function goOrder() { uni.switchTab({ url: '/pages/order/index' }) }
             <text class="store-address">{{ store.address }}</text>
             <view class="store-meta"><text :class="store.status">{{ store.status === 'open' ? '营业中' : '客流较多' }}</text><text>约 {{ store.waitMinutes }} 分钟</text></view>
             <text class="store-hours">{{ store.hours }}</text>
-            <view class="service-row"><text v-for="service in store.services" :key="service" class="chip">{{ service }}</text></view>
+            <view class="store-footer">
+              <view class="service-row"><text v-for="service in store.services" :key="service" class="chip">{{ service }}</text></view>
+              <text class="enter-btn" @click.stop="enterStore(store)">进店点餐 ›</text>
+            </view>
           </view>
-          <text v-if="store.id === state.currentStoreId" class="selected-mark">已选择</text>
+          <text v-if="store.id === state.currentStoreId" class="selected-mark">✓ 已选择</text>
         </view>
       </scroll-view>
-      <button class="primary-button confirm-button" @click="goOrder">进入 {{ currentStore.shortName }} 点餐</button>
     </view>
   </view>
 </template>
@@ -295,12 +306,10 @@ function goOrder() { uni.switchTab({ url: '/pages/order/index' }) }
 <style scoped lang="scss">
 .shop-page{height:100vh;overflow:hidden;padding:0;background:var(--oat-50);display:flex;flex-direction:column}
 .map-wrap{position:relative;flex:0 0 auto;overflow:hidden;background:#e6ebf6}.map-box{width:100%;height:100%}.vanilla-map{overflow:hidden}
-.zoom-control{position:absolute;z-index:3;right:24rpx;top:24rpx;display:flex;flex-direction:column;gap:8rpx}.zoom-btn{width:60rpx;height:60rpx;display:flex;align-items:center;justify-content:center;border:1rpx solid rgba(6,55,201,.12);border-radius:14rpx;background:#fff;box-shadow:0 6rpx 18rpx rgba(16,38,111,.16);color:#0637c9;font-size:32rpx;line-height:1;font-weight:700}
+.zoom-control{position:absolute;z-index:3;right:24rpx;top:24rpx;display:flex;flex-direction:column}.zoom-btn{width:60rpx;height:60rpx;margin-bottom:8rpx;display:flex;align-items:center;justify-content:center;border:1rpx solid rgba(6,55,201,.12);border-radius:14rpx;background:#fff;box-shadow:0 6rpx 18rpx rgba(16,38,111,.16);color:#0637c9;font-size:32rpx;line-height:1;font-weight:700}
 .recenter-button{position:absolute;z-index:3;right:24rpx;bottom:32rpx;width:68rpx;height:68rpx;padding:0;display:flex;align-items:center;justify-content:center;border:1rpx solid rgba(6,55,201,.1);border-radius:50%;background:#fff;box-shadow:0 8rpx 24rpx rgba(16,38,111,.17)}.recenter-button image{width:32rpx;height:32rpx}
-.shop-content{position:relative;z-index:4;flex:1 1 auto;min-height:0;margin-top:-26rpx;padding:12rpx 28rpx 170rpx;border-radius:32rpx 32rpx 0 0;background:var(--oat-50);box-shadow:0 -10rpx 35rpx rgba(34,48,42,.08);display:flex;flex-direction:column}.drag-zone{flex:0 0 auto;display:flex;align-items:center;justify-content:center;height:52rpx}.sheet-handle{width:68rpx;height:7rpx;border-radius:5rpx;background:#d6d2ca}.sheet-heading{display:flex;align-items:center;justify-content:space-between;margin:0 2rpx 19rpx}.sheet-heading text{display:block}.sheet-kicker{color:var(--brand);font-size:16rpx;font-weight:750;letter-spacing:3rpx}.sheet-title{margin-top:3rpx;font-size:31rpx;font-weight:780}.service-status{display:flex;align-items:center;gap:8rpx;padding:10rpx 15rpx;border-radius:24rpx;color:var(--brand);background:var(--brand-soft);font-size:19rpx;font-weight:650}.status-dot{width:10rpx;height:10rpx;border-radius:50%;background:var(--brand)}
-.search-box{display:flex;align-items:center;gap:14rpx;height:76rpx;padding:0 23rpx;border:1rpx solid var(--line);border-radius:22rpx;background:#fff;box-shadow:0 6rpx 20rpx rgba(16,38,111,.04)}.search-box input{flex:1;font-size:23rpx}.search-symbol{font-size:24rpx;color:var(--brand)}.clear{font-size:34rpx;color:var(--muted)}
-.result-title{display:flex;justify-content:space-between;margin:24rpx 2rpx 14rpx;font-size:27rpx;font-weight:750}.result-count{color:var(--muted);font-size:20rpx;font-weight:400}.store-list{flex:1 1 auto;min-height:0}
-.store-item{position:relative;display:flex;gap:18rpx;margin-bottom:14rpx;padding:18rpx;border-radius:22rpx;box-shadow:0 7rpx 22rpx rgba(16,38,111,.045)}.store-item.selected{border:1rpx solid rgba(6,55,201,.28);background:linear-gradient(135deg,#fff 60%,#edf2ff)}.store-cover{width:138rpx;height:166rpx;flex:0 0 138rpx;border-radius:17rpx;background:#e6e9f1}.store-main{min-width:0;flex:1}.store-row{display:flex;justify-content:space-between;gap:12rpx}.store-name{min-width:0;flex:1;font-size:24rpx;font-weight:760;line-height:1.3}.store-distance{flex:none;color:var(--brand);font-size:19rpx;font-weight:650}.store-address{display:block;margin-top:7rpx;color:var(--muted);font-size:18rpx;line-height:1.35}.store-meta{display:flex;gap:13rpx;margin-top:9rpx;color:var(--muted);font-size:17rpx}.store-meta .open{color:var(--brand);font-weight:700}.store-meta .busy{color:var(--danger);font-weight:700}.store-hours{display:block;margin-top:5rpx;color:#858891;font-size:16rpx}.service-row{display:flex;gap:7rpx;margin-top:10rpx}.service-row .chip{min-height:32rpx;padding:0 9rpx;color:#40527d;background:#f0f3fa;font-size:15rpx}.selected-mark{position:absolute;left:29rpx;bottom:27rpx;padding:5rpx 9rpx;border-radius:12rpx;color:#fff;background:rgba(6,55,201,.94);font-size:15rpx;font-weight:750}
-.confirm-button{position:fixed;z-index:10;left:28rpx;right:28rpx;bottom:calc(116rpx + env(safe-area-inset-bottom))}
-@media screen and (min-width:760px){.confirm-button{left:50%;right:auto;width:694px;transform:translateX(-50%)}}
+.shop-content{position:relative;z-index:4;flex:1 1 auto;min-height:0;margin-top:-26rpx;padding:12rpx 28rpx calc(120rpx + env(safe-area-inset-bottom));border-radius:32rpx 32rpx 0 0;background:var(--oat-50);box-shadow:0 -10rpx 35rpx rgba(34,48,42,.08);display:flex;flex-direction:column}.drag-zone{flex:0 0 auto;display:flex;align-items:center;justify-content:center;height:52rpx}.sheet-handle{width:68rpx;height:7rpx;border-radius:5rpx;background:#d6d2ca}.sheet-heading{display:flex;align-items:center;justify-content:space-between;margin:0 2rpx 19rpx}.sheet-heading text{display:block}.sheet-title{font-size:31rpx;font-weight:700}.service-status{display:flex;align-items:center;padding:10rpx 15rpx;border-radius:24rpx;color:var(--brand);background:var(--brand-soft);font-size:19rpx;font-weight:600}.status-dot{width:10rpx;height:10rpx;margin-right:8rpx;border-radius:50%;background:var(--brand)}
+.search-box{display:flex;align-items:center;height:76rpx;padding:0 23rpx;border:1rpx solid var(--line);border-radius:22rpx;background:#fff;box-shadow:0 6rpx 20rpx rgba(16,38,111,.04)}.search-box input{flex:1;margin-right:14rpx;font-size:23rpx}.search-symbol{margin-right:14rpx;font-size:24rpx;color:var(--brand)}.clear{font-size:34rpx;color:var(--muted)}
+.result-title{display:flex;justify-content:space-between;margin:24rpx 2rpx 14rpx;font-size:27rpx;font-weight:700}.result-count{color:var(--muted);font-size:20rpx;font-weight:400}
+.store-item{position:relative;display:flex;margin-bottom:14rpx;padding:18rpx;border-radius:22rpx;box-shadow:0 12rpx 32rpx rgba(16,38,111,.1)}.store-item.selected{border:1rpx solid rgba(6,55,201,.28);background:linear-gradient(135deg,#fff 60%,#edf2ff)}.store-cover{width:138rpx;height:166rpx;margin-right:18rpx;flex:0 0 138rpx;border-radius:17rpx;background:#e6e9f1}.store-main{min-width:0;flex:1}.store-row{display:flex;justify-content:space-between}.store-name{min-width:0;flex:1;font-size:24rpx;font-weight:700;line-height:1.3}.store-distance{flex:none;color:var(--brand);font-size:19rpx;font-weight:600}.store-address{display:block;margin-top:7rpx;color:var(--muted);font-size:18rpx;line-height:1.35}.store-meta{display:flex;margin-top:9rpx;color:var(--muted);font-size:17rpx}.store-meta text{margin-right:13rpx}.store-meta .open{color:var(--brand);font-weight:700}.store-meta .busy{color:var(--danger);font-weight:700}.store-hours{display:block;margin-top:5rpx;color:#858891;font-size:16rpx}.store-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12rpx}.service-row{display:flex}.service-row .chip{min-height:32rpx;margin-right:7rpx;padding:0 9rpx;color:#40527d;background:#f0f3fa;font-size:15rpx}.enter-btn{flex:none;padding:9rpx 18rpx;border-radius:26rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:700;box-shadow:0 6rpx 14rpx rgba(6,55,201,.2)}.selected-mark{position:absolute;left:20rpx;top:20rpx;padding:8rpx 16rpx;border-radius:14rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:800;box-shadow:0 6rpx 16rpx rgba(6,55,201,.3)}
 </style>

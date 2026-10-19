@@ -17,11 +17,25 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)  # 昵称/展示名（注册时取邮箱前缀）
+    email: Mapped[str] = mapped_column(String(120), unique=True, index=True)    # 登录标识（邮箱）
     password_hash: Mapped[str] = mapped_column(String(128))
     role: Mapped[str] = mapped_column(String(20), default="user")  # user / merchant / admin
     points: Mapped[int] = mapped_column(Integer, default=0)
     avatar: Mapped[str] = mapped_column(Text, default="")  # 头像 Base64 data URL，可空（不强制设置）
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class EmailCode(Base):
+    """邮箱验证码：落库存储，使用后标记 used，超过 expires_at 即失效"""
+    __tablename__ = "email_codes"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(120), index=True)
+    code: Mapped[str] = mapped_column(String(6))
+    purpose: Mapped[str] = mapped_column(String(20))  # register / login
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    used: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
@@ -129,6 +143,16 @@ class Coupon(Base):
     discount_cents: Mapped[int] = mapped_column(Integer, default=0)    # 优惠金额（分）
     expires: Mapped[str] = mapped_column(String(20), default="")       # 有效期，如 2026-12-31
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)     # 启用/停用
+
+
+class UserCoupon(Base):
+    """用户已领取的优惠券：领取后可于结算时使用"""
+    __tablename__ = "user_coupons"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    coupon_id: Mapped[str] = mapped_column(String(50), ForeignKey("coupons.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
 class Review(Base):

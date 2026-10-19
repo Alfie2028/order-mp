@@ -23,7 +23,6 @@ function back() { uni.navigateBack() }
   <view class="page-shell merchant-sub">
     <view class="sub-header">
       <button class="top-back" @click="back">‹</button>
-      <text class="eyebrow">CUSTOMER REVIEWS</text>
       <text class="title">用户评价</text>
       <text class="subtitle">顾客评分与反馈，实时了解用餐口碑</text>
     </view>
@@ -31,7 +30,7 @@ function back() { uni.navigateBack() }
     <view class="summary">
       <view class="sum-card card"><text class="sum-number">{{ avg }}</text><text class="sum-label">平均评分</text></view>
       <view class="sum-card card"><text class="sum-number">{{ reviews.length }}</text><text class="sum-label">评价总数</text></view>
-      <view class="sum-card card"><text class="sum-number">{{ goodRate }}%</text><text class="sum-label">好评率</text></view>
+      <view class="sum-card card last"><text class="sum-number">{{ goodRate }}%</text><text class="sum-label">好评率</text></view>
     </view>
 
     <view v-if="reviews.length" class="review-list">
@@ -51,20 +50,21 @@ function back() { uni.navigateBack() }
 <style scoped lang="scss">
 .merchant-sub { padding-bottom: 80rpx; }
 .sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; padding-bottom: 8rpx; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
 .eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
 .title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
 .subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(255,255,255,.65); }
-.summary { display: flex; gap: 20rpx; margin: -30rpx 28rpx 0; }
-.sum-card { flex: 1; display: flex; flex-direction: column; gap: 10rpx; padding: 32rpx 20rpx; }
-.sum-number { font-size: 46rpx; font-weight: 850; color: var(--brand-900); }
+.summary { display: flex; margin: -30rpx 28rpx 0; }
+.sum-card { flex: 1; display: flex; flex-direction: column; margin-right: 20rpx; padding: 32rpx 20rpx; }
+.sum-card.last { margin-right: 0; }
+.sum-number { margin-bottom: 10rpx; font-size: 46rpx; font-weight: 800; color: var(--brand-900); }
 .sum-label { font-size: 21rpx; color: var(--muted); }
 .review-list { padding: 26rpx 28rpx; }
 .review-card { margin-bottom: 20rpx; padding: 24rpx; }
 .review-head { display: flex; align-items: flex-start; justify-content: space-between; }
-.user-line { display: flex; flex-direction: column; gap: 8rpx; }
-.user-name { font-size: 26rpx; font-weight: 750; }
+.user-line { display: flex; flex-direction: column; }
+.user-name { margin-bottom: 8rpx; font-size: 26rpx; font-weight: 700; }
 .stars { font-size: 26rpx; color: #f7b731; letter-spacing: 3rpx; }
 .time { font-size: 19rpx; color: var(--muted); }
 .content { display: block; margin-top: 16rpx; font-size: 24rpx; color: var(--ink); line-height: 1.6; }

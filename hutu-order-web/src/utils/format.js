@@ -8,12 +8,12 @@ export function formatDistance(meters = 0) {
 
 export function formatDateTime(timestamp) {
   const date = new Date(timestamp)
-  const pad = (value) => String(value).padStart(2, '0')
+  const pad = (value) => ('0' + value).slice(-2)
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 export function createOrderNo() {
   const now = new Date()
-  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+  const stamp = `${now.getFullYear()}${('0' + (now.getMonth() + 1)).slice(-2)}${('0' + now.getDate()).slice(-2)}`
   return `XC${stamp}${String(now.getTime()).slice(-6)}`
 }

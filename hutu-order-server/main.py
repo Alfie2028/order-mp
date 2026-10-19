@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from database import Base, engine
 import models  # noqa: 确保 ORM 模型注册到 metadata
-from routers import auth, cart, catalog, favorite, merchant, order, pay, review
+from routers import auth, cart, catalog, coupons, favorite, merchant, order, pay, review
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,6 +32,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(catalog.router)
+app.include_router(coupons.router)
 app.include_router(order.router)
 app.include_router(pay.router)
 app.include_router(favorite.router)

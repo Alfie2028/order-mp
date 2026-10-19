@@ -51,7 +51,6 @@ function back() { uni.navigateBack() }
   <view class="page-shell merchant-sub">
     <view class="sub-header">
       <button class="top-back" @click="back">‹</button>
-      <text class="eyebrow">PRODUCT MANAGEMENT</text>
       <text class="title">餐品管理</text>
       <text class="subtitle">上新品、下架、改价、编辑配料</text>
     </view>
@@ -65,7 +64,7 @@ function back() { uni.navigateBack() }
 
     <view class="list">
       <view v-for="p in filtered" :key="p.id" class="product-card card" :class="{ off: !p.isActive }">
-        <image class="thumb" :src="p.image || '/static/image/product-lemon-tea.webp'" mode="aspectFill" />
+        <image class="thumb" :src="p.image || '/static/image/product-lemon-tea.png'" mode="aspectFill" />
         <view class="info">
           <view class="name-row"><text class="name">{{ p.name }}</text><text class="tag" :class="{ off: !p.isActive }">{{ p.isActive ? '在售' : '已下架' }}</text></view>
           <text class="subtitle">{{ p.subtitle }}</text>
@@ -83,39 +82,39 @@ function back() { uni.navigateBack() }
       </view>
     </view>
 
-    <view class="fab" @click="add">＋ 新增餐品</view>
+    <view class="fab" hover-class="hover-dim" @click="add">＋ 新增餐品</view>
   </view>
 </template>
 
 <style scoped lang="scss">
 .merchant-sub { padding-bottom: 140rpx; }
 .sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; padding-bottom: 8rpx; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
 .eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
 .title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
 .subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(255,255,255,.65); }
 .filter { white-space: nowrap; background: #fff; border-bottom: 1rpx solid var(--line); }
-.filter-inner { display: flex; gap: 10rpx; padding: 16rpx 24rpx; }
-.filter button { min-width: 108rpx; height: 56rpx; padding: 0 18rpx; border-radius: 28rpx; background: var(--oat-100); color: var(--muted); font-size: 22rpx; }
+.filter-inner { display: flex; padding: 16rpx 24rpx; }
+.filter button { display: flex; align-items: center; justify-content: center; min-width: 108rpx; height: 56rpx; margin-right: 10rpx; padding: 0 18rpx; border-radius: 28rpx; background: var(--oat-100); color: var(--muted); font-size: 22rpx; }
 .filter button.active { background: var(--brand-800); color: #fff; font-weight: 700; }
 .list { padding: 22rpx 28rpx; }
-.product-card { display: flex; gap: 18rpx; margin-bottom: 18rpx; padding: 20rpx; }
+.product-card { display: flex; margin-bottom: 18rpx; padding: 20rpx; }
 .product-card.off { opacity: .55; }
-.thumb { width: 148rpx; height: 148rpx; border-radius: 16rpx; background: var(--oat-100); flex-shrink: 0; }
-.info { flex: 1; min-width: 0; }
-.name-row { display: flex; align-items: center; gap: 10rpx; }
-.name { font-size: 27rpx; font-weight: 750; }
+.thumb { width: 148rpx; height: 148rpx; margin-right: 18rpx; border-radius: 16rpx; background: var(--oat-100); flex-shrink: 0; }
+.info { flex: 1; min-width: 0; margin-right: 18rpx; }
+.name-row { display: flex; align-items: center; }
+.name { margin-right: 10rpx; font-size: 27rpx; font-weight: 700; }
 .tag { padding: 3rpx 12rpx; border-radius: 10rpx; background: #e3eee4; color: var(--green); font-size: 19rpx; }
 .tag.off { background: #eee9e4; color: var(--muted); }
 .subtitle { display: block; margin-top: 6rpx; font-size: 20rpx; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .meta { display: block; margin-top: 8rpx; font-size: 19rpx; color: var(--muted); }
-.price-row { display: flex; align-items: baseline; gap: 12rpx; margin-top: 8rpx; }
-.price { color: var(--danger); font-size: 28rpx; font-weight: 800; }
+.price-row { display: flex; align-items: baseline; margin-top: 8rpx; }
+.price { margin-right: 12rpx; color: var(--danger); font-size: 28rpx; font-weight: 800; }
 .orig { font-size: 20rpx; color: var(--muted); text-decoration: line-through; }
-.actions { display: flex; flex-direction: column; gap: 10rpx; align-self: center; }
-.act { min-width: 92rpx; height: 52rpx; padding: 0 16rpx; border-radius: 26rpx; background: var(--oat-100); color: var(--brand-700); font-size: 21rpx; }
+.actions { display: flex; flex-direction: column; align-self: center; }
+.act { display: flex; align-items: center; justify-content: center; min-width: 92rpx; height: 52rpx; margin-bottom: 10rpx; padding: 0 16rpx; border-radius: 26rpx; background: var(--oat-100); color: var(--brand-700); font-size: 21rpx; }
 .act.warn { background: #f7ead7; color: #98642f; }
 .act.danger { background: #fbe7e2; color: var(--danger); }
-.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; font-size: 28rpx; font-weight: 750; box-shadow: 0 12rpx 26rpx rgba(6,55,201,.3); }
+.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; font-size: 28rpx; font-weight: 700; box-shadow: 0 12rpx 26rpx rgba(6,55,201,.3); }
 </style>

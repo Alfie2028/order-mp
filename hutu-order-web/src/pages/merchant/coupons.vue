@@ -2,9 +2,9 @@
 import { computed, reactive, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
-import { formatMoney } from '@/utils/format'
 
 const store = useAppStore()
+const yuan = (cents) => (cents / 100).toFixed(2).replace(/\.?0+$/, '')
 const coupons = computed(() => store.state.merchantCoupons || [])
 const editing = ref(false)
 const form = reactive({ name: '', thresholdYuan: '', discountYuan: '', expires: '' })
@@ -43,7 +43,6 @@ function back() { uni.navigateBack() }
   <view class="page-shell merchant-sub">
     <view class="sub-header">
       <button class="top-back" @click="back">‹</button>
-      <text class="eyebrow">COUPON MANAGEMENT</text>
       <text class="title">优惠券管理</text>
       <text class="subtitle">满减券创建与停用，用户端下单可选</text>
     </view>
@@ -51,21 +50,20 @@ function back() { uni.navigateBack() }
     <view class="list">
       <view v-for="c in coupons" :key="c.id" class="coupon-card card" :class="{ off: !c.isActive }">
         <view class="left">
-          <text class="discount">¥{{ (c.discountCents / 100).toFixed(2) }}</text>
-          <text class="threshold">{{ c.thresholdCents > 0 ? `满 ${formatMoney(c.thresholdCents)} 可用` : '无门槛' }}</text>
+          <text class="discount">¥{{ yuan(c.discountCents) }}</text>
+          <text class="threshold">{{ c.thresholdCents > 0 ? `满 ¥${yuan(c.thresholdCents)} 可用` : '无门槛' }}</text>
         </view>
         <view class="mid">
           <text class="name">{{ c.name }}</text>
           <text class="expires">{{ c.expires ? `有效期至 ${c.expires}` : '长期有效' }}</text>
         </view>
         <view class="right">
-          <text class="tag" :class="{ off: !c.isActive }">{{ c.isActive ? '生效中' : '已停用' }}</text>
           <button class="act" :class="{ warn: c.isActive }" @click="toggle(c)">{{ c.isActive ? '停用' : '启用' }}</button>
         </view>
       </view>
     </view>
 
-    <view class="fab" @click="add">＋ 新增优惠券</view>
+    <view class="fab" hover-class="hover-dim" @click="add">＋ 新增优惠券</view>
 
     <view v-if="editing" class="mask" @click="cancel">
       <view class="sheet card" @click.stop>
@@ -76,7 +74,7 @@ function back() { uni.navigateBack() }
         <view class="sheet-field"><text>有效期</text><input v-model="form.expires" placeholder="如 2026-12-31" maxlength="10" /></view>
         <view class="sheet-actions">
           <button class="sheet-btn" @click="cancel">取消</button>
-          <button class="sheet-btn primary" @click="save">创建</button>
+          <button class="sheet-btn primary last" @click="save">创建</button>
         </view>
       </view>
     </view>
@@ -86,33 +84,32 @@ function back() { uni.navigateBack() }
 <style scoped lang="scss">
 .merchant-sub { padding-bottom: 140rpx; }
 .sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; padding-bottom: 8rpx; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
 .eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
 .title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
 .subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(255,255,255,.65); }
 .list { padding: 24rpx 28rpx; }
-.coupon-card { display: flex; align-items: center; gap: 20rpx; margin-bottom: 18rpx; padding: 24rpx; }
+.coupon-card { display: flex; align-items: center; margin-bottom: 18rpx; padding: 24rpx; }
 .coupon-card.off { opacity: .55; }
-.left { width: 180rpx; flex-shrink: 0; border-right: 1rpx dashed var(--line); }
-.discount { display: block; color: var(--danger); font-size: 40rpx; font-weight: 850; }
+.left { width: 180rpx; flex-shrink: 0; margin-right: 20rpx; border-right: 1rpx dashed var(--line); }
+.discount { display: block; color: var(--danger); font-size: 40rpx; font-weight: 800; }
 .threshold { display: block; margin-top: 4rpx; font-size: 19rpx; color: var(--muted); }
-.mid { flex: 1; min-width: 0; }
-.name { display: block; font-size: 27rpx; font-weight: 750; }
+.mid { flex: 1; min-width: 0; margin-right: 20rpx; }
+.name { display: block; font-size: 27rpx; font-weight: 700; }
 .expires { display: block; margin-top: 8rpx; font-size: 19rpx; color: var(--muted); }
-.right { display: flex; flex-direction: column; align-items: flex-end; gap: 12rpx; }
-.tag { padding: 4rpx 12rpx; border-radius: 10rpx; background: #e3eee4; color: var(--green); font-size: 19rpx; }
-.tag.off { background: #eee9e4; color: var(--muted); }
-.act { min-width: 92rpx; height: 52rpx; border-radius: 26rpx; background: var(--oat-100); color: var(--brand-700); font-size: 21rpx; }
+.right { display: flex; flex-direction: column; align-items: flex-end; }
+.act { display: flex; align-items: center; justify-content: center; min-width: 92rpx; height: 52rpx; border-radius: 26rpx; background: var(--oat-100); color: var(--brand-700); font-size: 21rpx; }
 .act.warn { background: #f7ead7; color: #98642f; }
-.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; font-size: 28rpx; font-weight: 750; box-shadow: 0 12rpx 26rpx rgba(6,55,201,.3); }
+.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; font-size: 28rpx; font-weight: 700; box-shadow: 0 12rpx 26rpx rgba(6,55,201,.3); }
 .mask { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: flex-end; }
 .sheet { width: 100%; border-radius: 32rpx 32rpx 0 0; padding: 32rpx 30rpx calc(30rpx + env(safe-area-inset-bottom)); }
 .sheet-title { display: block; font-size: 32rpx; font-weight: 800; margin-bottom: 10rpx; }
-.sheet-field { display: flex; align-items: center; gap: 16rpx; min-height: 92rpx; border-bottom: 1rpx solid var(--line); }
-.sheet-field text { width: 130rpx; font-size: 24rpx; font-weight: 650; }
+.sheet-field { display: flex; align-items: center; min-height: 92rpx; border-bottom: 1rpx solid var(--line); }
+.sheet-field text { width: 130rpx; margin-right: 16rpx; font-size: 24rpx; font-weight: 600; }
 .sheet-field input { flex: 1; font-size: 24rpx; }
-.sheet-actions { display: flex; gap: 20rpx; margin-top: 30rpx; }
-.sheet-btn { flex: 1; height: 84rpx; border-radius: 42rpx; background: var(--oat-100); color: var(--ink); font-size: 27rpx; font-weight: 700; }
+.sheet-actions { display: flex; margin-top: 30rpx; }
+.sheet-btn { display: flex; align-items: center; justify-content: center; flex: 1; height: 84rpx; margin-right: 20rpx; border-radius: 42rpx; background: var(--oat-100); color: var(--ink); font-size: 27rpx; font-weight: 700; }
+.sheet-btn.last { margin-right: 0; }
 .sheet-btn.primary { background: var(--brand); color: #fff; }
 </style>

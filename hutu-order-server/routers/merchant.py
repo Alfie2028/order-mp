@@ -1,5 +1,5 @@
 """商家端接口：订单管理（接单 / 出餐）+ 经营管理（商品/档口/优惠券/营业状态/看板/上传）"""
-import base64
+import os
 import uuid
 from datetime import datetime, timezone
 
@@ -16,6 +16,19 @@ from utils import ok
 router = APIRouter(prefix="/api/merchant", tags=["商家"])
 
 MAIN_STORE_ID = "henau-canteen"
+
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "uploads")
+_CONTENT_TYPE_EXT = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/gif": ".gif",
+    "image/bmp": ".bmp",
+}
+
+
+def _ext_for(content_type):
+    return _CONTENT_TYPE_EXT.get((content_type or "").lower(), ".jpg")
 
 
 def _to_out(order: Order) -> dict:
@@ -247,9 +260,11 @@ def dashboard(user: User = Depends(get_current_user), db: Session = Depends(get_
 # ================= 图片上传 =================
 @router.post("/upload")
 def upload_image(file: UploadFile = File(...), user: User = Depends(get_current_user)):
-    """商品图片上传：Base64 编码后作为 data URL 返回，由前端存入 Product.image（存数据库）"""
+    """商品图片上传：保存到 uploads/ 目录，返回相对路径 /uploads/<filename>"""
     _require_merchant(user)
     data = file.file.read()
-    b64 = base64.b64encode(data).decode("ascii")
-    mime = file.content_type or "image/jpeg"
-    return ok({"url": f"data:{mime};base64,{b64}"})
+    filename = f"{uuid.uuid4().hex}{_ext_for(file.content_type)}"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    with open(os.path.join(UPLOAD_DIR, filename), "wb") as f:
+        f.write(data)
+    return ok({"url": f"/uploads/{filename}"})

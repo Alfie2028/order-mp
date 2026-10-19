@@ -1,4 +1,4 @@
-:root {
+:root, page {
   --brand: #0637c9;
   --brand-dark: #06268f;
   --brand-soft: #edf2ff;
@@ -26,9 +26,9 @@ page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
 }
 
-view, text, image, button, input, scroll-view { box-sizing: border-box; }
+view, text, image, button, input, scroll-view, textarea, picker, swiper, map { box-sizing: border-box; }
 button { margin: 0; padding: 0; line-height: normal; background: transparent; }
-button::after { border: 0; }
+button::after, uni-button::after { border: none !important; }
 
 .page-shell {
   width: 100%;
@@ -66,8 +66,9 @@ button::after { border: 0; }
 .primary-button:active { transform: scale(.985); }
 .primary-button.disabled { opacity: .45; }
 .chip { display: inline-flex; align-items: center; min-height: 48rpx; padding: 0 18rpx; border-radius: 24rpx; background: var(--oat-100); color: var(--brand-700); font-size: 22rpx; }
-.price { color: var(--danger); font-weight: 750; }
+.price { color: var(--danger); font-weight: 700; }
 .muted { color: var(--muted); }
+.hover-dim { opacity: .85; }
 
 @media screen and (min-width: 760px) {
   .page-shell { max-width: 750px; margin: 0 auto; box-shadow: 0 0 50px rgba(53, 35, 27, .08); }

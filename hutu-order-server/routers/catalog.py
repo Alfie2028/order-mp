@@ -24,7 +24,7 @@ def list_stalls(db: Session = Depends(get_db)):
 
 @router.get("/products")
 def list_products(stall_id: str = "", db: Session = Depends(get_db)):
-    q = db.query(Product).filter(Product.is_active == True).order_by(Product.sales.desc())
+    q = db.query(Product).order_by(Product.sales.desc())
     if stall_id:
         q = q.filter(Product.stall_id == stall_id)
     products = q.all()

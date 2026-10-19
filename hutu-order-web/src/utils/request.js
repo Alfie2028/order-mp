@@ -1,6 +1,6 @@
 // 请求层：统一封装 uni.request，处理 BASE_URL / token / 响应解包
 // 内网穿透后把 BASE_URL 改成公网域名（如 https://xxx.free.bufpay.com 的穿透地址）
-const BASE_URL = 'https://rochester-sensors-conversion-forecasts.trycloudflare.com'
+const BASE_URL = 'https://campus-order.learnshare.uk'
 
 function request(path, { method = 'GET', data = {} } = {}) {
   const token = uni.getStorageSync('TOKEN')

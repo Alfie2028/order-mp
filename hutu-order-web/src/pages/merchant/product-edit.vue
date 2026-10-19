@@ -94,7 +94,6 @@ function back() { uni.navigateBack() }
   <view class="page-shell merchant-sub">
     <view class="sub-header">
       <button class="top-back" @click="back">‹</button>
-      <text class="eyebrow">{{ form.id ? 'EDIT PRODUCT' : 'NEW PRODUCT' }}</text>
       <text class="title">{{ form.id ? '编辑餐品' : '新增餐品' }}</text>
       <text class="subtitle">填写基本信息与配料规格，图片可选相册/拍照</text>
     </view>
@@ -119,7 +118,7 @@ function back() { uni.navigateBack() }
           <text class="label">价格(元)</text>
           <input v-model="form.priceYuan" type="digit" placeholder="0.00" />
         </view>
-        <view class="field">
+        <view class="field second">
           <text class="label">原价(元)</text>
           <input v-model="form.originalYuan" type="digit" placeholder="选填" />
         </view>
@@ -128,7 +127,7 @@ function back() { uni.navigateBack() }
         <text class="label">徽标</text>
         <input v-model="form.badge" placeholder="如「招牌盖饭」" maxlength="20" />
       </view>
-      <view class="field image-field">
+      <view class="field image-field last">
         <text class="label">图片</text>
         <view class="image-box">
           <image v-if="form.image" class="preview" :src="store.resolveImage(form.image)" mode="aspectFill" />
@@ -167,26 +166,26 @@ function back() { uni.navigateBack() }
 <style scoped lang="scss">
 .merchant-sub { padding-bottom: 160rpx; }
 .sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; padding-bottom: 8rpx; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
 .eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
 .title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
 .subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(255,255,255,.65); }
 .form { margin: -30rpx 28rpx 0; padding: 12rpx 26rpx; position: relative; }
-.field { display: flex; align-items: center; gap: 16rpx; min-height: 92rpx; border-bottom: 1rpx solid var(--line); }
-.field:last-child { border-bottom: 0; }
-.label { width: 130rpx; font-weight: 650; font-size: 24rpx; flex-shrink: 0; }
+.field { display: flex; align-items: center; min-height: 92rpx; border-bottom: 1rpx solid var(--line); }
+.field.last { border-bottom: 0; }
+.label { width: 130rpx; margin-right: 16rpx; font-weight: 600; font-size: 24rpx; flex-shrink: 0; }
 .field input { flex: 1; font-size: 24rpx; }
 .field-row { display: flex; }
 .field-row .field { flex: 1; }
-.field-row .field + .field { border-left: 1rpx solid var(--line); padding-left: 20rpx; }
+.field.second { border-left: 1rpx solid var(--line); padding-left: 20rpx; border-bottom: 0; }
 .picker { flex: 1; }
 .picker-value { display: flex; align-items: center; justify-content: space-between; font-size: 24rpx; }
 .picker-value.empty { color: var(--muted); }
 .arrow { color: var(--muted); font-size: 30rpx; }
 .image-field { align-items: flex-start; padding: 22rpx 0; }
-.image-box { flex: 1; display: flex; align-items: center; gap: 18rpx; }
-.preview { width: 128rpx; height: 128rpx; border-radius: 14rpx; background: var(--oat-100); }
+.image-box { flex: 1; display: flex; align-items: center; }
+.preview { width: 128rpx; height: 128rpx; margin-right: 18rpx; border-radius: 14rpx; background: var(--oat-100); }
 .preview.empty { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 20rpx; }
 .upload-btn { min-width: 120rpx; height: 60rpx; display: flex; align-items: center; justify-content: center; border-radius: 30rpx; background: var(--brand-soft); color: var(--brand-700); font-size: 22rpx; }
 .options { margin: 28rpx 28rpx 0; }
@@ -195,16 +194,17 @@ function back() { uni.navigateBack() }
 .add-group { padding: 10rpx 22rpx; border-radius: 28rpx; background: var(--brand-soft); color: var(--brand-700); font-size: 22rpx; }
 .op-hint { display: block; padding: 30rpx; text-align: center; color: var(--muted); font-size: 22rpx; border: 1rpx dashed var(--line); border-radius: 18rpx; }
 .group { margin-bottom: 18rpx; padding: 22rpx; }
-.group-head { display: flex; align-items: center; gap: 14rpx; }
-.group-name { flex: 1; font-size: 25rpx; font-weight: 700; }
-.del { min-width: 72rpx; height: 52rpx; border-radius: 26rpx; background: var(--oat-100); color: var(--muted); font-size: 21rpx; }
-.group-toggles { display: flex; gap: 12rpx; margin-top: 14rpx; }
-.group-toggles button { min-width: 88rpx; height: 50rpx; border-radius: 25rpx; background: var(--oat-100); color: var(--muted); font-size: 21rpx; }
+.group-head { display: flex; align-items: center; }
+.group-name { flex: 1; margin-right: 14rpx; font-size: 25rpx; font-weight: 700; }
+.del { display: flex; align-items: center; justify-content: center; min-width: 72rpx; height: 52rpx; border-radius: 26rpx; background: var(--oat-100); color: var(--muted); font-size: 21rpx; }
+.group-toggles { display: flex; margin-top: 14rpx; }
+.group-toggles button { display: flex; align-items: center; justify-content: center; min-width: 88rpx; height: 50rpx; margin-right: 12rpx; border-radius: 25rpx; background: var(--oat-100); color: var(--muted); font-size: 21rpx; }
 .group-toggles button.on { background: var(--brand-800); color: #fff; }
-.opt-row { display: flex; align-items: center; gap: 12rpx; margin-top: 16rpx; padding: 12rpx; border-radius: 14rpx; background: var(--oat-50); }
-.opt-name { flex: 1; font-size: 23rpx; }
-.opt-price { display: flex; align-items: center; gap: 4rpx; font-size: 20rpx; color: var(--muted); }
-.opt-price input { width: 80rpx; text-align: right; font-size: 22rpx; }
-.add-option { width: 100%; height: 60rpx; margin-top: 14rpx; border: 1rpx dashed var(--line); border-radius: 14rpx; color: var(--brand-600); font-size: 22rpx; }
+.opt-row { display: flex; align-items: center; margin-top: 16rpx; padding: 12rpx; border-radius: 14rpx; background: var(--oat-50); }
+.opt-name { flex: 1; margin-right: 12rpx; font-size: 23rpx; }
+.opt-price { display: flex; align-items: center; margin-right: 12rpx; font-size: 20rpx; color: var(--muted); }
+.opt-price text { margin-right: 4rpx; }
+.opt-price input { width: 80rpx; margin-right: 4rpx; text-align: right; font-size: 22rpx; }
+.add-option { display: flex; align-items: center; justify-content: center; width: 100%; height: 60rpx; margin-top: 14rpx; border: 1rpx dashed var(--line); border-radius: 14rpx; color: var(--brand-600); font-size: 22rpx; }
 .save-wrap { padding: 30rpx 28rpx; }
 </style>

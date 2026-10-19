@@ -59,7 +59,7 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
   <view class="page-shell merchant-page">
     <view class="merchant-header">
       <view class="header-top">
-        <view><text class="eyebrow">MERCHANT DESK</text><text class="title">商家工作台</text></view>
+        <view><text class="title">商家工作台</text></view>
         <button class="logout" @click="logout">退出</button>
       </view>
 
@@ -72,7 +72,7 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
           <text class="stat-number">{{ todayOrders }}</text>
           <text class="stat-label">今日订单</text>
         </view>
-        <view class="stat-card">
+        <view class="stat-card last">
           <text class="stat-number">{{ formatMoney(todaySales) }}</text>
           <text class="stat-label">今日流水</text>
         </view>
@@ -88,7 +88,7 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
     </view>
 
     <view class="entry-grid">
-      <view v-for="entry in entries" :key="entry.key" class="entry-card card" @click="goEntry(entry.url)">
+      <view v-for="(entry, index) in entries" :key="entry.key" class="entry-card card" :class="{ last: index % 2 === 1 }" @click="goEntry(entry.url)">
         <text class="entry-name">{{ entry.name }}</text>
         <text class="entry-desc">{{ entry.desc }}</text>
         <text class="entry-arrow">›</text>
@@ -111,7 +111,7 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
           </view>
         </view>
         <view class="order-foot">
-          <view class="pickup"><text>取餐码</text><text class="pickup-code">{{ order.pickupCode }}</text></view>
+          <view class="pickup"><text class="pickup-label">取餐码</text><text class="pickup-code">{{ order.pickupCode }}</text></view>
           <text class="amount">{{ formatMoney(order.totalCents) }}</text>
           <view class="actions">
             <button v-if="order.status === 'paid'" class="primary" @click="accept(order.id)">接单</button>
@@ -132,32 +132,33 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 .eyebrow { font-size: 18rpx; letter-spacing: 5rpx; color: #edcf91; }
 .title { margin-top: 12rpx; font-size: 44rpx; font-weight: 800; }
 .logout { width: 130rpx; height: 60rpx; display: flex; align-items: center; justify-content: center; border: 1rpx solid rgba(255,255,255,.3); border-radius: 30rpx; background: transparent; color: #fff; font-size: 22rpx; }
-.stats-row { display: flex; gap: 18rpx; margin-top: 30rpx; }
-.stat-card { flex: 1; display: flex; flex-direction: column; gap: 6rpx; padding: 22rpx 20rpx; border-radius: 18rpx; background: rgba(255,255,255,.1); }
-.stat-number { font-size: 40rpx; font-weight: 850; line-height: 1; }
+.stats-row { display: flex; margin-top: 30rpx; }
+.stat-card { flex: 1; display: flex; flex-direction: column; margin-right: 18rpx; padding: 22rpx 20rpx; border-radius: 18rpx; background: rgba(255,255,255,.1); }
+.stat-card.last { margin-right: 0; }
+.stat-number { margin-bottom: 6rpx; font-size: 40rpx; font-weight: 800; line-height: 1; }
 .stat-label { font-size: 20rpx; color: rgba(255,255,255,.7); }
-.open-toggle { display: flex; align-items: center; gap: 12rpx; margin-top: 20rpx; padding: 20rpx 24rpx; border-radius: 18rpx; background: rgba(255,255,255,.12); }
+.open-toggle { display: flex; align-items: center; margin-top: 20rpx; padding: 20rpx 24rpx; border-radius: 18rpx; background: rgba(255,255,255,.12); }
 .open-toggle.closed { background: rgba(240, 75, 47, .25); }
-.dot { width: 16rpx; height: 16rpx; border-radius: 50%; background: #6ee7a0; }
+.dot { width: 16rpx; height: 16rpx; margin-right: 12rpx; border-radius: 50%; background: #6ee7a0; }
 .open-toggle.closed .dot { background: #fbb8ab; }
-.open-text { font-size: 26rpx; font-weight: 750; }
+.open-text { font-size: 26rpx; font-weight: 700; }
 .open-action { margin-left: auto; font-size: 22rpx; color: rgba(255,255,255,.75); }
 .poll-hint { display: block; margin-top: 16rpx; font-size: 18rpx; color: rgba(255,255,255,.5); }
 .entry-grid { display: flex; flex-wrap: wrap; padding: 26rpx 28rpx 10rpx; }
-.entry-card { position: relative; width: calc(50% - 10rpx); margin-bottom: 20rpx; padding: 26rpx 22rpx; }
-.entry-card:nth-child(odd) { margin-right: 20rpx; }
-.entry-name { display: block; font-size: 28rpx; font-weight: 750; }
+.entry-card { position: relative; width: calc(50% - 10rpx); margin-right: 20rpx; margin-bottom: 20rpx; padding: 26rpx 22rpx; }
+.entry-card.last { margin-right: 0; }
+.entry-name { display: block; font-size: 28rpx; font-weight: 700; }
 .entry-desc { display: block; margin-top: 10rpx; font-size: 20rpx; color: var(--muted); }
 .entry-arrow { position: absolute; right: 22rpx; top: 24rpx; font-size: 36rpx; color: var(--brand-600); }
 .tabs { white-space: nowrap; background: #fff; border-bottom: 1rpx solid var(--line); }
-.tabs-inner { display: flex; padding: 16rpx 22rpx; gap: 10rpx; }
-.tabs button { min-width: 128rpx; height: 62rpx; padding: 0 20rpx; border-radius: 31rpx; color: var(--muted); font-size: 23rpx; }
+.tabs-inner { display: flex; padding: 16rpx 22rpx; }
+.tabs button { display: flex; align-items: center; justify-content: center; min-width: 128rpx; height: 62rpx; margin-right: 10rpx; padding: 0 20rpx; border-radius: 31rpx; color: var(--muted); font-size: 23rpx; }
 .tabs button.active { background: var(--brand-800); color: #fff; font-weight: 700; }
 .order-list { padding: 22rpx 28rpx; }
 .order-card { margin-bottom: 20rpx; padding: 24rpx; }
 .order-head { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 18rpx; border-bottom: 1rpx solid var(--line); }
 .order-no, .order-time { display: block; }
-.order-no { font-size: 25rpx; font-weight: 750; }
+.order-no { font-size: 25rpx; font-weight: 700; }
 .order-time { margin-top: 6rpx; font-size: 19rpx; color: var(--muted); }
 .status { padding: 8rpx 14rpx; border-radius: 12rpx; background: #eee9e4; color: var(--muted); font-size: 21rpx; }
 .status.paid { background: #f7ead7; color: #98642f; }
@@ -165,15 +166,16 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 .status.ready { background: #e3eee4; color: var(--green); }
 .status.completed { background: #eee9e4; color: var(--muted); }
 .items { padding: 14rpx 0; }
-.item-row { display: flex; align-items: center; gap: 14rpx; padding: 12rpx 0; }
-.item-name { flex: 1; font-size: 24rpx; font-weight: 650; }
-.item-options { color: var(--muted); font-size: 19rpx; }
+.item-row { display: flex; align-items: center; padding: 12rpx 0; }
+.item-name { flex: 1; margin-right: 14rpx; font-size: 24rpx; font-weight: 600; }
+.item-options { margin-right: 14rpx; color: var(--muted); font-size: 19rpx; }
 .item-qty { font-size: 22rpx; }
-.order-foot { display: flex; align-items: center; gap: 16rpx; padding-top: 16rpx; border-top: 1rpx solid var(--line); }
-.pickup { display: flex; flex-direction: column; }
-.pickup text:first-child { font-size: 18rpx; color: var(--muted); }
-.pickup-code { margin-top: 4rpx; font-size: 40rpx; font-weight: 850; color: var(--brand-900); letter-spacing: 4rpx; }
+.order-foot { display: flex; align-items: center; padding-top: 16rpx; border-top: 1rpx solid var(--line); }
+.pickup { display: flex; flex-direction: column; margin-right: 16rpx; }
+.pickup-label { font-size: 18rpx; color: var(--muted); }
+.pickup-code { margin-top: 4rpx; font-size: 40rpx; font-weight: 800; color: var(--brand-900); letter-spacing: 4rpx; }
 .amount { flex: 1; text-align: right; font-size: 30rpx; font-weight: 800; color: var(--brand-900); }
+.actions { margin-left: 16rpx; }
 .actions .primary { min-width: 130rpx; height: 66rpx; display: flex; align-items: center; justify-content: center; border-radius: 33rpx; background: var(--brand); color: #fff; font-size: 24rpx; font-weight: 700; }
 .empty { padding: 120rpx 30rpx; text-align: center; color: var(--muted); font-size: 24rpx; }
 </style>

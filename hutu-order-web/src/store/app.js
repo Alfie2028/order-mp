@@ -20,6 +20,12 @@ function resolveImage(src) {
   if (src.startsWith('/static/') || src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) return src
   return BASE_URL + src
 }
+// 把 resolve 后的完整图片 URL 还原成相对路径，避免把临时域名写入数据库
+function stripBaseUrl(src) {
+  if (!src) return ''
+  if (src.startsWith(BASE_URL)) return src.slice(BASE_URL.length)
+  return src
+}
 
 const STORAGE_KEY = 'CAMPUS_ORDERING_V11'
 
@@ -40,7 +46,7 @@ function mapCoupon(c) {
   return { id: c.id, name: c.name, thresholdCents: c.threshold_cents, discountCents: c.discount_cents, expires: c.expires, isActive: c.is_active !== false }
 }
 function mapUser(u) {
-  return { id: u.id, name: u.username, role: u.role, title: u.role === 'merchant' ? '商家' : '标准会员', avatar: u.avatar || '/static/image/avatar/default.jpg', points: u.points, level: 3, nextLevelPoints: 1200 }
+  return { id: u.id, name: u.username || u.email, role: u.role, title: u.role === 'merchant' ? '商家' : '标准会员', avatar: resolveImage(u.avatar || '/static/image/avatar/default.png'), points: u.points, level: 3, nextLevelPoints: 1200 }
 }
 function mapOrder(o) {
   return {
@@ -55,7 +61,7 @@ function mapOrder(o) {
     createdAt: parseDate(o.created_at),
     remark: o.remark,
     items: (o.items || []).map((it) => {
-      const stat = CATALOG_PRODUCTS.find((p) => p.id === it.product_id) || {}
+      const stat = state.products.find((p) => p.id === it.product_id) || CATALOG_PRODUCTS.find((p) => p.id === it.product_id) || {}
       return { productId: it.product_id, name: it.name, quantity: it.quantity, unitPriceCents: it.unit_price_cents, selectedOptions: JSON.parse(it.options || '[]'), stallName: stat.stallName || '', image: stat.image || '', fallback: stat.fallback || it.name }
     }),
     subtotalCents: o.subtotal_cents,
@@ -67,7 +73,7 @@ function mapOrder(o) {
 
 const cartKey = (productId, options) => `${productId}:${options.map((option) => option.id).sort().join('-')}`
 function mapCartItem(c) {
-  const stat = CATALOG_PRODUCTS.find((p) => p.id === c.product_id) || {}
+  const stat = state.products.find((p) => p.id === c.product_id) || CATALOG_PRODUCTS.find((p) => p.id === c.product_id) || {}
   const options = JSON.parse(c.options || '[]')
   const extras = options.reduce((sum, option) => sum + Number(option.extraCents || 0), 0)
   return { id: c.id, key: cartKey(c.product_id, options), productId: c.product_id, name: stat.name || '', stallName: stat.stallName || '', image: stat.image || '', fallback: stat.fallback || '', selectedOptions: options, unitPriceCents: (stat.priceCents || 0) + extras, quantity: c.quantity }
@@ -92,7 +98,7 @@ const initialState = () => ({
   myReviews: [],
   merchantReviews: [],
   favoriteIds: [],
-  couponIds: CATALOG_COUPONS.map((coupon) => coupon.id),
+  couponIds: [],
   user: null,
 })
 
@@ -106,22 +112,29 @@ function persist() {
 const isLoggedIn = () => !!state.user
 
 // ---- 数据拉取 ----
+let catalogPromise = null
 function loadCatalog() {
-  return allSettled([get('/api/catalog/stores'), get('/api/catalog/stalls'), get('/api/catalog/products'), get('/api/catalog/coupons')]).then(([s, st, p, c]) => {
+  if (catalogPromise) return catalogPromise
+  catalogPromise = allSettled([get('/api/catalog/stores'), get('/api/catalog/stalls'), get('/api/catalog/products'), get('/api/catalog/coupons')]).then(([s, st, p, c]) => {
     if (s.status === 'fulfilled') state.stores = s.value.map(mapStore)
     if (st.status === 'fulfilled') state.stalls = st.value.map(mapStall)
     if (p.status === 'fulfilled') state.products = p.value.map(mapProduct)
     if (c.status === 'fulfilled') state.coupons = c.value.map(mapCoupon)
   }).catch(() => {})
+  return catalogPromise
 }
 function loadOrders() {
-  return get('/api/orders').then((list) => { state.orders = list.map(mapOrder) })
+  return loadCatalog().then(() => get('/api/orders')).then((list) => { state.orders = list.map(mapOrder) })
 }
 function loadFavorites() {
   return get('/api/favorites').then((ids) => { state.favoriteIds = ids })
 }
 function loadCart() {
-  return get('/api/cart').then((list) => { state.cart = list.map(mapCartItem); persist() })
+  return loadCatalog().then(() => get('/api/cart')).then((list) => { state.cart = list.map(mapCartItem); persist() })
+}
+function loadMyCoupons() {
+  if (!isLoggedIn()) return Promise.resolve()
+  return get('/api/coupons/mine').then((list) => { state.couponIds = list.map((c) => c.id); persist() }).catch(() => {})
 }
 function loadMerchantOrders(status = '') {
   return get('/api/merchant/orders', status ? { status } : {}).then((list) => { state.merchantOrders = list.map(mapOrder) })
@@ -147,12 +160,14 @@ export function initializeStore() {
   const userInfo = uni.getStorageSync('USER_INFO')
   if (token && userInfo) state.user = userInfo
   state.initialized = true
-  loadCatalog()
-  if (isLoggedIn()) {
-    loadOrders().catch(() => {})
-    loadFavorites().catch(() => {})
-    loadCart().catch(() => {})
-  }
+  loadCatalog().then(() => {
+    if (isLoggedIn()) {
+      loadOrders().catch(() => {})
+      loadFavorites().catch(() => {})
+      loadCart().catch(() => {})
+      loadMyCoupons().catch(() => {})
+    }
+  })
 }
 
 export function useAppStore() {
@@ -216,21 +231,43 @@ export function useAppStore() {
     }).catch(() => {})
   }
 
-  // ---- 认证 ----
-  function login(username, password) {
-    return post('/api/auth/login', { username, password }).then((data) => {
-      uni.setStorageSync('TOKEN', data.access_token)
-      state.user = mapUser(data.user)
-      uni.setStorageSync('USER_INFO', state.user)
-      return mergeLocalCart().then(() => allSettled([loadOrders(), loadFavorites(), loadCart()]))
+  // ---- 优惠券 ----
+  function claimCoupon(couponId) {
+    if (!isLoggedIn()) { uni.navigateTo({ url: '/pages/login/index' }); return Promise.resolve(null) }
+    return post(`/api/coupons/${couponId}/claim`).then((coupon) => {
+      const mapped = mapCoupon(coupon)
+      if (!state.couponIds.includes(mapped.id)) state.couponIds = [...state.couponIds, mapped.id]
+      persist()
+      return mapped
     })
   }
-  function register(username, password) {
-    return post('/api/auth/register', { username, password }).then((data) => {
+
+  // ---- 认证 ----
+  function sendCode(email, purpose = 'register') {
+    return post('/api/auth/send-code', { email, purpose })
+  }
+  function login(email, password) {
+    return post('/api/auth/login', { email, password }).then((data) => {
       uni.setStorageSync('TOKEN', data.access_token)
       state.user = mapUser(data.user)
       uni.setStorageSync('USER_INFO', state.user)
-      return mergeLocalCart().then(() => allSettled([loadOrders(), loadFavorites(), loadCart()]))
+      return mergeLocalCart().then(() => allSettled([loadOrders(), loadFavorites(), loadCart(), loadMyCoupons()]))
+    })
+  }
+  function register(email, code, password) {
+    return post('/api/auth/register', { email, code, password }).then((data) => {
+      uni.setStorageSync('TOKEN', data.access_token)
+      state.user = mapUser(data.user)
+      uni.setStorageSync('USER_INFO', state.user)
+      return mergeLocalCart().then(() => allSettled([loadOrders(), loadFavorites(), loadCart(), loadMyCoupons()]))
+    })
+  }
+  function loginByCode(email, code) {
+    return post('/api/auth/login-by-code', { email, code }).then((data) => {
+      uni.setStorageSync('TOKEN', data.access_token)
+      state.user = mapUser(data.user)
+      uni.setStorageSync('USER_INFO', state.user)
+      return mergeLocalCart().then(() => allSettled([loadOrders(), loadFavorites(), loadCart(), loadMyCoupons()]))
     })
   }
   function logout() {
@@ -357,7 +394,7 @@ export function useAppStore() {
       price_cents: Number(payload.priceCents) || 0,
       original_price_cents: Number(payload.originalPriceCents) || 0,
       badge: payload.badge || '',
-      image: payload.image || '',
+      image: stripBaseUrl(payload.image),
       options: JSON.stringify(payload.options || []),
     }
     if (payload.id) return put(`/api/merchant/products/${payload.id}`, body)
@@ -430,5 +467,5 @@ export function useAppStore() {
 
   function resetStore() { const keepUser = state.user; Object.assign(state, initialState(), { initialized: true }); state.user = keepUser; persist() }
 
-  return { state, currentStore, cartCount, cartSubtotal, loadCatalog, loadOrders, loadFavorites, loadCart, loadMerchantOrders, loadMerchantProducts, loadMerchantStalls, loadMerchantCoupons, loadDashboard, loadMerchantReviews, saveProduct, deleteProduct, toggleProduct, saveStall, toggleStall, saveCoupon, toggleCoupon, toggleStoreStatus, uploadImage, setAvatar, resolveImage, setStore, setOrderMode, setStall, addToCart, updateCartQuantity, clearCart, toggleFavorite, login, register, logout, createOrder, findOrder, payOrder, completeOrder, refreshOrder, submitReview, loadMyReviews, acceptOrder, readyOrder, reorder, resetStore }
+  return { state, currentStore, cartCount, cartSubtotal, loadCatalog, loadOrders, loadFavorites, loadCart, loadMyCoupons, claimCoupon, loadMerchantOrders, loadMerchantProducts, loadMerchantStalls, loadMerchantCoupons, loadDashboard, loadMerchantReviews, saveProduct, deleteProduct, toggleProduct, saveStall, toggleStall, saveCoupon, toggleCoupon, toggleStoreStatus, uploadImage, setAvatar, resolveImage, setStore, setOrderMode, setStall, addToCart, updateCartQuantity, clearCart, toggleFavorite, sendCode, login, register, loginByCode, logout, createOrder, findOrder, payOrder, completeOrder, refreshOrder, submitReview, loadMyReviews, acceptOrder, readyOrder, reorder, resetStore }
 }
