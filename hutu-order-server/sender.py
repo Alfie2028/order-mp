@@ -1,23 +1,20 @@
-"""邮箱验证码发送：标准库 smtplib + email.mime，支持 QQ / 163 授权码（SMTP_SSL，465）。
+"""邮箱验证码发送：从 email_templates 取模板，仅负责 SMTP 连接与投递。
 SMTP_MOCK=True 时不发真邮件，验证码打印到日志。
 """
 import logging
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 from config import (
     SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM,
-    SMTP_SSL, SMTP_MOCK, CODE_TTL_SECONDS,
+    SMTP_SSL, SMTP_MOCK,
 )
+from email_templates import build_code_email
 
 logger = logging.getLogger("email_auth")
 
 
 def send_code_email(email: str, code: str, purpose: str = "register") -> bool:
     """发送验证码邮件，成功返回 True，失败返回 False。"""
-    purpose_text = "注册" if purpose == "register" else "登录"
-
     if SMTP_MOCK:
         logger.info("[MOCK] 验证码 email=%s purpose=%s code=%s", email, purpose, code)
         return True
@@ -27,25 +24,7 @@ def send_code_email(email: str, code: str, purpose: str = "register") -> bool:
         return False
 
     try:
-        msg = MIMEMultipart()
-        msg["From"] = SMTP_FROM
-        msg["To"] = email
-        msg["Subject"] = f"邮箱{purpose_text}验证码"
-
-        html = f"""
-        <div style="padding:32px;font-family:Arial,sans-serif;max-width:480px;margin:0 auto">
-          <h2 style="color:#0637c9;margin:0 0 16px">邮箱{purpose_text}验证</h2>
-          <p style="color:#555;margin:0 0 24px">您的验证码为：</p>
-          <div style="font-size:36px;font-weight:bold;color:#0637c9;letter-spacing:8px;
-                      background:#f0f4ff;padding:20px;border-radius:12px;text-align:center;margin-bottom:24px">
-            {code}
-          </div>
-          <p style="color:#999;font-size:14px;margin:0">
-            验证码 {CODE_TTL_SECONDS // 60} 分钟内有效，请勿泄露给他人。
-          </p>
-        </div>
-        """
-        msg.attach(MIMEText(html, "html", "utf-8"))
+        msg = build_code_email(email, code, purpose, SMTP_FROM)
 
         if SMTP_SSL:
             server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=15)
