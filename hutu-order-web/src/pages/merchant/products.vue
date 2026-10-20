@@ -64,7 +64,7 @@ function back() { uni.navigateBack() }
 
     <view class="list">
       <view v-for="p in filtered" :key="p.id" class="product-card card" :class="{ off: !p.isActive }">
-        <image class="thumb" :src="p.image || '/static/image/product-lemon-tea.png'" mode="aspectFill" />
+        <image class="thumb" :src="store.resolveImage(p.image || '/uploads/catalog/product/product-lemon-tea.png')" mode="aspectFill" />
         <view class="info">
           <view class="name-row"><text class="name">{{ p.name }}</text><text class="tag" :class="{ off: !p.isActive }">{{ p.isActive ? '在售' : '已下架' }}</text></view>
           <text class="subtitle">{{ p.subtitle }}</text>

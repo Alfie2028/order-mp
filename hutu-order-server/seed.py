@@ -9,15 +9,15 @@ STORES = [
     {"id": "henau-canteen", "name": "河南农业大学许昌校区学生餐厅", "short_name": "许昌校区餐厅",
      "address": "许昌市建安区永宁街与劳动北路交叉口向北500米", "distance": 160,
      "hours": "07:30–21:30", "status": "open", "wait_minutes": 8,
-     "latitude": 34.136151, "longitude": 113.809055, "image": "/static/image/store-campus.png"},
+     "latitude": 34.136151, "longitude": 113.809055, "image": "/uploads/catalog/store/store-campus.png"},
     {"id": "nongda-road", "name": "农大路学生生活区餐厅", "short_name": "农大路餐厅",
      "address": "许昌市建安区苏桥镇南村劳动路与农大路交叉口西侧", "distance": 850,
      "hours": "08:00–22:00", "status": "open", "wait_minutes": 10,
-     "latitude": 34.141490, "longitude": 113.802449, "image": "/static/image/store-street.png"},
+     "latitude": 34.141490, "longitude": 113.802449, "image": "/uploads/catalog/store/store-street.png"},
     {"id": "suqiao-town", "name": "苏桥镇中心生活区餐厅", "short_name": "苏桥生活区餐厅",
      "address": "许昌市建安区苏桥镇中心生活区", "distance": 1886,
      "hours": "08:00–21:30", "status": "busy", "wait_minutes": 15,
-     "latitude": 34.129395, "longitude": 113.790261, "image": "/static/image/store-town.png"},
+     "latitude": 34.129395, "longitude": 113.790261, "image": "/uploads/catalog/store/store-town.png"},
 ]
 
 STALLS = [
@@ -116,7 +116,7 @@ def seed():
         for pid, stall_id, name, subtitle, price, original, badge, sales, image, options in PRODUCTS:
             data = dict(id=pid, stall_id=stall_id, name=name, subtitle=subtitle, price_cents=price,
                         original_price_cents=original, badge=badge, sales=sales,
-                        image=f"/static/image/{image}", options=json.dumps(options, ensure_ascii=False))
+                        image=f"/uploads/catalog/product/{image}", options=json.dumps(options, ensure_ascii=False))
             existing = db.get(models.Product, pid)
             if existing:
                 for k, v in data.items():

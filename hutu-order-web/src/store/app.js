@@ -46,7 +46,7 @@ function mapCoupon(c) {
   return { id: c.id, name: c.name, thresholdCents: c.threshold_cents, discountCents: c.discount_cents, expires: c.expires, isActive: c.is_active !== false }
 }
 function mapUser(u) {
-  return { id: u.id, name: u.username || u.email, role: u.role, title: u.role === 'merchant' ? '商家' : '标准会员', avatar: resolveImage(u.avatar || '/static/image/avatar/default.png'), points: u.points, level: 3, nextLevelPoints: 1200 }
+  return { id: u.id, name: u.username || u.email, role: u.role, title: u.role === 'merchant' ? '商家' : '标准会员', avatar: resolveImage(u.avatar || '/uploads/catalog/avatar/default.png'), points: u.points, level: 3, nextLevelPoints: 1200 }
 }
 function mapOrder(o) {
   return {
@@ -62,7 +62,7 @@ function mapOrder(o) {
     remark: o.remark,
     items: (o.items || []).map((it) => {
       const stat = state.products.find((p) => p.id === it.product_id) || CATALOG_PRODUCTS.find((p) => p.id === it.product_id) || {}
-      return { productId: it.product_id, name: it.name, quantity: it.quantity, unitPriceCents: it.unit_price_cents, selectedOptions: JSON.parse(it.options || '[]'), stallName: stat.stallName || '', image: stat.image || '', fallback: stat.fallback || it.name }
+      return { productId: it.product_id, name: it.name, quantity: it.quantity, unitPriceCents: it.unit_price_cents, selectedOptions: JSON.parse(it.options || '[]'), stallName: stat.stallName || '', image: resolveImage(stat.image || ''), fallback: stat.fallback || it.name }
     }),
     subtotalCents: o.subtotal_cents,
     discountCents: o.discount_cents,
@@ -76,14 +76,16 @@ function mapCartItem(c) {
   const stat = state.products.find((p) => p.id === c.product_id) || CATALOG_PRODUCTS.find((p) => p.id === c.product_id) || {}
   const options = JSON.parse(c.options || '[]')
   const extras = options.reduce((sum, option) => sum + Number(option.extraCents || 0), 0)
-  return { id: c.id, key: cartKey(c.product_id, options), productId: c.product_id, name: stat.name || '', stallName: stat.stallName || '', image: stat.image || '', fallback: stat.fallback || '', selectedOptions: options, unitPriceCents: (stat.priceCents || 0) + extras, quantity: c.quantity }
+  return { id: c.id, key: cartKey(c.product_id, options), productId: c.product_id, name: stat.name || '', stallName: stat.stallName || '', image: resolveImage(stat.image || ''), fallback: stat.fallback || '', selectedOptions: options, unitPriceCents: (stat.priceCents || 0) + extras, quantity: c.quantity }
 }
+
+const withRemoteImage = (item) => ({ ...item, image: resolveImage(item.image) })
 
 const initialState = () => ({
   initialized: false,
-  stores: CATALOG_STORES,
+  stores: CATALOG_STORES.map(withRemoteImage),
   stalls: CATALOG_STALLS,
-  products: CATALOG_PRODUCTS,
+  products: CATALOG_PRODUCTS.map(withRemoteImage),
   coupons: CATALOG_COUPONS,
   currentStoreId: CATALOG_STORES[0].id,
   selectedStallId: CATALOG_STALLS[0].id,
