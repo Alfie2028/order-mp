@@ -18,3 +18,8 @@ cloudflared.exe
 .claude/
 .playwright-mcp/
 .DS_Store
+
+# 本地密钥与启动脚本（含密钥，勿提交）
+.env
+start-backend.ps1
+start-backend.bat

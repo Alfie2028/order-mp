@@ -33,7 +33,8 @@ def build_code_email(email: str, code: str, purpose: str, from_addr: str) -> MIM
     tpl = TEMPLATES.get(purpose, TEMPLATES["register"])
     subject = tpl["subject"].format(brand=APP_BRAND, code=code)
     scene = tpl["scene"].format(brand=APP_BRAND)
-    guard = tpl["guard"].format(brand=APP_BRAND, ttl=_ttl_text())
+    ttl = _ttl_text()
+    guard = tpl["guard"].format(brand=APP_BRAND, ttl=ttl)
 
     msg = MIMEMultipart()
     # From 带服务昵称（RFC2047 自动编码中文），收件箱将显示"校园点餐"而非裸账号
@@ -42,6 +43,9 @@ def build_code_email(email: str, code: str, purpose: str, from_addr: str) -> MIM
     msg["Subject"] = subject
 
     html = f"""
+    <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all">
+      【{APP_BRAND}】您的验证码是 {code}，{ttl} 分钟内有效，请勿向任何人泄露。
+    </div>
     <div style="padding:32px;font-family:Arial,sans-serif;max-width:480px;margin:0 auto">
       <h2 style="color:#0637c9;margin:0 0 16px">{APP_BRAND} · 验证</h2>
       <p style="color:#555;margin:0 0 24px">{scene}</p>
