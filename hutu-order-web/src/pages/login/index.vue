@@ -32,7 +32,7 @@ async function sendCode() {
     const purpose = mode.value === 'register' ? 'register' : 'login'
     await store.sendCode(addr, purpose)
     startCountdown()
-    uni.showToast({ title: '验证码已由匿名发件人发出', icon: 'none' })
+    uni.showToast({ title: '验证码已发送', icon: 'none' })
   } catch (e) {
     // 错误提示已由请求层统一 toast
   } finally {

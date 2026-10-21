@@ -23,3 +23,8 @@ cloudflared.exe
 .env
 start-backend.ps1
 start-backend.bat
+
+# Deploy assets (keys, service units, scripts) - keep out of VCS
+.deploy/
+deploy/
+logs/
