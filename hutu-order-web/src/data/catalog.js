@@ -9,10 +9,10 @@ export const CAMPUS = {
 export const STORES = [
   {
     id: 'henau-canteen',
-    name: '河南农业大学许昌校区学生餐厅', shortName: '许昌校区餐厅',
+    name: '农大温馨家园', shortName: '农大温馨家园', tag: '校内',
     address: '许昌市建安区永宁街与劳动北路交叉口向北500米', distance: 160,
     hours: '07:30–21:30', status: 'open', waitMinutes: 8,
-    services: ['到店自取', '餐厅堂食'],
+    services: ['到店自取', '档口堂食'],
     latitude: 34.136151, longitude: 113.809055,
     osmLatitude: 34.137604, osmLongitude: 113.803046,
     image: '/uploads/catalog/store/store-campus.png', imageCredit: 'Taha Samet Arslan / Pexels',
@@ -20,10 +20,10 @@ export const STORES = [
   },
   {
     id: 'nongda-road',
-    name: '农大路学生生活区餐厅', shortName: '农大路餐厅',
+    name: '农大路美食档口', shortName: '农大路美食档口', tag: '校外',
     address: '许昌市建安区苏桥镇南村劳动路与农大路交叉口西侧', distance: 850,
     hours: '08:00–22:00', status: 'open', waitMinutes: 10,
-    services: ['到店自取', '餐厅堂食'],
+    services: ['到店自取', '档口堂食'],
     latitude: 34.141490, longitude: 113.802449,
     osmLatitude: 34.142931, osmLongitude: 113.796422,
     image: '/uploads/catalog/store/store-street.png', imageCredit: 'Dynin / Pexels',
@@ -31,10 +31,10 @@ export const STORES = [
   },
   {
     id: 'suqiao-town',
-    name: '苏桥镇中心生活区餐厅', shortName: '苏桥生活区餐厅',
+    name: '苏桥老街档口', shortName: '苏桥老街档口', tag: '校外',
     address: '许昌市建安区苏桥镇中心生活区', distance: 1886,
     hours: '08:00–21:30', status: 'busy', waitMinutes: 15,
-    services: ['到店自取', '餐厅堂食', '停车便利'],
+    services: ['到店自取', '档口堂食', '停车便利'],
     latitude: 34.129395, longitude: 113.790261,
     osmLatitude: 34.130821, osmLongitude: 113.784204,
     image: '/uploads/catalog/store/store-town.png', imageCredit: 'Amelia Hallsworth / Pexels',

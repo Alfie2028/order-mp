@@ -46,13 +46,17 @@ function submitReview() {
     uni.showToast({ title: '评价成功', icon: 'success' })
   }).catch(() => {})
 }
+function goBack() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>
   <view class="page-shell settled-page">
     <template v-if="order">
       <view class="status-hero" :class="order.status">
-        <button class="top-back" @click="uni.navigateBack()">‹</button>
+        <button class="top-back" @click="goBack">‹</button>
         <text class="status-title">{{ statusTitle }}</text>
         <text class="status-copy">{{ statusCopy }}</text>
         <view class="pickup-code"><text class="pickup-code-label">取餐码</text><text class="pickup-code-value">{{ order.pickupCode }}</text></view>
@@ -69,7 +73,7 @@ function submitReview() {
       <view class="section">
         <view class="section-heading"><text class="section-title">订单详情</text><text class="section-link">{{ formatDateTime(order.createdAt) }}</text></view>
         <view class="detail-card card">
-          <view class="store-row"><view><text class="store-name">{{ order.storeName }}</text><text class="order-no">订单号 {{ order.id }}</text></view><text class="mode">{{ order.mode === 'pickup' ? '到店自取' : '餐厅堂食' }}</text></view>
+          <view class="store-row"><view><text class="store-name">{{ order.storeName }}</text><text class="order-no">订单号 {{ order.id }}</text></view><text class="mode">{{ order.mode === 'pickup' ? '到店自取' : '档口堂食' }}</text></view>
           <view v-for="item in order.items" :key="item.key" class="order-item"><image class="item-image" :src="item.image" mode="aspectFill" /><view class="item-main"><text class="item-name">{{ item.name }} × {{ item.quantity }}</text><text class="item-stall">{{ item.stallName }}</text><text class="item-options">{{ item.selectedOptions.map(option => option.name).join(' · ') || '标准制作' }}</text></view><text>{{ formatMoney(item.unitPriceCents * item.quantity) }}</text></view>
           <view class="bill"><view><text>餐品金额</text><text>{{ formatMoney(order.subtotalCents) }}</text></view><view><text>优惠</text><text>{{ order.discountCents ? `-${formatMoney(order.discountCents)}` : formatMoney(0) }}</text></view><view class="bill-total"><text>实付</text><text>{{ formatMoney(order.totalCents) }}</text></view></view>
         </view>

@@ -20,7 +20,10 @@ const cards = computed(() => [
   { label: '待取餐', value: d.value.ready_count || 0, color: '#0637c9' },
   { label: '已完成', value: d.value.completed_count || 0, color: '#2f8f4e' },
 ])
-function back() { uni.navigateBack() }
+function back() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>

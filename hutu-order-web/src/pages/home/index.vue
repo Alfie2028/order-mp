@@ -18,8 +18,8 @@
     </view>
 
     <view class="store-card card" @click="goStores">
-      <view class="store-pin">餐厅</view>
-      <view class="store-copy"><view class="store-label">当前餐厅 · 营业中</view><view class="store-name">{{ currentStore.name }}</view><view class="store-meta">{{ formatDistance(currentStore.distance) }} · {{ state.stalls.length }} 个档口 · 预计 {{ currentStore.waitMinutes }} 分钟取餐</view></view>
+      <view class="store-pin">档口</view>
+      <view class="store-copy"><view class="store-label">当前档口 · 营业中</view><view class="store-name">{{ currentStore.name }}</view><view class="store-meta">{{ formatDistance(currentStore.distance) }} · {{ state.stalls.length }} 个档口 · 预计 {{ currentStore.waitMinutes }} 分钟取餐</view></view>
       <view class="arrow">›</view>
     </view>
 
@@ -59,8 +59,6 @@
         </view>
       </scroll-view>
     </view>
-
-    <view class="member-card section" @click="goMine"><view><view class="member-kicker">LEVEL {{ user.level }} · 会员等级</view><view class="member-title">{{ user.points }} 会员积分</view><view class="member-desc">还需 {{ user.nextLevelPoints - user.points }} 积分升级</view></view><view class="member-progress"><view class="member-progress-value" :style="{ width: progress + '%' }"></view></view></view>
 
     <view v-if="couponPopup.show" class="coupon-mask">
       <view class="coupon-popup-wrap">

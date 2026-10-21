@@ -29,7 +29,10 @@ async function toggle(s) {
   uni.showToast({ title: s.isActive ? '已下架' : '已上架', icon: 'none' })
   load()
 }
-function back() { uni.navigateBack() }
+function back() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>

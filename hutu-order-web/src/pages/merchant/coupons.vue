@@ -36,7 +36,10 @@ async function toggle(c) {
   uni.showToast({ title: c.isActive ? '已停用' : '已启用', icon: 'none' })
   load()
 }
-function back() { uni.navigateBack() }
+function back() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>

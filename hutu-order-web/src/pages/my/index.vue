@@ -7,16 +7,18 @@ import { useAppStore } from '@/store/app'
 const store = useAppStore()
 const user = computed(() => store.state.user)
 const isCustomAvatar = computed(() => user.value && typeof user.value.avatar === 'string' && user.value.avatar.startsWith('data:'))
-const favorites = computed(() => store.state.products.filter((product) => store.state.favoriteIds.includes(product.id)))
-const availableCoupons = computed(() => store.state.coupons.filter((coupon) => store.state.couponIds.includes(coupon.id)))
-const activeOrder = computed(() => store.state.orders.find((order) => ['paid','making','ready'].includes(order.status)))
-const levelProgress = computed(() => user.value ? Math.min(100, Math.round(user.value.points / user.value.nextLevelPoints * 100)) : 0)
+const favorites = computed(() => (store.state.products || []).filter((product) => store.state.favoriteIds.includes(product.id)))
+const availableCoupons = computed(() => (store.state.coupons || []).filter((coupon) => store.state.couponIds.includes(coupon.id)))
+const activeOrder = computed(() => (store.state.orders || []).find((order) => ['paid','making','ready'].includes(order.status)))
+const levelProgress = computed(() => user.value ? Math.min(100, Math.round(user.value.points / (user.value.nextLevelPoints || 1200) * 100)) : 0)
 onShow(() => { if (user.value) { store.loadOrders().catch(() => {}); store.loadFavorites().catch(() => {}) } })
 
 function openProduct(product) { uni.navigateTo({ url: `/pages/item-detail/index?id=${product.id}` }) }
 function quickAdd(product) { product.options.length ? openProduct(product) : (store.addToCart(product.id), uni.showToast({ title: '已加入购物车', icon: 'success' })) }
 function showFeature(message) { uni.showToast({ title: message, icon: 'none' }) }
-function goLogin() { uni.navigateTo({ url: '/pages/login/index' }) }
+function goLogin() {
+  uni.navigateTo({ url: '/pages/login/index', fail: (err) => { console.error('navigateTo /pages/login/index fail:', err); uni.redirectTo({ url: '/pages/login/index' }) } })
+}
 function chooseAvatar() {
   if (!user.value) return goLogin()
   uni.chooseImage({
@@ -68,7 +70,7 @@ function logout() {
       <view class="quick-item divider" @click="uni.navigateTo({ url: '/pages/my-order/index' })"><text class="quick-number">{{ store.state.orders.length }}</text><text>全部订单</text></view>
       <view class="quick-item divider" @click="showFeature('优惠券可在提交订单时选择')"><text class="quick-number">{{ availableCoupons.length }}</text><text>优惠券</text></view>
       <view class="quick-item divider" @click="showFeature('收藏餐品可在本页下方查看')"><text class="quick-number">{{ favorites.length }}</text><text>我的收藏</text></view>
-      <view class="quick-item" @click="showFeature('会员等级信息已展示在页面顶部')"><text class="quick-number">{{ store.state.user.level }}</text><text>会员等级</text></view>
+      <view class="quick-item" @click="showFeature('会员等级信息已展示在页面顶部')"><text class="quick-number">{{ store.state.user ? store.state.user.level : 0 }}</text><text>会员等级</text></view>
     </view>
 
     <view v-if="activeOrder" class="section">
@@ -84,8 +86,8 @@ function logout() {
       <view class="section-heading"><text class="section-title">常用服务</text></view>
       <view class="services card">
         <view class="service-item" @click="uni.navigateTo({ url: '/pages/my-order/index' })"><text class="service-name">订单记录</text><text class="service-desc">查看历史订单</text></view>
-        <view class="service-item" @click="uni.switchTab({ url: '/pages/shop/index' })"><text class="service-name">餐厅地图</text><text class="service-desc">查找附近餐厅</text></view>
-        <view class="service-item no-border" @click="showFeature('请在订单完成后联系餐厅申请开票')"><text class="service-name">申请开票</text><text class="service-desc">订单完成后申请</text></view>
+        <view class="service-item" @click="uni.switchTab({ url: '/pages/shop/index' })"><text class="service-name">档口地图</text><text class="service-desc">查找附近档口</text></view>
+        <view class="service-item no-border" @click="showFeature('请在订单完成后联系档口申请开票')"><text class="service-name">申请开票</text><text class="service-desc">订单完成后联系档口申请开票</text></view>
         <view class="service-item no-border" @click="showFeature('客户服务时间：08:00-22:00')"><text class="service-name">帮助与客服</text><text class="service-desc">服务时间 08:00-22:00</text></view>
       </view>
     </view>

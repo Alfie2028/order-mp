@@ -16,7 +16,10 @@ onShow(() => {
 })
 
 function stars(rating) { return '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating) }
-function back() { uni.navigateBack() }
+function back() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>

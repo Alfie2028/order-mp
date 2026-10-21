@@ -14,11 +14,14 @@ const parseDate = (str) => {
   if (m.length < 6) return Date.now()
   return Date.UTC(+m[0], +m[1] - 1, +m[2], +m[3] || 0, +m[4] || 0, +m[5] || 0)
 }
-// 图片地址解析：静态资源走原样；上传图片（/uploads/）拼 BASE_URL，兼容内网穿透换域名
+// 图片地址解析：静态资源走原样；上传图片（/uploads/）拼 BASE_URL，兼容内网穿透换域名；
+// 统一附加 imageVersion 版本号参数，图片加载失败后置位即可强制重绘重试
 function resolveImage(src) {
   if (!src) return ''
-  if (src.startsWith('/static/') || src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) return src
-  return BASE_URL + src
+  const t = src.startsWith('/static/') || src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:') ? src : BASE_URL + src
+  if (t.startsWith('data:')) return t
+  const v = typeof state !== 'undefined' && state && typeof state.imageVersion !== 'undefined' ? state.imageVersion : 0
+  return t + (t.includes('?') ? `&v=${v}` : `?v=${v}`)
 }
 // 把 resolve 后的完整图片 URL 还原成相对路径，避免把临时域名写入数据库
 function stripBaseUrl(src) {
@@ -29,10 +32,13 @@ function stripBaseUrl(src) {
 
 const STORAGE_KEY = 'CAMPUS_ORDERING_V11'
 
+// 档口展示名覆盖：后端旧名（学生餐厅等）统一展示为新档口名
+const kStoreNames = { 'henau-canteen': '农大温馨家园', 'nongda-road': '农大路美食档口', 'suqiao-town': '苏桥老街档口' }
+
 // ---- 字段映射：后端 snake_case -> 前端 camelCase，静态 catalog 补齐展示字段 ----
 function mapStore(s) {
   const stat = CATALOG_STORES.find((x) => x.id === s.id) || {}
-  return { ...stat, id: s.id, name: s.name, shortName: s.short_name, address: s.address, distance: s.distance, hours: s.hours, status: s.status, waitMinutes: s.wait_minutes, latitude: s.latitude, longitude: s.longitude, image: resolveImage(s.image) }
+  return { ...stat, id: s.id, name: kStoreNames[s.id] || s.name, shortName: kStoreNames[s.id] || s.short_name || s.name, tag: stat.tag || (s.id === 'henau-canteen' ? '校内' : '校外'), address: s.address, distance: s.distance, hours: s.hours, status: s.status, waitMinutes: s.wait_minutes, latitude: s.latitude, longitude: s.longitude, image: resolveImage(s.image) }
 }
 function mapStall(s) {
   const stat = CATALOG_STALLS.find((x) => x.id === s.id) || {}
@@ -46,7 +52,7 @@ function mapCoupon(c) {
   return { id: c.id, name: c.name, thresholdCents: c.threshold_cents, discountCents: c.discount_cents, expires: c.expires, isActive: c.is_active !== false }
 }
 function mapUser(u) {
-  return { id: u.id, name: u.username || u.email, role: u.role, title: u.role === 'merchant' ? '商家' : '标准会员', avatar: resolveImage(u.avatar || '/uploads/catalog/avatar/default.png'), points: u.points, level: 3, nextLevelPoints: 1200 }
+  return { id: u.id, name: u.username || u.email, role: u.role, title: u.role === 'merchant' ? '商家' : '标准会员', avatar: resolveImage(u.avatar || '/uploads/catalog/avatar/default.png'), points: u.points || 0, level: 3, nextLevelPoints: 1200 }
 }
 function mapOrder(o) {
   return {
@@ -79,10 +85,11 @@ function mapCartItem(c) {
   return { id: c.id, key: cartKey(c.product_id, options), productId: c.product_id, name: stat.name || '', stallName: stat.stallName || '', image: resolveImage(stat.image || ''), fallback: stat.fallback || '', selectedOptions: options, unitPriceCents: (stat.priceCents || 0) + extras, quantity: c.quantity }
 }
 
-const withRemoteImage = (item) => ({ ...item, image: resolveImage(item.image) })
+const withRemoteImage = (item) => ({ ...item, image: resolveImage(item.image), tag: item.tag || (item.id === 'henau-canteen' ? '校内' : '校外') })
 
 const initialState = () => ({
   initialized: false,
+  imageVersion: 0,
   stores: CATALOG_STORES.map(withRemoteImage),
   stalls: CATALOG_STALLS,
   products: CATALOG_PRODUCTS.map(withRemoteImage),
@@ -118,11 +125,16 @@ let catalogPromise = null
 function loadCatalog() {
   if (catalogPromise) return catalogPromise
   catalogPromise = allSettled([get('/api/catalog/stores'), get('/api/catalog/stalls'), get('/api/catalog/products'), get('/api/catalog/coupons')]).then(([s, st, p, c]) => {
+    state.imageVersion = 1
     if (s.status === 'fulfilled') state.stores = s.value.map(mapStore)
     if (st.status === 'fulfilled') state.stalls = st.value.map(mapStall)
     if (p.status === 'fulfilled') state.products = p.value.map(mapProduct)
     if (c.status === 'fulfilled') state.coupons = c.value.map(mapCoupon)
-  }).catch(() => {})
+    if (p.status !== 'fulfilled') state.products = state.products.map((item) => ({ ...item, image: resolveImage(item.image.replace(/[?&]v=\d+/, '')) }))
+  }).catch(() => {
+    state.imageVersion = 1
+    state.products = state.products.map((item) => ({ ...item, image: resolveImage(item.image.replace(/[?&]v=\d+/, '')) }))
+  })
   return catalogPromise
 }
 function loadOrders() {

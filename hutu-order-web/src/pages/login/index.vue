@@ -32,7 +32,7 @@ async function sendCode() {
     const purpose = mode.value === 'register' ? 'register' : 'login'
     await store.sendCode(addr, purpose)
     startCountdown()
-    uni.showToast({ title: '验证码已发送', icon: 'none' })
+    uni.showToast({ title: '验证码已由匿名发件人发出', icon: 'none' })
   } catch (e) {
     // 错误提示已由请求层统一 toast
   } finally {
@@ -80,12 +80,16 @@ function switchMode(next) {
   password.value = ''
   code.value = ''
 }
+function goBack() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>
   <view class="page-shell login-page">
     <view class="login-header">
-      <button class="top-back" @click="uni.navigateBack()">‹</button>
+      <button class="top-back" @click="goBack">‹</button>
       <text class="title">{{ mode === 'login' ? '登录' : mode === 'register' ? '注册' : '验证码登录' }}</text>
       <text class="subtitle">{{ mode === 'register' ? '创建账户，开启校园点餐' : '登录后同步订单、收藏与购物车' }}</text>
     </view>
@@ -126,9 +130,10 @@ function switchMode(next) {
     </view>
 
     <view class="tips">
-      <text class="tip-title">演示账号</text>
+      <text class="tip-title">演示账号与说明</text>
       <text class="tip-line">用户端：test@example.com / 123456</text>
       <text class="tip-line">商家端：merchant@example.com / 123456</text>
+      <text class="tip-line">验证码由【匿名发件人】系统代发，请留意查收</text>
     </view>
   </view>
 </template>

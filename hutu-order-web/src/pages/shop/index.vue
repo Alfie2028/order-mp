@@ -15,7 +15,7 @@ const minMapHeight = Math.round(windowHeight * 0.22)
 const maxMapHeight = Math.round(windowHeight * 0.72)
 const mapHeightPx = ref(Math.round(windowHeight * 0.45))
 // scroll-view 在微信端需显式高度才能纵向滚动
-const listHeight = computed(() => Math.max(140, windowHeight - mapHeightPx.value - 213))
+const listHeight = computed(() => Math.max(140, windowHeight - mapHeightPx.value - 140))
 let dragStartY = 0
 let dragStartHeight = 0
 
@@ -36,28 +36,20 @@ const filteredStores = computed(() => {
   return key ? state.stores.filter((store) => `${store.name}${store.address}`.includes(key)) : state.stores
 })
 
-const markers = computed(() => [
-  {
-    id: 0,
-    latitude: CAMPUS.latitude,
-    longitude: CAMPUS.longitude,
-    title: CAMPUS.name,
-    iconPath: '/static/icon/my-location.png',
-    width: 32,
-    height: 32,
-    callout: { content: `${CAMPUS.name}\n${CAMPUS.campus}`, display: 'ALWAYS', padding: 8, borderRadius: 6, color: '#35231b', bgColor: '#ffffff' },
-  },
-  ...state.stores.map((store, index) => ({
-    id: index + 1,
+const markers = computed(() => state.stores.map((store, index) => {
+  const isInside = store.tag === '校内' || store.id === 'henau-canteen'
+  const isSelected = store.id === state.currentStoreId
+  return {
+    id: index,
     latitude: store.latitude,
     longitude: store.longitude,
     title: store.name,
-    iconPath: store.id === state.currentStoreId ? '/static/icon/shop-location-selected.png' : '/static/icon/shop-location.png',
-    width: store.id === state.currentStoreId ? 32 : 27,
-    height: store.id === state.currentStoreId ? 32 : 27,
-    callout: { content: store.name, display: store.id === state.currentStoreId ? 'ALWAYS' : 'BYCLICK', padding: 7, borderRadius: 5, color: '#35231b', bgColor: '#ffffff' },
-  })),
-])
+    iconPath: isInside ? (isSelected ? '/static/icon/marker-blue-selected.png' : '/static/icon/marker-blue.png') : (isSelected ? '/static/icon/marker-orange-selected.png' : '/static/icon/marker-orange.png'),
+    width: isSelected ? 34 : 28,
+    height: isSelected ? 34 : 28,
+    callout: { content: `${isInside ? '[校内] ' : '[校外] '}${store.name}`, display: isSelected ? 'ALWAYS' : 'BYCLICK', padding: 7, borderRadius: 5, color: isInside ? '#0637c9' : '#d96a00', borderColor: isInside ? '#0637c9' : '#d96a00', borderWidth: 1, bgColor: '#ffffff' },
+  }
+}))
 
 // ---- H5 端地图：原生瓦片地图（高德瓦片，国内可访问、免 key、零外部依赖）----
 // #ifdef H5
@@ -96,7 +88,8 @@ function renderPins(left, top) {
     const isCampus = i === 0
     const selected = p.store && p.store.id === state.currentStoreId
     const size = isCampus ? 18 : selected ? 16 : 12
-    const color = isCampus ? '#0637c9' : selected ? '#0637c9' : '#ff5a3c'
+    const isInside = p.store && (p.store.tag === '校内' || p.store.id === 'henau-canteen')
+    const color = isCampus ? '#0637c9' : isInside ? '#0637c9' : '#ff5a3c'
     const pin = document.createElement('div')
     pin.style.cssText = `position:absolute;left:${px - size / 2}px;top:${py - size / 2}px;width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);cursor:pointer`
     if (p.store) pin.addEventListener('click', () => { if (!dragState.moved) select(p.store) })
@@ -218,14 +211,13 @@ function select(store) {
     // #endif
   }
   if (state.cart.length && state.currentStoreId !== store.id) {
-    uni.showModal({ title: '切换餐厅', content: '切换餐厅将清空当前购物车，是否继续？', success: ({ confirm }) => confirm && apply() })
+    uni.showModal({ title: '切换档口', content: '切换档口将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
   } else apply()
 }
 
 function handleMarkerTap(event) {
   const markerId = Number(event.detail && event.detail.markerId != null ? event.detail.markerId : event.markerId)
-  if (markerId === 0) return recenterCampus()
-  const store = state.stores[markerId - 1]
+  const store = state.stores[markerId]
   if (store) select(store)
 }
 
@@ -242,7 +234,7 @@ function goOrder() { uni.switchTab({ url: '/pages/order/index' }) }
 function enterStore(store) {
   const apply = () => { setStore(store.id); goOrder() }
   if (state.cart.length && state.currentStoreId !== store.id) {
-    uni.showModal({ title: '切换餐厅', content: '切换餐厅将清空当前购物车，是否继续？', success: ({ confirm }) => confirm && apply() })
+    uni.showModal({ title: '切换档口', content: '切换档口将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
   } else apply()
 }
 </script>
@@ -278,16 +270,16 @@ function enterStore(store) {
         <view class="sheet-handle" />
       </view>
       <view class="sheet-heading">
-        <view><text class="sheet-title">选择就餐地点</text></view>
+        <view><text class="sheet-title">选择档口</text></view>
         <view class="service-status"><text class="status-dot"></text><text>营业中</text></view>
       </view>
-      <view class="search-box"><text class="search-symbol">⌕</text><input v-model="keyword" placeholder="搜索餐厅名称或地址" confirm-type="search" /><text v-if="keyword" class="clear" @click="keyword = ''">×</text></view>
-      <view class="result-title"><text>附近餐厅</text><text class="result-count">{{ filteredStores.length }} 家</text></view>
+      <view class="search-box"><text class="search-symbol">⌕</text><input v-model="keyword" placeholder="搜索档口名称或地址" confirm-type="search" /><text v-if="keyword" class="clear" @click="keyword = ''">×</text></view>
+      <view class="result-title"><text>附近档口</text><text class="result-count">{{ filteredStores.length }} 家</text></view>
       <scroll-view scroll-y class="store-list" :style="{ height: listHeight + 'px' }">
         <view v-for="store in filteredStores" :key="store.id" class="store-item card" :class="{ selected: store.id === state.currentStoreId }" @click="select(store)">
           <image class="store-cover" :src="store.image" mode="aspectFill" />
           <view class="store-main">
-            <view class="store-row"><text class="store-name">{{ store.name }}</text><text class="store-distance">{{ formatDistance(store.distance) }}</text></view>
+            <view class="store-row"><view class="store-name-wrap"><text class="store-name">{{ store.name }}</text><text class="tag-badge" :class="store.tag === '校内' ? 'inside' : 'outside'">{{ store.tag }}</text></view><text class="store-distance">{{ formatDistance(store.distance) }}</text></view>
             <text class="store-address">{{ store.address }}</text>
             <view class="store-meta"><text :class="store.status">{{ store.status === 'open' ? '营业中' : '客流较多' }}</text><text>约 {{ store.waitMinutes }} 分钟</text></view>
             <text class="store-hours">{{ store.hours }}</text>
@@ -311,5 +303,5 @@ function enterStore(store) {
 .shop-content{position:relative;z-index:4;flex:1 1 auto;min-height:0;margin-top:-26rpx;padding:12rpx 28rpx calc(120rpx + env(safe-area-inset-bottom));border-radius:32rpx 32rpx 0 0;background:var(--oat-50);box-shadow:0 -10rpx 35rpx rgba(34,48,42,.08);display:flex;flex-direction:column}.drag-zone{flex:0 0 auto;display:flex;align-items:center;justify-content:center;height:52rpx}.sheet-handle{width:68rpx;height:7rpx;border-radius:5rpx;background:#d6d2ca}.sheet-heading{display:flex;align-items:center;justify-content:space-between;margin:0 2rpx 19rpx}.sheet-heading text{display:block}.sheet-title{font-size:31rpx;font-weight:700}.service-status{display:flex;align-items:center;padding:10rpx 15rpx;border-radius:24rpx;color:var(--brand);background:var(--brand-soft);font-size:19rpx;font-weight:600}.status-dot{width:10rpx;height:10rpx;margin-right:8rpx;border-radius:50%;background:var(--brand)}
 .search-box{display:flex;align-items:center;height:76rpx;padding:0 23rpx;border:1rpx solid var(--line);border-radius:22rpx;background:#fff;box-shadow:0 6rpx 20rpx rgba(16,38,111,.04)}.search-box input{flex:1;margin-right:14rpx;font-size:23rpx}.search-symbol{margin-right:14rpx;font-size:24rpx;color:var(--brand)}.clear{font-size:34rpx;color:var(--muted)}
 .result-title{display:flex;justify-content:space-between;margin:24rpx 2rpx 14rpx;font-size:27rpx;font-weight:700}.result-count{color:var(--muted);font-size:20rpx;font-weight:400}
-.store-item{position:relative;display:flex;margin-bottom:14rpx;padding:18rpx;border-radius:22rpx;box-shadow:0 12rpx 32rpx rgba(16,38,111,.1)}.store-item.selected{border:1rpx solid rgba(6,55,201,.28);background:linear-gradient(135deg,#fff 60%,#edf2ff)}.store-cover{width:138rpx;height:166rpx;margin-right:18rpx;flex:0 0 138rpx;border-radius:17rpx;background:#e6e9f1}.store-main{min-width:0;flex:1}.store-row{display:flex;justify-content:space-between}.store-name{min-width:0;flex:1;font-size:24rpx;font-weight:700;line-height:1.3}.store-distance{flex:none;color:var(--brand);font-size:19rpx;font-weight:600}.store-address{display:block;margin-top:7rpx;color:var(--muted);font-size:18rpx;line-height:1.35}.store-meta{display:flex;margin-top:9rpx;color:var(--muted);font-size:17rpx}.store-meta text{margin-right:13rpx}.store-meta .open{color:var(--brand);font-weight:700}.store-meta .busy{color:var(--danger);font-weight:700}.store-hours{display:block;margin-top:5rpx;color:#858891;font-size:16rpx}.store-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12rpx}.service-row{display:flex}.service-row .chip{min-height:32rpx;margin-right:7rpx;padding:0 9rpx;color:#40527d;background:#f0f3fa;font-size:15rpx}.enter-btn{flex:none;padding:9rpx 18rpx;border-radius:26rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:700;box-shadow:0 6rpx 14rpx rgba(6,55,201,.2)}.selected-mark{position:absolute;left:20rpx;top:20rpx;padding:8rpx 16rpx;border-radius:14rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:800;box-shadow:0 6rpx 16rpx rgba(6,55,201,.3)}
+.store-item{position:relative;display:flex;margin-bottom:14rpx;padding:18rpx;border-radius:22rpx;box-shadow:0 12rpx 32rpx rgba(16,38,111,.1)}.store-item.selected{border:1rpx solid rgba(6,55,201,.28);background:linear-gradient(135deg,#fff 60%,#edf2ff)}.store-cover{width:138rpx;height:166rpx;margin-right:18rpx;flex:0 0 138rpx;border-radius:17rpx;background:#e6e9f1}.store-main{min-width:0;flex:1}.store-row{display:flex;justify-content:space-between;align-items:center}.store-name-wrap{display:flex;align-items:center;min-width:0;flex:1}.store-name{min-width:0;font-size:24rpx;font-weight:700;line-height:1.3}.tag-badge{margin-left:12rpx;padding:2rpx 10rpx;font-size:18rpx;border-radius:8rpx;font-weight:600;white-space:nowrap;flex:none}.tag-badge.inside{background:#edf2ff;color:#0637c9;border:1rpx solid rgba(6,55,201,.2)}.tag-badge.outside{background:#fff4ea;color:#d96a00;border:1rpx solid rgba(217,106,0,.2)}.store-distance{flex:none;color:var(--brand);font-size:19rpx;font-weight:600}.store-address{display:block;margin-top:7rpx;color:var(--muted);font-size:18rpx;line-height:1.35}.store-meta{display:flex;margin-top:9rpx;color:var(--muted);font-size:17rpx}.store-meta text{margin-right:13rpx}.store-meta .open{color:var(--brand);font-weight:700}.store-meta .busy{color:var(--danger);font-weight:700}.store-hours{display:block;margin-top:5rpx;color:#858891;font-size:16rpx}.store-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12rpx}.service-row{display:flex}.service-row .chip{min-height:32rpx;margin-right:7rpx;padding:0 9rpx;color:#40527d;background:#f0f3fa;font-size:15rpx}.enter-btn{flex:none;padding:9rpx 18rpx;border-radius:26rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:700;box-shadow:0 6rpx 14rpx rgba(6,55,201,.2)}.selected-mark{position:absolute;left:20rpx;top:20rpx;padding:8rpx 16rpx;border-radius:14rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:800;box-shadow:0 6rpx 16rpx rgba(6,55,201,.3)}
 </style>

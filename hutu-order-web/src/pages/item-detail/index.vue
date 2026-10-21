@@ -45,6 +45,11 @@ function add(goCheckout = false) {
   uni.showToast({ title: '已加入购物车', icon: 'success' })
   if (goCheckout) setTimeout(() => uni.navigateTo({ url: '/pages/confirm-order/index' }), 250)
 }
+
+function goBack() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>
@@ -52,7 +57,7 @@ function add(goCheckout = false) {
     <view class="visual">
       <image v-if="!imageFailed" class="visual-image" :src="product.image" mode="aspectFit" @error="imageFailed = true" />
       <text v-else class="visual-fallback">{{ product.fallback }}</text>
-      <button class="back-button" @click="uni.navigateBack()">‹</button>
+      <button class="back-button" @click="goBack">‹</button>
       <button class="favorite-button" :class="{ active: favorite }" @click="store.toggleFavorite(product.id)">{{ favorite ? '♥' : '♡' }}</button>
       <view class="visual-glow" />
     </view>
@@ -85,7 +90,7 @@ function add(goCheckout = false) {
         </view>
       </view>
 
-      <view class="notice card"><view><text class="notice-title">档口现制</text><text class="notice-copy">餐品将在下单后开始制作，请按预计出餐时间到餐厅取餐。</text></view></view>
+      <view class="notice card"><view><text class="notice-title">档口现制</text><text class="notice-copy">餐品将在下单后开始制作，请按预计出餐时间到档口取餐。</text></view></view>
     </view>
 
     <view class="action-bar">

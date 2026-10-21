@@ -36,12 +36,17 @@ async function submit() {
     paying.value = false
   }
 }
+
+function goBack() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>
   <view class="page-shell checkout-page">
     <view class="checkout-header">
-      <button class="top-back" @click="uni.navigateBack()">‹</button>
+      <button class="top-back" @click="goBack">‹</button>
       <text class="header-title">确认订单</text><text class="header-subtitle">请确认餐品、取餐与支付信息</text>
     </view>
 
@@ -57,7 +62,7 @@ async function submit() {
       <view class="section-heading"><text class="section-title">取餐方式</text></view>
       <view class="mode-switch card">
         <button :class="{ active: store.state.orderMode === 'pickup' }" @click="store.setOrderMode('pickup')">到店自取</button>
-        <button :class="{ active: store.state.orderMode === 'dineIn' }" @click="store.setOrderMode('dineIn')">餐厅堂食</button>
+        <button :class="{ active: store.state.orderMode === 'dineIn' }" @click="store.setOrderMode('dineIn')">档口堂食</button>
       </view>
       <view class="time-row">
         <button v-for="time in ['尽快取餐','15 分钟后','30 分钟后']" :key="time" class="time-chip" :class="{ active: pickupTime === time }" @click="pickupTime = time">{{ time }}</button>

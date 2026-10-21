@@ -15,11 +15,15 @@ onShow(() => { if (store.state.user) store.loadOrders().catch(() => {}) })
 function openOrder(id) { uni.navigateTo({ url: `/pages/settled/index?id=${id}` }) }
 function reorder(id) { store.reorder(id); uni.switchTab({ url: '/pages/order/index' }) }
 function stallCount(order) { return new Set(order.items.map((item) => item.stallName).filter(Boolean)).size }
+function goBack() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>
   <view class="page-shell orders-page">
-    <view class="page-header"><button class="top-back" @click="uni.navigateBack()">‹</button><text class="title">我的订单</text><text class="subtitle">查看订单进度与历史记录</text></view>
+    <view class="page-header"><button class="top-back" @click="goBack">‹</button><text class="title">我的订单</text><text class="subtitle">查看订单进度与历史记录</text></view>
     <scroll-view scroll-x class="tabs"><view class="tabs-inner"><button v-for="tab in tabs" :key="tab.id" :class="{ active: currentTab === tab.id }" @click="currentTab = tab.id">{{ tab.name }}</button></view></scroll-view>
     <view v-if="orders.length" class="order-list">
       <view v-for="order in orders" :key="order.id" class="order-card card" @click="openOrder(order.id)">

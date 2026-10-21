@@ -11,17 +11,21 @@ function reset() {
   } })
 }
 function toast(text) { uni.showToast({ title: text, icon: 'none' }) }
+function goBack() {
+  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
+  else uni.switchTab({ url: '/pages/home/index' })
+}
 </script>
 
 <template>
   <view class="page-shell setting-page">
-    <view class="setting-header"><button class="top-back" @click="uni.navigateBack()">‹</button><text class="header-title">设置</text><text class="header-sub">管理账户、通知与使用偏好</text></view>
+    <view class="setting-header"><button class="top-back" @click="goBack">‹</button><text class="header-title">设置</text><text class="header-sub">管理账户、通知与使用偏好</text></view>
     <view class="section">
       <view class="section-heading"><text class="section-title">基础设置</text></view>
       <view class="settings card">
         <view class="setting-row"><view><text class="row-title">默认位置</text><text class="row-copy">{{ CAMPUS.name }} · {{ CAMPUS.campus }}</text></view><text class="tag">已启用</text></view>
         <view class="setting-row"><view><text class="row-title">数据管理</text><text class="row-copy">购物车、订单与偏好设置</text></view><text class="tag">本地保存</text></view>
-        <view class="setting-row last"><view><text class="row-title">服务范围</text><text class="row-copy">点餐、餐厅查询与订单管理</text></view><text class="safe">✓</text></view>
+        <view class="setting-row last"><view><text class="row-title">服务范围</text><text class="row-copy">点餐、档口查询与订单管理</text></view><text class="safe">✓</text></view>
       </view>
     </view>
     <view class="section">
