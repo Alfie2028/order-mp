@@ -11,7 +11,6 @@
         <swiper-item v-for="banner in banners" :key="banner.id">
           <view class="banner-slide" @click="onBannerTap(banner)">
             <image class="banner-image" :src="resolveImage(banner.image)" mode="aspectFill" />
-            <button v-if="banner.link === 'coupon'" class="banner-coupon-btn" @click.stop="onClaimCoupon">领取优惠券</button>
           </view>
         </swiper-item>
       </swiper>
@@ -94,14 +93,14 @@ const openProduct = (id) => { const product = state.products.find((p) => p.id ==
 // 首页轮播图：第 1 张为主视觉「多档口聚合一站式校园点餐」，以下 4 张为占位图（后续替换真实素材）
 // link: pickup=点单 / stores=餐厅 / coupon=领券
 const banners = [
-  { id: 2, image: '/uploads/catalog/store/store-campus.png', link: 'coupon' },
-  { id: 3, image: '/uploads/catalog/store/store-street.png', link: 'stores' },
-  { id: 4, image: '/uploads/catalog/store/store-town.png', link: 'pickup' },
-  { id: 5, image: '/uploads/catalog/banner/hero-campus-dining.png', link: 'pickup' },
+  { id: 2, image: '/uploads/catalog/banner/coupon-newbie.jpg', link: 'coupon' },
+  { id: 3, image: '/uploads/catalog/banner/store-dining-1.png', link: 'stores' },
+  { id: 4, image: '/uploads/catalog/banner/store-dining-2.png', link: 'pickup' },
+  { id: 5, image: '/uploads/catalog/banner/store-dining-3.png', link: 'pickup' },
 ]
 const couponPopup = reactive({ show: false })
 function onBannerTap(banner) {
-  if (banner.link === 'coupon') return
+  if (banner.link === 'coupon') { onClaimCoupon(); return }
   if (banner.link === 'stores') goStores()
   else startOrder('pickup')
 }
@@ -123,6 +122,6 @@ function goOrderFromPopup() { couponPopup.show = false; startOrder('pickup') }
 .recommend-section{padding-right:0}.recommend-scroll{width:100%;white-space:nowrap}.recommend-row{display:flex;padding:2rpx 28rpx 18rpx 0}.recommend-card{display:inline-flex;flex-direction:column;width:244rpx;margin-right:18rpx;padding:14rpx}.recommend-visual{position:relative;height:190rpx;overflow:visible;border-radius:50%;background:linear-gradient(145deg,#f7f8fb,#edf1f8)}.recommend-visual image{width:100%;height:100%;transform:scale(1.04)}.recommend-fallback{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:82rpx;background:#f2f4f8}.recommend-sold{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:7rpx 14rpx;border-radius:9rpx;color:#fff;background:rgba(60,60,66,.82);font-size:20rpx;font-weight:700}.recommend-card.sold-out .recommend-visual image{opacity:.55}.recommend-name{margin-top:15rpx;overflow:hidden;text-overflow:ellipsis;font-size:25rpx;font-weight:700}.recommend-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:12rpx}.recommend-add{display:flex;align-items:center;justify-content:center;width:42rpx;height:42rpx;border-radius:13rpx;color:#fff;background:var(--brand);font-size:28rpx}.member-card{margin-bottom:20rpx;padding:30rpx;border-radius:28rpx;color:#fff;background:linear-gradient(120deg,#071a62,#123aa8)}.member-kicker{color:var(--caramel-300);font-size:19rpx;letter-spacing:2rpx}.member-title{margin-top:12rpx;font-size:34rpx;font-weight:700}.member-desc{margin-top:5rpx;color:rgba(255,255,255,.65);font-size:21rpx}.member-progress{height:8rpx;margin-top:22rpx;overflow:hidden;border-radius:4rpx;background:rgba(255,255,255,.18)}.member-progress-value{height:100%;border-radius:4rpx;background:var(--caramel-300)}
 .hero-slide{position:relative;background-color:#fff}.hero-bg{position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:100%;z-index:0}.hero-slide::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;z-index:1;background:linear-gradient(90deg,rgba(255,255,255,.99) 0%,rgba(255,255,255,.94) 34%,rgba(255,255,255,.58) 54%,rgba(255,255,255,0) 76%)}
 .stall-grid{display:flex;flex-wrap:wrap;margin-right:-14rpx}.stall-card{display:flex;align-items:center;width:calc(50% - 14rpx);margin-right:14rpx;margin-bottom:14rpx;min-width:0;min-height:128rpx;padding:12rpx 14rpx;border:1rpx solid #e6e9f0;border-radius:20rpx;background:#fff;box-shadow:0 7rpx 20rpx rgba(17,38,91,.045)}.stall-card image{width:96rpx;height:96rpx;flex:0 0 96rpx;margin-right:11rpx;border-radius:50%;background:#f2f4f8}.stall-card>view{min-width:0}.stall-name,.stall-desc{display:block}.stall-name{font-size:22rpx;font-weight:700;white-space:nowrap}.stall-desc{margin-top:5rpx;overflow:hidden;color:var(--muted);font-size:16rpx;text-overflow:ellipsis;white-space:nowrap}
-.banner-section{position:relative}.banner-swiper{height:360rpx}.banner-slide{position:relative;width:100%;height:100%}.banner-image{width:100%;height:100%}.banner-coupon-btn{position:absolute;right:24rpx;bottom:24rpx;display:flex;align-items:center;justify-content:center;height:60rpx;padding:0 24rpx;border-radius:30rpx;background:linear-gradient(135deg,#d21f28,#ff5a3d);color:#fff;font-size:23rpx;font-weight:700;box-shadow:0 8rpx 20rpx rgba(210,31,40,.35)}
+.banner-section{position:relative}.banner-swiper{height:360rpx}.banner-slide{position:relative;width:100%;height:100%}.banner-image{width:100%;height:100%}
 .coupon-mask{position:fixed;left:0;top:0;right:0;bottom:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5)}.coupon-popup-wrap{display:flex;flex-direction:column;align-items:center}.coupon-popup{width:560rpx;padding:48rpx 40rpx 36rpx;border-radius:28rpx;text-align:center;background:#fff;box-shadow:0 24rpx 60rpx rgba(0,0,0,.25)}.coupon-popup-emoji{display:block;font-size:88rpx;line-height:1}.coupon-popup-title{display:block;margin-top:20rpx;font-size:34rpx;font-weight:800;color:var(--brand-950)}.coupon-popup-copy{display:block;margin-top:12rpx;color:var(--muted);font-size:23rpx}.coupon-popup-value{display:flex;align-items:baseline;justify-content:center;margin-top:26rpx;color:#d21f28}.coupon-popup-symbol{font-size:34rpx;font-weight:800}.coupon-popup-number{font-size:88rpx;font-weight:900;line-height:1}.coupon-popup-btn{display:flex;align-items:center;justify-content:center;width:100%;height:82rpx;margin-top:26rpx;border-radius:41rpx;background:linear-gradient(135deg,#d21f28,#ff5a3d);color:#fff;font-size:27rpx;font-weight:700}.coupon-close{display:flex;align-items:center;justify-content:center;width:64rpx;height:64rpx;margin-top:28rpx;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:32rpx;line-height:1}
 </style>
