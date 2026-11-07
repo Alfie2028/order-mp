@@ -97,6 +97,8 @@ const initialState = () => ({
   currentStoreId: CATALOG_STORES[0].id,
   selectedStallId: CATALOG_STALLS[0].id,
   orderMode: 'pickup',
+  channel: 'delivery',       // 首页双模卡：delivery=商家配送 / pickup=到店自取（仅前端偏好，订单 mode 仍为 pickup）
+  reviewSummary: {},         // { storeId: { count, avgRating, goodRate, recent } } 首页店铺卡评分来源
   cart: [],
   orders: [],
   merchantOrders: [],
@@ -115,7 +117,7 @@ const state = reactive(initialState())
 
 function persist() {
   if (!state.initialized) return
-  uni.setStorageSync(STORAGE_KEY, { currentStoreId: state.currentStoreId, selectedStallId: state.selectedStallId, orderMode: state.orderMode, cart: state.cart, favoriteIds: state.favoriteIds, couponIds: state.couponIds })
+  uni.setStorageSync(STORAGE_KEY, { currentStoreId: state.currentStoreId, selectedStallId: state.selectedStallId, orderMode: state.orderMode, channel: state.channel, cart: state.cart, favoriteIds: state.favoriteIds, couponIds: state.couponIds })
 }
 
 const isLoggedIn = () => !!state.user
@@ -166,10 +168,42 @@ function loadDashboard() {
   return get('/api/merchant/dashboard').then((data) => { state.dashboard = data })
 }
 
+// 门店评分聚合（免登录只读）：首页店铺卡展示真实评分与真实好评摘要
+let reviewSummaryPromise = null
+function loadStoreReviewSummary() {
+  if (reviewSummaryPromise) return reviewSummaryPromise
+  const ids = (state.stores || []).map((s) => s.id)
+  reviewSummaryPromise = allSettled(ids.map((id) => get(`/api/reviews/store/${id}`))).then((results) => {
+    const next = {}
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled' && r.value) {
+        next[ids[i]] = {
+          count: r.value.count || 0,
+          avgRating: r.value.avg_rating || 0,
+          goodRate: r.value.good_rate || 0,
+          recent: (r.value.recent || []).map((x) => ({ ...x, createdAt: parseDate(x.created_at) })),
+        }
+      }
+    })
+    state.reviewSummary = next
+  }).catch(() => { reviewSummaryPromise = null })
+  return reviewSummaryPromise
+}
+
+// 好评摘要：取最新一条有内容的评价首句，截 14 字以内
+function pickQuote(summary) {
+  if (!summary || !summary.recent) return ''
+  const hit = summary.recent.find((r) => r.content && r.rating >= 4) || summary.recent.find((r) => r.content)
+  if (!hit) return ''
+  const first = String(hit.content).split(/[，。！？,]/)[0].trim()
+  return first.length > 14 ? first.slice(0, 14) : first
+}
+
 export function initializeStore() {
   if (state.initialized) return
   const saved = uni.getStorageSync(STORAGE_KEY)
   if (saved && typeof saved === 'object') Object.assign(state, initialState(), saved)
+  if (!state.channel) state.channel = 'delivery'
   const token = uni.getStorageSync('TOKEN')
   const userInfo = uni.getStorageSync('USER_INFO')
   if (token && userInfo) state.user = userInfo
@@ -190,6 +224,49 @@ export function useAppStore() {
   const cartCount = computed(() => state.cart.reduce((sum, item) => sum + item.quantity, 0))
   const cartSubtotal = computed(() => state.cart.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0))
 
+  // 首页店铺卡：以“档口”为单位，字段全部由真实数据推导（不编造）
+  const merchantCards = computed(() => {
+    const byStall = {}
+    ;(state.products || []).forEach((p) => { (byStall[p.stallId] = byStall[p.stallId] || []).push(p) })
+    return (state.stalls || []).filter((s) => s.isActive !== false && (byStall[s.id] || []).length).map((s) => {
+      const list = byStall[s.id].slice().sort((a, b) => (b.sales || 0) - (a.sales || 0))
+      const store = state.stores.find((x) => x.id === s.storeId) || state.stores[0] || {}
+      const summary = state.reviewSummary[s.storeId] || null
+      const salesSum = list.reduce((n, p) => n + (p.sales || 0), 0)
+      const avgCents = Math.round(list.reduce((n, p) => n + (p.priceCents || 0), 0) / list.length)
+      return {
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        badge: s.badge || '门店',
+        storeId: s.storeId,
+        storeName: store.shortName || store.name || '',
+        image: list[0].image,
+        productCount: list.length,
+        salesSum,
+        avgPriceCents: avgCents,
+        rating: summary && summary.count ? Number(summary.avgRating.toFixed(1)) : 0,
+        ratingCount: summary ? summary.count : 0,
+        quote: pickQuote(summary) || '校园热销 · 现制现做',
+        distance: store.distance || 0,
+        waitMinutes: store.waitMinutes || 0,
+        hours: store.hours || '',
+      }
+    })
+  })
+
+  // 附近门店（按真实 distance 排序），用于首页门店切换条
+  const nearbyStores = computed(() => (state.stores || []).slice().sort((a, b) => (a.distance || 0) - (b.distance || 0)).map((s) => ({
+    id: s.id,
+    name: s.shortName || s.name,
+    fullName: s.name,
+    distance: s.distance || 0,
+    waitMinutes: s.waitMinutes || 0,
+    status: s.status,
+    hours: s.hours,
+    stallCount: (state.stalls || []).filter((x) => x.storeId === s.id && x.isActive !== false).length,
+  })))
+
   function setStore(storeId) {
     if (!state.stores.some((store) => store.id === storeId)) return
     if (state.currentStoreId !== storeId && state.cart.length) state.cart = []
@@ -197,6 +274,8 @@ export function useAppStore() {
     persist()
   }
   function setOrderMode(mode) { state.orderMode = mode === 'dineIn' ? 'dineIn' : 'pickup'; persist() }
+  // 首页双模卡（商家配送 / 到店自取）：只记录前端偏好，订单 mode 仍按后端口径写 pickup
+  function setChannel(channel) { state.channel = channel === 'pickup' ? 'pickup' : 'delivery'; persist() }
   function setStall(stallId) { if (state.stalls.some((stall) => stall.id === stallId)) { state.selectedStallId = stallId; persist() } }
 
   // ---- 购物车：登录走后端，未登录本地 ----
@@ -481,5 +560,5 @@ export function useAppStore() {
 
   function resetStore() { const keepUser = state.user; Object.assign(state, initialState(), { initialized: true }); state.user = keepUser; persist() }
 
-  return { state, currentStore, cartCount, cartSubtotal, loadCatalog, loadOrders, loadFavorites, loadCart, loadMyCoupons, claimCoupon, loadMerchantOrders, loadMerchantProducts, loadMerchantStalls, loadMerchantCoupons, loadDashboard, loadMerchantReviews, saveProduct, deleteProduct, toggleProduct, saveStall, toggleStall, saveCoupon, toggleCoupon, toggleStoreStatus, uploadImage, setAvatar, resolveImage, setStore, setOrderMode, setStall, addToCart, updateCartQuantity, clearCart, toggleFavorite, sendCode, login, register, loginByCode, logout, createOrder, findOrder, payOrder, completeOrder, refreshOrder, submitReview, loadMyReviews, acceptOrder, readyOrder, reorder, resetStore }
+  return { state, currentStore, cartCount, cartSubtotal, merchantCards, nearbyStores, loadCatalog, loadStoreReviewSummary, loadOrders, loadFavorites, loadCart, loadMyCoupons, claimCoupon, loadMerchantOrders, loadMerchantProducts, loadMerchantStalls, loadMerchantCoupons, loadDashboard, loadMerchantReviews, saveProduct, deleteProduct, toggleProduct, saveStall, toggleStall, saveCoupon, toggleCoupon, toggleStoreStatus, uploadImage, setAvatar, resolveImage, setStore, setOrderMode, setChannel, setStall, addToCart, updateCartQuantity, clearCart, toggleFavorite, sendCode, login, register, loginByCode, logout, createOrder, findOrder, payOrder, completeOrder, refreshOrder, submitReview, loadMyReviews, acceptOrder, readyOrder, reorder, resetStore }
 }
