@@ -1,5 +1,6 @@
 """预置数据：测试账号 + 餐厅/档口/餐品（含完整规格，作为前端唯一数据源）"""
 import json
+from datetime import timedelta
 
 from database import Base, engine, SessionLocal
 import models  # noqa
@@ -90,6 +91,29 @@ COUPONS = [
 ]
 
 
+# ---- 演示评价：给餐品详情页评价区准备的真实感数据 ----
+# 评价只能挂在已完成订单上，所以这里同时造订单 + 评价；order_no 已存在则跳过，可重复执行
+DEMO_REVIEWERS = [
+    ("许昌同学", "demo1@example.com"),
+    ("食堂常客", "demo2@example.com"),
+    ("赶课人", "demo3@example.com"),
+    ("夜宵党", "demo4@example.com"),
+]
+# (order_no, reviewer序号, stall_id, product_id, product_name, price_cents, 规格文字, rating, content, days_ago)
+DEMO_REVIEWS = [
+    ("SC20261028001", 1, "stir-fry", "yuxiang-pork-rice", "鱼香肉丝盖饭", 1680, "标准份 / 微辣", 5,
+     "鱼香肉丝给得很足，酸甜微辣很下饭，下单到出餐大概六分钟。", 6),
+    ("SC20261029002", 2, "noodles", "braised-beef-noodles", "红烧牛肉面", 1980, "标准份 / 标准辣 / 加卤蛋", 4,
+     "牛肉块挺多，汤头浓，就是面稍微软了一点。", 5),
+    ("SC20261030003", 3, "dumplings", "pork-cabbage-dumplings", "猪肉白菜水饺", 1680, "12 个 / 陈醋", 5,
+     "现点现煮，皮薄馅大，蘸陈醋很合适，下课来一份刚好。", 3),
+    ("SC20261031004", 4, "drinks", "lemon-tea", "鸭屎香柠檬茶", 1400, "中杯 / 冰 / 半糖", 3,
+     "柠檬茶本身不错，就是高峰时段等得有点久。", 2),
+    ("SC20261101005", 1, "light-food", "chicken-bagel", "烟熏鸡肉贝果", 1880, "默认规格", 4,
+     "贝果有嚼劲，鸡肉不柴，当早餐刚好。", 1),
+]
+
+
 def seed():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
@@ -132,8 +156,40 @@ def seed():
                 db.add(models.Coupon(id=cid, name=name, threshold_cents=threshold,
                                      discount_cents=discount, expires=expires))
 
+        # 演示评价账号（仅用于评价展示，登录方式与普通用户一致）
+        for username, email in DEMO_REVIEWERS:
+            if not db.query(models.User).filter(models.User.email == email).first():
+                db.add(models.User(username=username, email=email, password_hash=hash_password("123456"), role="user", points=0))
+        db.flush()
+
+        # 演示订单 + 对应评价：订单完成后才能评价，这里一次性造齐
+        demo_added = 0
+        for order_no, reviewer_no, stall_id, product_id, product_name, price, option_text, rating, content, days_ago in DEMO_REVIEWS:
+            if db.query(models.Order).filter(models.Order.order_no == order_no).first():
+                continue
+            _, email = DEMO_REVIEWERS[reviewer_no - 1]
+            user = db.query(models.User).filter(models.User.email == email).first()
+            if not user:
+                continue
+            created = models.utcnow() - timedelta(days=days_ago)
+            order = models.Order(
+                order_no=order_no, user_id=user.id, store_id="henau-canteen", stall_id=stall_id,
+                status="completed", status_text="已完成", pickup_code=str(1000 + int(order_no[-3:])),
+                mode="pickup", subtotal_cents=price, discount_cents=0, total_cents=price,
+                created_at=created, paid_at=created,
+            )
+            order.items.append(models.OrderItem(
+                product_id=product_id, name=product_name, quantity=1, unit_price_cents=price,
+                options=json.dumps([{"name": option_text}], ensure_ascii=False),
+            ))
+            db.add(order)
+            db.flush()
+            db.add(models.Review(order_id=order.id, user_id=user.id, rating=rating,
+                                 content=content, created_at=created + timedelta(hours=1)))
+            demo_added += 1
+
         db.commit()
-        print("seed 完成：2 账号 / 3 餐厅 / 6 档口 / 24 餐品（含规格）/ 3 优惠券")
+        print(f"seed 完成：2 账号 / 3 餐厅 / 6 档口 / 24 餐品（含规格）/ 3 优惠券 / 新增演示订单评价 {demo_added} 条")
     finally:
         db.close()
 

@@ -12,12 +12,13 @@ const tabs = [
   { id: 'ready', name: '待取餐' },
   { id: 'completed', name: '已完成' },
 ]
+// 功能入口：压缩成一行 4 个「图标 + 短标签」，把纵向空间还给订单列表
+// 「营业看板」不再单独占入口，改为点击头部「今日订单 / 今日流水」进入
 const entries = [
-  { key: 'products', name: '餐品管理', desc: '上新 / 下架 / 编辑', url: '/pages/merchant/products' },
-  { key: 'stalls', name: '档口管理', desc: '新增 / 上下架', url: '/pages/merchant/stalls' },
-  { key: 'coupons', name: '优惠券', desc: '满减券创建停用', url: '/pages/merchant/coupons' },
-  { key: 'dashboard', name: '营业看板', desc: '今日订单与流水', url: '/pages/merchant/dashboard' },
-  { key: 'reviews', name: '用户评价', desc: '评分与反馈', url: '/pages/merchant/reviews' },
+  { key: 'products', short: '餐品', icon: '餐', color: '#0637c9', url: '/pages/merchant/products' },
+  { key: 'stalls', short: '档口', icon: '档', color: '#0f8b8d', url: '/pages/merchant/stalls' },
+  { key: 'coupons', short: '优惠券', icon: '券', color: '#d99000', url: '/pages/merchant/coupons' },
+  { key: 'reviews', short: '评价', icon: '评', color: '#7a4fd0', url: '/pages/merchant/reviews' },
 ]
 let timer = null
 
@@ -52,6 +53,7 @@ async function toggleOpen() {
   uni.showToast({ title: res.status === 'closed' ? '已打烊' : '已开张', icon: 'none' })
 }
 function goEntry(url) { uni.navigateTo({ url }) }
+function goDashboard() { uni.navigateTo({ url: '/pages/merchant/dashboard' }) }
 function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }) }
 </script>
 
@@ -68,11 +70,11 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
           <text class="stat-number">{{ pendingCount }}</text>
           <text class="stat-label">待接订单</text>
         </view>
-        <view class="stat-card">
+        <view class="stat-card" @click="goDashboard">
           <text class="stat-number">{{ todayOrders }}</text>
           <text class="stat-label">今日订单</text>
         </view>
-        <view class="stat-card last">
+        <view class="stat-card last" @click="goDashboard">
           <text class="stat-number">{{ formatMoney(todaySales) }}</text>
           <text class="stat-label">今日流水</text>
         </view>
@@ -87,11 +89,10 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
       <text class="poll-hint">订单每 3 秒自动刷新，请保持页面开启</text>
     </view>
 
-    <view class="entry-grid">
-      <view v-for="(entry, index) in entries" :key="entry.key" class="entry-card card" :class="{ last: index % 2 === 1 }" @click="goEntry(entry.url)">
-        <text class="entry-name">{{ entry.name }}</text>
-        <text class="entry-desc">{{ entry.desc }}</text>
-        <text class="entry-arrow">›</text>
+    <view class="entry-row">
+      <view v-for="entry in entries" :key="entry.key" class="entry-item" hover-class="entry-item--tap" @click="goEntry(entry.url)">
+        <view class="entry-icon" :style="{ background: entry.color }">{{ entry.icon }}</view>
+        <text class="entry-label">{{ entry.short }}</text>
       </view>
     </view>
 
@@ -144,12 +145,14 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 .open-text { font-size: 26rpx; font-weight: 700; }
 .open-action { margin-left: auto; font-size: 22rpx; color: rgba(255,255,255,.75); }
 .poll-hint { display: block; margin-top: 16rpx; font-size: 18rpx; color: rgba(255,255,255,.5); }
-.entry-grid { display: flex; flex-wrap: wrap; padding: 26rpx 28rpx 10rpx; }
-.entry-card { position: relative; width: calc(50% - 10rpx); margin-right: 20rpx; margin-bottom: 20rpx; padding: 26rpx 22rpx; }
-.entry-card.last { margin-right: 0; }
-.entry-name { display: block; font-size: 28rpx; font-weight: 700; }
-.entry-desc { display: block; margin-top: 10rpx; font-size: 20rpx; color: var(--muted); }
-.entry-arrow { position: absolute; right: 22rpx; top: 24rpx; font-size: 36rpx; color: var(--brand-600); }
+
+/* 功能入口：一行 4 个，紧凑排列，不再每个占半屏 */
+.entry-row { display: flex; margin: 22rpx 24rpx 4rpx; padding: 24rpx 6rpx 20rpx; background: #fff; border-radius: 20rpx; }
+.entry-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.entry-item--tap { opacity: .7; }
+.entry-icon { width: 78rpx; height: 78rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-size: 30rpx; font-weight: 700; }
+.entry-label { margin-top: 12rpx; font-size: 22rpx; color: #41506e; }
+
 .tabs { white-space: nowrap; background: #fff; border-bottom: 1rpx solid var(--line); }
 .tabs-inner { display: flex; padding: 16rpx 22rpx; }
 .tabs button { display: flex; align-items: center; justify-content: center; min-width: 128rpx; height: 62rpx; margin-right: 10rpx; padding: 0 20rpx; border-radius: 31rpx; color: var(--muted); font-size: 23rpx; }

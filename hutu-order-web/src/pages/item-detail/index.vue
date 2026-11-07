@@ -1,7 +1,8 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
+import { get } from '@/utils/request'
 import { formatMoney } from '@/utils/format'
 
 const store = useAppStore()
@@ -10,6 +11,38 @@ const product = computed(() => store.state.products.find((item) => item.id === p
 const selected = reactive({})
 const quantity = ref(1)
 const imageFailed = ref(false)
+// 评价：按门店汇总，公开只读接口，失败时整块不显示，不影响点餐
+const reviewSummary = ref(null)
+
+const storeId = computed(() => {
+  const current = product.value
+  const stall = current ? (store.state.stalls || []).find((item) => item.id === current.stallId) : null
+  return (stall && stall.storeId) || store.state.currentStoreId || ''
+})
+
+const reviewStars = computed(() => {
+  if (!reviewSummary.value || !reviewSummary.value.count) return ''
+  const full = Math.round(reviewSummary.value.avg_rating)
+  return '★'.repeat(full) + '☆'.repeat(Math.max(0, 5 - full))
+})
+
+function loadReviews() {
+  if (!storeId.value) { console.log('[评价] storeId 为空，跳过请求'); return }
+  console.log('[评价] 请求门店', storeId.value)
+  get(`/api/reviews/store/${storeId.value}`).then((data) => {
+    console.log('[评价] 返回', data)
+    reviewSummary.value = data
+  }).catch((err) => {
+    console.warn('[评价] 请求失败', err)
+    reviewSummary.value = null
+  })
+}
+
+watch(storeId, () => loadReviews(), { immediate: true })
+
+function formatDate(value) {
+  return value ? String(value).slice(0, 10) : ''
+}
 
 onLoad((query) => {
   productId.value = query.id || store.state.products[0]?.id
@@ -90,6 +123,30 @@ function goBack() {
         </view>
       </view>
 
+      <view v-if="reviewSummary" class="review-card card">
+        <view v-if="reviewSummary.count" class="review-head">
+          <view class="review-score">
+            <text class="review-score-value">{{ reviewSummary.avg_rating.toFixed(1) }}</text>
+            <text class="review-score-label">综合评分</text>
+          </view>
+          <view class="review-head-main">
+            <text class="review-stars">{{ reviewStars }}</text>
+            <text class="review-sub">{{ reviewSummary.count }} 条评价 · 好评率 {{ reviewSummary.good_rate }}%</text>
+          </view>
+        </view>
+        <view v-if="reviewSummary.count" class="review-list">
+          <view v-for="item in reviewSummary.recent" :key="item.id" class="review-item">
+            <view class="review-item-head">
+              <text class="review-user">{{ item.username }}</text>
+              <text class="review-stars small">{{ '★'.repeat(item.rating) }}</text>
+            </view>
+            <text class="review-content">{{ item.content }}</text>
+            <text class="review-date">{{ formatDate(item.created_at) }}</text>
+          </view>
+        </view>
+        <view v-else class="review-empty">这个档口还没有评价，等你来写第一条</view>
+      </view>
+
       <view class="notice card"><view><text class="notice-title">档口现制</text><text class="notice-copy">餐品将在下单后开始制作，请按预计出餐时间到档口取餐。</text></view></view>
     </view>
 
@@ -119,6 +176,7 @@ function goBack() {
 .price-block{text-align:right;padding-top:34rpx}.price{font-size:34rpx}.sales{margin-top:8rpx;font-size:20rpx;color:var(--muted)}
 .option-card{margin-top:32rpx;padding:8rpx 26rpx}.option-group{padding:26rpx 0;border-bottom:1rpx solid var(--line)}.option-group.last{border-bottom:0}.option-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:18rpx}.option-title{font-weight:700;font-size:29rpx}.option-tip{font-size:21rpx;color:var(--muted)}
 .option-grid{display:flex;flex-wrap:wrap;margin-right:-14rpx}.option{width:calc(50% - 14rpx);margin-right:14rpx;margin-bottom:14rpx;display:flex;align-items:center;justify-content:center;min-height:74rpx;padding:0 16rpx;border:1rpx solid var(--line);border-radius:16rpx;color:var(--ink);background:#fff;font-size:25rpx}.option.selected{border-color:var(--brand-700);background:var(--oat-100);color:var(--brand-800);font-weight:700}.option-extra{margin-left:6rpx;font-size:19rpx;color:var(--muted)}
+.review-card{margin-top:22rpx;padding:26rpx}.review-head{display:flex;align-items:center;padding-bottom:20rpx;border-bottom:1rpx solid var(--line)}.review-score{display:flex;flex-direction:column;align-items:center;margin-right:26rpx;padding-right:26rpx;border-right:1rpx solid var(--line)}.review-score-value{font-size:48rpx;font-weight:800;line-height:1;color:var(--brand-900)}.review-score-label{margin-top:8rpx;font-size:18rpx;color:var(--muted)}.review-head-main{flex:1}.review-stars{font-size:30rpx;letter-spacing:2rpx;color:var(--caramel-500)}.review-stars.small{font-size:22rpx}.review-sub{display:block;margin-top:8rpx;font-size:20rpx;color:var(--muted)}.review-list{margin-top:6rpx}.review-item{padding:18rpx 0;border-bottom:1rpx solid var(--line)}.review-item:last-child{padding-bottom:0;border-bottom:0}.review-item-head{display:flex;align-items:center;justify-content:space-between}.review-user{font-size:24rpx;font-weight:700}.review-content{display:block;margin-top:10rpx;font-size:23rpx;line-height:1.6;color:#4a5160}.review-date{display:block;margin-top:8rpx;font-size:18rpx;color:var(--muted)}.review-empty{padding:24rpx 0;text-align:center;font-size:22rpx;color:var(--muted)}
 .notice{display:flex;margin-top:22rpx;padding:24rpx;border-left:5rpx solid var(--caramel-500)}.notice-title{font-size:25rpx;font-weight:700}.notice-copy{margin-top:6rpx;font-size:22rpx;color:var(--muted);line-height:1.5}
 .action-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;padding:18rpx 24rpx calc(18rpx + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);box-shadow:0 -10rpx 30rpx rgba(53,35,27,.08)}
 .stepper{display:flex;align-items:center;margin-right:12rpx}.stepper button{width:52rpx;height:52rpx;margin-right:8rpx;padding:0;display:flex;align-items:center;justify-content:center;border:1rpx solid var(--line);border-radius:50%;font-size:27rpx;line-height:1}.stepper text{min-width:28rpx;margin-right:8rpx;text-align:center;font-weight:700}.secondary-action,.primary-action{display:flex;align-items:center;justify-content:center;height:78rpx;padding:0 22rpx;border-radius:20rpx;font-size:24rpx;font-weight:700}.secondary-action{border:1rpx solid var(--brand);color:var(--brand);margin-right:12rpx}.primary-action{flex:1;background:var(--brand);color:white;white-space:nowrap}
