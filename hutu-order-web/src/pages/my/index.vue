@@ -172,7 +172,7 @@ function logout() {
       <button class="logout-entry" @click="logout">退出登录</button>
     </view>
 
-    <view class="footer-mark">校园点餐 · 多档口聚合服务</view>
+    <view class="footer-mark">校园点餐 · 多门店聚合服务</view>
   </view>
 </template>
 

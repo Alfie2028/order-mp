@@ -189,7 +189,7 @@
           <view v-for="item in nearbyStores" :key="item.id" class="store-chip card" :class="{ current: item.id === currentStore.id }" @click="pickStore(item)">
             <text class="store-chip-name">{{ item.name }}</text>
             <text class="store-chip-meta">{{ formatDistance(item.distance) }} · 出餐约 {{ item.waitMinutes }} 分钟</text>
-            <text class="store-chip-meta">{{ item.stallCount ? item.stallCount + ' 个店铺档口' : '档口筹备中' }}</text>
+            <text class="store-chip-meta">{{ item.stallCount ? item.stallCount + ' 家店铺' : '店铺筹备中' }}</text>
           </view>
         </view>
       </view>
@@ -224,7 +224,7 @@ const statusBarHeight = (() => {
 
 const keyword = ref('')
 const searching = ref(false)
-const placeholder = '搜店铺、档口或餐品'
+const placeholder = '搜店铺、门店或餐品'
 const activeFilter = ref('rating')
 const filterTabs = [
   { id: 'rating', name: '口碑榜首' },
@@ -338,7 +338,7 @@ function startOrder(stallId = '') { setOrderMode('pickup'); if (stallId) setStal
 function goStall(stallId) { setStall(stallId); uni.switchTab({ url: '/pages/order/index' }) }
 function goStores() { uni.switchTab({ url: '/pages/shop/index' }) }
 function pickStore(item) {
-  if (!item.stallCount) { uni.showToast({ title: `${item.name} 档口筹备中`, icon: 'none' }); return }
+  if (!item.stallCount) { uni.showToast({ title: `${item.name} 店铺筹备中`, icon: 'none' }); return }
   setStore(item.id); uni.showToast({ title: `已切换到${item.name}`, icon: 'none' })
 }
 function openProduct(id) {
