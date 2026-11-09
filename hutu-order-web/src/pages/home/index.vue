@@ -115,26 +115,6 @@
         </view>
       </view>
 
-      <!-- 吃货券包：三张真实券 -->
-      <view class="section">
-        <view class="coupon-pack card">
-          <view class="pack-head">
-            <text class="pack-title">吃货券包</text>
-            <text class="pack-count">{{ couponPack.length }} 张可用</text>
-            <text class="pack-link" @click="goMyCoupons">我的券 ›</text>
-          </view>
-          <view class="pack-row">
-            <view v-for="c in couponPack" :key="c.id" class="ticket" :class="{ claimed: c.claimed }" @click="claimOne(c)">
-              <view class="ticket-amount"><text class="ticket-symbol">¥</text><text class="ticket-num">{{ c.amount }}</text></view>
-              <text class="ticket-threshold">{{ c.thresholdText }}</text>
-              <text class="ticket-expire">{{ c.expires }} 到期</text>
-              <view class="ticket-btn" :class="{ claimed: c.claimed }">{{ c.claimed ? '已领' : '领取' }}</view>
-            </view>
-            <view v-if="!couponPack.length" class="ticket-empty">暂无可用券</view>
-          </view>
-        </view>
-      </view>
-
       <!-- 筛选栏：口碑榜首在前，综合排序在后 -->
       <view class="section">
         <scroll-view scroll-x class="filter-scroll" :show-scrollbar="false">
@@ -514,25 +494,6 @@ function openProduct(id) {
 .flash-num{margin-left:2rpx;color:#ef3f28;font-size:42rpx;font-weight:800;line-height:1}
 .flash-old{margin-left:6rpx;color:#a9adb6;font-size:18rpx;text-decoration:line-through}
 .flash-btn{padding:11rpx 22rpx;border-radius:12rpx;color:#fff;background:linear-gradient(100deg,#ff6a44,#e6341f);font-size:21rpx;font-weight:700}
-/* ---- 券包 ---- */
-.coupon-pack{padding:18rpx 18rpx 16rpx;border:3rpx solid #ffd7c9;background:linear-gradient(180deg,#fffdfc,#fff5f0)}
-.pack-head{display:flex;align-items:center;margin-bottom:14rpx}
-.pack-title{color:#43271f;font-size:26rpx;font-weight:800}
-.pack-count{margin-left:10rpx;color:#a9adb6;font-size:18rpx}
-.pack-link{margin-left:auto;color:#8d8f97;font-size:19rpx}
-.pack-row{display:flex;margin-right:-14rpx}
-.ticket{flex:1;margin-right:14rpx;padding:14rpx 12rpx 12rpx;border:2rpx solid #ffe0d6;border-radius:14rpx;background:#fff;text-align:center}
-.ticket.claimed{border-color:#eceff4;background:#f7f8fa}
-.ticket-amount{display:flex;align-items:baseline;justify-content:center}
-.ticket-symbol{color:#ef3f28;font-size:19rpx;font-weight:800}
-.ticket-num{margin-left:2rpx;color:#ef3f28;font-size:40rpx;font-weight:800;line-height:1}
-.ticket.claimed .ticket-symbol,.ticket.claimed .ticket-num{color:#b9bdc8}
-.ticket-threshold{display:block;margin-top:8rpx;color:#6c6f78;font-size:19rpx}
-.ticket-expire{display:block;margin-top:4rpx;color:#a6aab4;font-size:16rpx}
-.ticket.claimed .ticket-threshold,.ticket.claimed .ticket-expire{color:#b9bdc8}
-.ticket-btn{margin-top:10rpx;padding:8rpx 0;border-radius:20rpx;color:#fff;background:linear-gradient(100deg,#ff8a4c,#f0452b);font-size:18rpx;font-weight:700}
-.ticket-btn.claimed{background:#eceff4;color:#9aa0ad}
-.ticket-empty{padding:40rpx 0;color:var(--muted);font-size:21rpx}
 /* ---- 筛选 ---- */
 .filter-scroll{width:100%;white-space:nowrap}
 .filter-row{display:flex;padding-right:24rpx}
