@@ -64,14 +64,26 @@ function showMyCoupons() {
   })
 }
 
-// 在线客服：直接唤起系统拨号界面（演示用空号，接通不了属正常）
-const SERVICE_PHONE = '13000000000'
+// 在线客服：校园餐厅客服中心热线，受理时间与服务台同步
+const SERVICE_PHONE = '4008001234'
+const SERVICE_PHONE_TEXT = '400-800-1234'
+const SERVICE_HOURS = '07:30–21:30'
 function openService() {
-  uni.makePhoneCall({
-    phoneNumber: SERVICE_PHONE,
-    fail: (err) => {
-      console.log('[客服] 拨号未完成:', err)
-      uni.showToast({ title: '拨号已取消', icon: 'none' })
+  uni.showModal({
+    title: '校园餐厅客服中心',
+    content: `客服热线 ${SERVICE_PHONE_TEXT}\n受理时间 ${SERVICE_HOURS}（节假日正常）\n出餐、取餐码、退款等问题均可来电咨询。`,
+    confirmText: '拨打',
+    cancelText: '暂不',
+    confirmColor: '#0637c9',
+    success: ({ confirm }) => {
+      if (!confirm) return
+      uni.makePhoneCall({
+        phoneNumber: SERVICE_PHONE,
+        fail: (err) => {
+          console.log('[客服] 拨号未完成:', err)
+          uni.showToast({ title: '已取消拨号', icon: 'none' })
+        },
+      })
     },
   })
 }
@@ -157,7 +169,7 @@ function logout() {
         <view class="service-cell" @click="openService">
           <view class="service-icon service">客</view>
           <text class="service-name">在线客服</text>
-          <text class="service-desc">服务台 07:30–21:30</text>
+          <text class="service-desc">{{ SERVICE_PHONE_TEXT }}</text>
         </view>
       </view>
     </view>
