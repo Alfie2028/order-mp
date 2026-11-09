@@ -207,7 +207,7 @@ function select(store) {
     // #endif
   }
   if (state.cart.length && state.currentStoreId !== store.id) {
-    uni.showModal({ title: '切换档口', content: '切换档口将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
+    uni.showModal({ title: '切换门店', content: '切换门店将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
   } else apply()
 }
 
@@ -230,7 +230,7 @@ function goOrder() { uni.switchTab({ url: '/pages/order/index' }) }
 function enterStore(store) {
   const apply = () => { setStore(store.id); goOrder() }
   if (state.cart.length && state.currentStoreId !== store.id) {
-    uni.showModal({ title: '切换档口', content: '切换档口将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
+    uni.showModal({ title: '切换门店', content: '切换门店将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
   } else apply()
 }
 </script>
@@ -266,11 +266,11 @@ function enterStore(store) {
         <view class="sheet-handle" />
       </view>
       <view class="sheet-heading">
-        <view><text class="sheet-title">选择档口</text></view>
+        <view><text class="sheet-title">选择门店</text></view>
         <view class="service-status"><text class="status-dot"></text><text>营业中</text></view>
       </view>
-      <view class="search-box"><text class="search-symbol">⌕</text><input v-model="keyword" placeholder="搜索档口名称或地址" confirm-type="search" /><text v-if="keyword" class="clear" @click="keyword = ''">×</text></view>
-      <view class="result-title"><text>附近档口</text><text class="result-count">{{ filteredStores.length }} 家</text></view>
+      <view class="search-box"><text class="search-symbol">⌕</text><input v-model="keyword" placeholder="搜索门店名称或地址" confirm-type="search" /><text v-if="keyword" class="clear" @click="keyword = ''">×</text></view>
+      <view class="result-title"><text>附近门店</text><text class="result-count">{{ filteredStores.length }} 家</text></view>
       <scroll-view scroll-y class="store-list">
         <view v-for="store in filteredStores" :key="store.id" class="store-item card" :class="{ selected: store.id === state.currentStoreId }" @click="select(store)">
           <image class="store-cover" :src="store.image" mode="aspectFill" />

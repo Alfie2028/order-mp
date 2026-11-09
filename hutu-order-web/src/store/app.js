@@ -238,7 +238,6 @@ export function useAppStore() {
         id: s.id,
         name: s.name,
         description: s.description,
-        badge: s.badge || '门店',
         storeId: s.storeId,
         storeName: store.shortName || store.name || '',
         image: list[0].image,

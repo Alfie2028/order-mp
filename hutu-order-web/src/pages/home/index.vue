@@ -72,49 +72,85 @@
         </view>
       </view>
 
-      <!-- 金刚区：6 个门店 -->
+      <!-- 金刚区：两行五列十格，分区口径按点单区 mock，点击进对应门店 -->
       <view class="section">
-        <view class="diamond-grid">
-          <view v-for="stall in stallEntries" :key="stall.id" class="diamond-item" @click="goStall(stall.id)">
-            <image class="diamond-icon" :src="stall.image" mode="aspectFill" />
-            <text class="diamond-name">{{ stall.shortName || stall.name }}</text>
+        <view class="diamond card">
+          <view class="diamond-grid">
+            <view v-for="cat in categoryTabs" :key="cat.key" class="diamond-item" @click="onCategoryTap(cat)">
+              <text v-if="cat.badge" class="diamond-badge" :class="cat.badgeClass">{{ cat.badge }}</text>
+              <view class="diamond-icon">{{ cat.icon }}</view>
+              <text class="diamond-name">{{ cat.name }}</text>
+            </view>
           </view>
         </view>
       </view>
 
-      <!-- 美食节横幅 -->
-      <view class="section" @click="startOrder(festival.stallId)">
-        <view class="festival">
+      <!-- 美食节横幅：绿底 + 商家配送标 + 立即开吃 -->
+      <view class="section">
+        <view class="festival" @click="startOrder('dumplings')">
           <view class="festival-copy">
-            <view class="festival-tag">校园美食节</view>
-            <view class="festival-title">{{ festival.name }}</view>
-            <view class="festival-sub">{{ festival.subtitle }}</view>
-            <view class="festival-price"><text class="festival-symbol">¥</text><text class="festival-amount">{{ festival.price }}</text><text class="festival-cta">立即点单 ›</text></view>
+            <view class="festival-brand">
+              <text class="brand-pill">商家配送</text>
+              <text class="brand-sub">超级品牌日 · 校园精选鲜饺</text>
+            </view>
+            <view class="festival-title">鲜饺尝鲜 · 校园美食节</view>
+            <view class="festival-sub">现包现煮 皮薄汁多 · 平台立减 ¥6</view>
+            <view class="festival-btn">立即开吃 <text class="festival-arrow">›</text></view>
           </view>
-          <image class="festival-image" :src="festival.image" mode="aspectFill" />
+          <view class="festival-pic">
+            <image class="festival-image" :src="festival.image" mode="aspectFill" />
+          </view>
         </view>
       </view>
 
-      <!-- 券卡 + 今日特惠 -->
+      <!-- 券卡 + 秒杀卡：复用肥嘟嘟双卡样式 -->
       <view class="section">
-        <view class="promo-grid">
-          <view class="promo-card coupon-card" @click="onClaimCoupon">
-            <view class="promo-tag">吃货券</view>
-            <view class="promo-title">{{ homeCoupon.title }}</view>
-            <view class="promo-desc">{{ homeCoupon.desc }}</view>
-            <view class="coupon-action">
-              <text class="coupon-amount">¥{{ homeCoupon.discount }}</text>
-              <view class="coupon-btn" :class="{ claimed: homeCoupon.claimed }">{{ homeCoupon.claimed ? '已领取' : (state.user ? '一键领取' : '登录领取') }}</view>
+        <view class="promo-row">
+          <view class="promo voucher" @click="claimOne(couponPack[0])">
+            <text class="v-tag">限时吃券</text>
+            <view class="v-title">吃货专属津贴券</view>
+            <view class="v-sub">最高狂省 ¥{{ voucherSave }}</view>
+            <view class="v-mid"><text class="v-symbol">¥</text><text class="v-num">{{ voucherAmount }}</text></view>
+            <view class="v-btn" :class="{ claimed: voucherClaimed }">{{ voucherClaimed ? '已领取' : '一键领券' }}</view>
+          </view>
+          <view class="promo flash" @click="openProduct(deal.id)">
+            <view class="flash-head">
+              <text class="flash-tag">原味特惠</text>
+              <text class="flash-clock">{{ deal.clock }}</text>
+            </view>
+            <view class="flash-title">{{ deal.name }}秒杀</view>
+            <view class="flash-sub">现做现发 · 门店现制</view>
+            <view class="flash-sales">已售 {{ deal.sales }} 份 · 剩 {{ deal.stock }} 份</view>
+            <view class="flash-bar"><view class="flash-bar-fill" :style="{ width: deal.stockPercent + '%' }" /></view>
+            <view class="flash-bar-tip">已抢 {{ deal.stockPercent }}%，手慢无</view>
+            <view class="flash-foot">
+              <view class="flash-price">
+                <text class="flash-symbol">¥</text>
+                <text class="flash-num">{{ deal.priceNum }}</text>
+                <text v-if="deal.originalNum" class="flash-old">¥{{ deal.originalNum }}</text>
+              </view>
+              <view class="flash-btn">马上抢</view>
             </view>
           </view>
-          <view class="promo-card deal-card" @click="openProduct(deal.id)">
-            <view class="deal-head"><text class="promo-tag deal-tag">今日特惠</text><text class="deal-save">省 {{ deal.save }}</text></view>
-            <view class="promo-title">{{ deal.name }}</view>
-            <view class="promo-desc">{{ deal.subtitle }}</view>
-            <view class="deal-bottom">
-              <view class="deal-price"><text class="deal-cur">{{ deal.price }}</text><text class="deal-old">{{ deal.original }}</text></view>
-              <text class="deal-btn">马上点</text>
+        </view>
+      </view>
+
+      <!-- 吃货券包：三张真实券 -->
+      <view class="section">
+        <view class="coupon-pack card">
+          <view class="pack-head">
+            <text class="pack-title">吃货券包</text>
+            <text class="pack-count">{{ couponPack.length }} 张可用</text>
+            <text class="pack-link" @click="goMyCoupons">我的券 ›</text>
+          </view>
+          <view class="pack-row">
+            <view v-for="c in couponPack" :key="c.id" class="ticket" :class="{ claimed: c.claimed }" @click="claimOne(c)">
+              <view class="ticket-amount"><text class="ticket-symbol">¥</text><text class="ticket-num">{{ c.amount }}</text></view>
+              <text class="ticket-threshold">{{ c.thresholdText }}</text>
+              <text class="ticket-expire">{{ c.expires }} 到期</text>
+              <view class="ticket-btn" :class="{ claimed: c.claimed }">{{ c.claimed ? '已领' : '领取' }}</view>
             </view>
+            <view v-if="!couponPack.length" class="ticket-empty">暂无可用券</view>
           </view>
         </view>
       </view>
@@ -141,7 +177,6 @@
         <view v-for="shop in visibleShops" :key="shop.id" class="shop-card card" @click="goStall(shop.id)">
           <view class="shop-cover">
             <image :src="shop.image" mode="aspectFill" />
-            <text class="shop-cover-tag">{{ shop.badge }}</text>
           </view>
           <view class="shop-info">
             <view class="shop-title-row"><text class="shop-name">{{ shop.name }}</text><text class="shop-store">{{ shop.storeName }}</text></view>
@@ -235,26 +270,81 @@ const filterTabs = [
 
 onShow(() => { loadCatalog().catch(() => {}); loadStoreReviewSummary().catch(() => {}) })
 
-const stallEntries = computed(() => merchantCards.value.map((shop) => ({ id: shop.id, name: shop.name, shortName: (state.stalls.find((s) => s.id === shop.id) || {}).shortName, image: shop.image })))
 const popularProducts = computed(() => state.products.filter((product) => product.featured))
 
-// 美食节横幅：取真实高分餐品
+// 金刚区十格：品类在点单区按门店 mock，超出的分区落到最接近的真实门店
+const categoryTabs = [
+  { key: 'rice', name: '便当盖饭', icon: '🍱', badge: '热门', badgeClass: 'hot', stallId: 'stir-fry' },
+  { key: 'noodle', name: '特色粉面', icon: '🍜', stallId: 'noodles' },
+  { key: 'wok', name: '家常热炒', icon: '🥘', stallId: 'henan' },
+  { key: 'fried', name: '炸鸡汉堡', icon: '🍗', badge: '新品', badgeClass: 'new', stallId: 'stir-fry' },
+  { key: 'light', name: '减脂轻食', icon: '🥗', stallId: 'light-food' },
+  { key: 'drink', name: '鲜果茶饮', icon: '🧋', stallId: 'drinks' },
+  { key: 'dumpling', name: '水饺馄饨', icon: '🥟', badge: '手工', badgeClass: 'hand', stallId: 'dumplings' },
+  { key: 'snack', name: '小吃卤味', icon: '🍢', stallId: 'drinks' },
+  { key: 'night', name: '夜宵专场', icon: '🌙', stallId: 'stir-fry' },
+  { key: 'mart', name: '超市便利', icon: '🏪', badge: '新卡', badgeClass: 'cardnew', stallId: '' },
+]
+
+// 美食节横幅：取水饺门店的真实封面图
 const festival = computed(() => {
-  const product = state.products.find((p) => p.id === 'braised-beef-noodles') || popularProducts.value[0] || { name: '今日现制', subtitle: '', priceCents: 0, image: '' }
-  return { name: product.name, subtitle: product.subtitle, price: (product.priceCents / 100).toFixed(1), image: product.image, stallId: product.stallId }
+  const product = state.products.find((p) => p.stallId === 'dumplings' && p.image) || state.products.find((p) => p.image) || { image: '' }
+  return { image: product.image }
 })
-// 今日特惠：黑椒鸡腿饭，价与原价都来自后端数据
+
+// 秒杀卡：黑椒鸡腿饭，价格与销量都来自后端；库存进度为首页展示用的前端值
 const deal = computed(() => {
   const product = state.products.find((p) => p.id === 'black-pepper-chicken-rice') || state.products[0] || {}
   const cur = product.priceCents || 0
   const original = product.originalPriceCents || 0
   return {
-    id: product.id, name: product.name, subtitle: product.subtitle,
-    price: '¥' + (cur / 100).toFixed(1),
-    original: original > cur ? '¥' + (original / 100).toFixed(1) : '',
-    save: original > cur ? '¥' + ((original - cur) / 100).toFixed(1) : '限时价',
+    id: product.id,
+    name: product.name || '黑椒鸡腿饭',
+    priceNum: (cur / 100).toFixed(1),
+    originalNum: original > cur ? (original / 100).toFixed(1) : '',
+    sales: product.sales || 0,
+    stock: 40,
+    stockPercent: 92,
+    clock: '11:30',
   }
 })
+
+// 券包：按后端真实券列表排三张，已领的置灰
+const couponPack = computed(() => {
+  const list = (state.coupons || []).filter((c) => c.isActive !== false)
+  return list.slice()
+    .sort((a, b) => (a.thresholdCents || 0) - (b.thresholdCents || 0))
+    .slice(0, 3)
+    .map((c) => ({
+      id: c.id,
+      amount: (c.discountCents / 100).toFixed(0),
+      thresholdText: c.thresholdCents ? `满 ${(c.thresholdCents / 100).toFixed(0)} 元可用` : '无门槛',
+      expires: c.expires,
+      claimed: state.couponIds.includes(c.id),
+    }))
+})
+const voucherTotal = computed(() => (state.coupons || []).reduce((sum, c) => sum + (c.discountCents || 0), 0))
+const voucherSave = computed(() => (voucherTotal.value / 100).toFixed(0))
+const voucherAmount = computed(() => (couponPack.value[0] ? couponPack.value[0].amount : '0'))
+const voucherClaimed = computed(() => (couponPack.value.length ? couponPack.value.every((c) => c.claimed) : true))
+
+function onCategoryTap(cat) {
+  if (!cat.stallId) { uni.showToast({ title: '超市便利试营业中，先逛逛门店', icon: 'none' }); return }
+  goStall(cat.stallId)
+}
+function goMyCoupons() { uni.switchTab({ url: '/pages/my/index' }) }
+async function claimOne(coupon) {
+  if (!coupon || !coupon.id) { uni.showToast({ title: '券正在准备中', icon: 'none' }); return }
+  if (!state.user) { uni.navigateTo({ url: '/pages/login/index' }); return }
+  if (coupon.claimed) { goMyCoupons(); return }
+  const result = await claimCoupon(coupon.id)
+  if (result) {
+    couponPopup.show = true
+    couponPopup.title = '领取成功'
+    couponPopup.copy = `${result.name} 已放入账户，结算时可用`
+    couponPopup.amount = (result.discountCents / 100).toFixed(0)
+  }
+}
 
 // 首页主券：门槛最低的一张真实券
 const homeCoupon = computed(() => {
@@ -365,7 +455,7 @@ function openProduct(id) {
 .loc-arrow{margin-left:6rpx;color:rgba(255,255,255,.8);font-size:24rpx}
 .hero-status-chip{padding:5rpx 14rpx;border-radius:20rpx;color:#fff;background:rgba(0,0,0,.28);font-size:19rpx}
 /* ---- 搜索栏 ---- */
-.search-dock{position:sticky;top:0;z-index:30;margin-top:-34rpx;padding:0 24rpx 10rpx}
+.search-dock{position:sticky;top:0;z-index:30;margin-top:-124rpx;padding:0 24rpx 10rpx}
 .search-bar{display:flex;align-items:center;height:80rpx;padding:0 10rpx 0 24rpx;border-radius:40rpx;background:#fff;box-shadow:0 10rpx 28rpx rgba(12,26,64,.14)}
 .search-glyph{position:relative;width:30rpx;height:30rpx;margin-right:14rpx;flex:0 0 30rpx}
 .search-glyph::before{content:'';position:absolute;left:0;top:0;width:22rpx;height:22rpx;border:3rpx solid #9aa0ac;border-radius:50%}
@@ -399,42 +489,80 @@ function openProduct(id) {
 .channel-desc{display:block;margin-top:5rpx;color:var(--muted);font-size:18rpx;line-height:1.35}
 .channel-icon{display:flex;align-items:center;justify-content:center;width:52rpx;height:52rpx;flex:0 0 52rpx;margin-left:8rpx;border-radius:16rpx;color:#fff;background:linear-gradient(145deg,#0b4ee7,#062b9e);font-size:21rpx;font-weight:800}
 .channel-icon.pickup{background:linear-gradient(145deg,#c99457,#8a5f2a)}
-/* ---- 金刚区 ---- */
-.diamond-grid{display:flex;flex-wrap:wrap;padding:16rpx 4rpx;border-radius:20rpx;background:#fff;box-shadow:0 4rpx 14rpx rgba(16,38,90,.05)}
-.diamond-item{display:flex;flex-direction:column;align-items:center;width:33.33%;padding:10rpx 0}
-.diamond-icon{width:76rpx;height:76rpx;border-radius:50%;background:#f4f6fa}
-.diamond-name{margin-top:9rpx;color:var(--ink);font-size:21rpx;font-weight:700}
-/* ---- 美食节 ---- */
-.festival{position:relative;display:flex;overflow:hidden;border-radius:22rpx;background:linear-gradient(115deg,#fff4ef 0%,#ffe6da 62%,#ffd9c6 100%)}
-.festival-copy{position:relative;z-index:2;flex:1;padding:24rpx 20rpx}
-.festival-tag{display:inline-block;padding:3rpx 12rpx;border-radius:6rpx;color:#fff;background:#e8502c;font-size:18rpx;font-weight:700}
-.festival-title{margin-top:10rpx;color:#4b1d0d;font-size:30rpx;font-weight:800}
-.festival-sub{margin-top:6rpx;color:#8a5b47;font-size:19rpx;line-height:1.4}
-.festival-price{display:flex;align-items:baseline;margin-top:12rpx}
-.festival-symbol{color:#e8502c;font-size:22rpx;font-weight:800}
-.festival-amount{color:#e8502c;font-size:42rpx;font-weight:900;letter-spacing:-1rpx}
-.festival-cta{margin-left:14rpx;color:#4b1d0d;font-size:20rpx;font-weight:700}
-.festival-image{width:220rpx;height:100%;min-height:180rpx;flex:0 0 220rpx;opacity:.96}
-/* ---- 券卡 + 特惠 ---- */
-.promo-grid{display:flex;margin-right:-12rpx}
-.promo-card{width:calc(50% - 12rpx);margin-right:12rpx;padding:18rpx;border-radius:20rpx}
-.coupon-card{background:linear-gradient(135deg,#fff6f5 0%,#ffeae6 100%);border:1rpx solid #ffd8d2}
-.deal-card{background:linear-gradient(135deg,#fff9f5 0%,#fff0e4 100%);border:1rpx solid #ffe1cc}
-.promo-tag{display:inline-block;padding:2rpx 10rpx;border-radius:6rpx;color:#fff;background:#e8502c;font-size:18rpx;font-weight:700}
-.promo-tag.deal-tag{background:#f2761f}
-.promo-title{margin-top:10rpx;overflow:hidden;color:#222;font-size:25rpx;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
-.promo-desc{margin-top:4rpx;overflow:hidden;color:#8b8f98;font-size:18rpx;text-overflow:ellipsis;white-space:nowrap}
-.coupon-action{display:flex;align-items:center;justify-content:space-between;margin-top:12rpx}
-.coupon-amount{color:#e8502c;font-size:34rpx;font-weight:900}
-.coupon-btn{padding:5rpx 18rpx;border-radius:20rpx;color:#fff;background:#f2761f;font-size:19rpx;font-weight:700}
-.coupon-btn.claimed{background:#c9ccd4}
-.deal-head{display:flex;align-items:center;justify-content:space-between}
-.deal-save{color:#f2761f;font-size:18rpx;font-weight:700}
-.deal-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:10rpx}
-.deal-price{display:flex;align-items:baseline}
-.deal-cur{color:#e8502c;font-size:30rpx;font-weight:900}
-.deal-old{margin-left:6rpx;color:#b3b6bd;font-size:18rpx;text-decoration:line-through}
-.deal-btn{padding:5rpx 16rpx;border-radius:18rpx;color:#fff;background:#e8502c;font-size:19rpx;font-weight:700}
+/* ---- 金刚区：两行五列 ---- */
+.diamond{padding:20rpx 10rpx 18rpx}
+.diamond-grid{display:flex;flex-wrap:wrap}
+.diamond-item{position:relative;display:flex;flex-direction:column;align-items:center;width:20%;padding:10rpx 0}
+.diamond-badge{position:absolute;top:0;left:50%;transform:translateX(16rpx);padding:4rpx 8rpx 3rpx;border-radius:9rpx 9rpx 9rpx 0;color:#fff;font-size:17rpx;font-weight:700;line-height:1.2;z-index:2}
+.diamond-badge.hot{background:linear-gradient(135deg,#ff6b4a,#f03b23)}
+.diamond-badge.new{background:linear-gradient(135deg,#ff8a5c,#f5452b)}
+.diamond-badge.hand{background:linear-gradient(135deg,#ff9b4a,#ef7a22)}
+.diamond-badge.cardnew{background:linear-gradient(135deg,#ff7357,#e83e2c)}
+.diamond-icon{display:flex;align-items:center;justify-content:center;width:82rpx;height:82rpx;border-radius:18rpx;background:linear-gradient(180deg,#fffdf8,#fff4e3);font-size:44rpx;line-height:1}
+.diamond-item:nth-child(5n+2) .diamond-icon{background:linear-gradient(180deg,#fffaf8,#ffeee5)}
+.diamond-item:nth-child(5n+3) .diamond-icon{background:linear-gradient(180deg,#fefcef,#fff6df)}
+.diamond-item:nth-child(5n+4) .diamond-icon{background:linear-gradient(180deg,#fbfdf5,#f1f9e3)}
+.diamond-item:nth-child(5n) .diamond-icon{background:linear-gradient(180deg,#f8fbfe,#eaf4ff)}
+.diamond-name{margin-top:10rpx;color:#2b2f36;font-size:23rpx;letter-spacing:.2rpx}
+/* ---- 美食节 banner：绿底 ---- */
+.festival{position:relative;overflow:hidden;border-radius:20rpx;background:linear-gradient(120deg,#14a06b 0%,#0a7a52 62%,#0a6a48 100%)}
+.festival-copy{position:relative;z-index:2;min-height:186rpx;padding:22rpx 206rpx 22rpx 24rpx}
+.festival-brand{display:flex;align-items:center}
+.brand-pill{padding:5rpx 9rpx;border-radius:6rpx;color:#5a3d05;background:#f7d774;font-size:18rpx;font-weight:700;letter-spacing:.5rpx}
+.brand-sub{margin-left:10rpx;color:rgba(255,255,255,.78);font-size:18rpx}
+.festival-title{margin-top:12rpx;color:#fff;font-size:42rpx;font-weight:800;letter-spacing:1rpx;line-height:1.18}
+.festival-sub{margin-top:8rpx;color:rgba(255,255,255,.8);font-size:20rpx}
+.festival-btn{display:inline-flex;align-items:center;margin-top:14rpx;padding:11rpx 18rpx;border-radius:12rpx;color:#123d2c;background:#fff;font-size:21rpx;font-weight:700}
+.festival-arrow{margin-left:8rpx;font-size:20rpx}
+.festival-pic{position:absolute;right:18rpx;bottom:10rpx;z-index:2;width:186rpx;height:186rpx;overflow:hidden;border-radius:50%;background:#0b6647;box-shadow:0 10rpx 26rpx rgba(0,0,0,.22)}
+.festival-image{width:100%;height:100%}
+/* ---- 券卡 + 秒杀卡 ---- */
+.promo-row{display:flex;margin-right:-16rpx}
+.promo{position:relative;margin-right:16rpx;padding:18rpx;border-radius:18rpx}
+.voucher{flex:1.02;background:linear-gradient(160deg,#fff1ec 0%,#ffe3d9 100%);border:3rpx solid #ffd0c2}
+.v-tag{display:inline-block;padding:4rpx 9rpx;border-radius:8rpx;color:#f0432c;background:#fff;font-size:17rpx;font-weight:700;box-shadow:0 2rpx 6rpx rgba(240,67,44,.16)}
+.v-title{margin-top:10rpx;color:#4a2a22;font-size:28rpx;font-weight:800}
+.v-sub{margin-top:4rpx;color:#9c6a55;font-size:19rpx}
+.v-mid{display:flex;align-items:flex-end;margin-top:10rpx}
+.v-symbol{margin-bottom:6rpx;color:#ef3f28;font-size:22rpx;font-weight:800;line-height:1}
+.v-num{margin-left:10rpx;color:#ef3f28;font-size:62rpx;font-weight:800;line-height:.95}
+.v-btn{margin-top:12rpx;padding:13rpx 0;border-radius:14rpx;text-align:center;color:#fff;background:linear-gradient(100deg,#ff8a4c,#f5452b);font-size:22rpx;font-weight:700;box-shadow:0 6rpx 14rpx rgba(240,69,43,.28)}
+.v-btn.claimed{background:#e9ecf2;color:#9aa0ad;box-shadow:none}
+.flash{flex:.96;display:flex;flex-direction:column;background:#fff;border:3rpx solid #ffd4c6}
+.flash-head{display:flex;align-items:center;justify-content:space-between}
+.flash-tag{padding:4rpx 8rpx;border-radius:6rpx;color:#f0432c;background:#fff4ef;font-size:16rpx;font-weight:700}
+.flash-clock{padding:4rpx 9rpx;border-radius:7rpx;color:#fff;background:#22262c;font-size:17rpx;letter-spacing:.5rpx}
+.flash-title{margin-top:10rpx;color:#3a241f;font-size:27rpx;font-weight:800}
+.flash-sub{margin-top:4rpx;color:#a07a6c;font-size:18rpx}
+.flash-sales{margin-top:8rpx;color:#b8826d;font-size:17rpx}
+.flash-bar{height:10rpx;margin-top:10rpx;overflow:hidden;border-radius:6rpx;background:#ffe6dc}
+.flash-bar-fill{height:100%;border-radius:6rpx;background:linear-gradient(90deg,#ffb08a,#f0452b)}
+.flash-bar-tip{margin-top:6rpx;color:#b0745f;font-size:16rpx}
+.flash-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:12rpx}
+.flash-price{display:flex;align-items:baseline}
+.flash-symbol{color:#ef3f28;font-size:20rpx;font-weight:800}
+.flash-num{margin-left:2rpx;color:#ef3f28;font-size:42rpx;font-weight:800;line-height:1}
+.flash-old{margin-left:6rpx;color:#a9adb6;font-size:18rpx;text-decoration:line-through}
+.flash-btn{padding:11rpx 22rpx;border-radius:12rpx;color:#fff;background:linear-gradient(100deg,#ff6a44,#e6341f);font-size:21rpx;font-weight:700}
+/* ---- 券包 ---- */
+.coupon-pack{padding:18rpx 18rpx 16rpx;border:3rpx solid #ffd7c9;background:linear-gradient(180deg,#fffdfc,#fff5f0)}
+.pack-head{display:flex;align-items:center;margin-bottom:14rpx}
+.pack-title{color:#43271f;font-size:26rpx;font-weight:800}
+.pack-count{margin-left:10rpx;color:#a9adb6;font-size:18rpx}
+.pack-link{margin-left:auto;color:#8d8f97;font-size:19rpx}
+.pack-row{display:flex;margin-right:-14rpx}
+.ticket{flex:1;margin-right:14rpx;padding:14rpx 12rpx 12rpx;border:2rpx solid #ffe0d6;border-radius:14rpx;background:#fff;text-align:center}
+.ticket.claimed{border-color:#eceff4;background:#f7f8fa}
+.ticket-amount{display:flex;align-items:baseline;justify-content:center}
+.ticket-symbol{color:#ef3f28;font-size:19rpx;font-weight:800}
+.ticket-num{margin-left:2rpx;color:#ef3f28;font-size:40rpx;font-weight:800;line-height:1}
+.ticket.claimed .ticket-symbol,.ticket.claimed .ticket-num{color:#b9bdc8}
+.ticket-threshold{display:block;margin-top:8rpx;color:#6c6f78;font-size:19rpx}
+.ticket-expire{display:block;margin-top:4rpx;color:#a6aab4;font-size:16rpx}
+.ticket.claimed .ticket-threshold,.ticket.claimed .ticket-expire{color:#b9bdc8}
+.ticket-btn{margin-top:10rpx;padding:8rpx 0;border-radius:20rpx;color:#fff;background:linear-gradient(100deg,#ff8a4c,#f0452b);font-size:18rpx;font-weight:700}
+.ticket-btn.claimed{background:#eceff4;color:#9aa0ad}
+.ticket-empty{padding:40rpx 0;color:var(--muted);font-size:21rpx}
 /* ---- 筛选 ---- */
 .filter-scroll{width:100%;white-space:nowrap}
 .filter-row{display:flex;padding-right:24rpx}
@@ -446,7 +574,6 @@ function openProduct(id) {
 .shop-card{display:flex;margin-bottom:14rpx;padding:14rpx}
 .shop-cover{position:relative;width:196rpx;height:168rpx;flex:0 0 196rpx;overflow:hidden;border-radius:16rpx;background:#f2f4f8}
 .shop-cover image{width:100%;height:100%}
-.shop-cover-tag{position:absolute;left:8rpx;top:8rpx;padding:2rpx 10rpx;border-radius:8rpx;color:#fff;background:rgba(0,0,0,.42);font-size:17rpx}
 .shop-info{flex:1;min-width:0;padding:4rpx 6rpx 4rpx 16rpx}
 .shop-title-row{display:flex;align-items:baseline}
 .shop-name{overflow:hidden;font-size:27rpx;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
