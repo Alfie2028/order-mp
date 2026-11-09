@@ -64,14 +64,15 @@ function showMyCoupons() {
   })
 }
 
-// 在线客服：校园餐厅服务台
+// 在线客服：直接唤起系统拨号界面（演示用空号，接通不了属正常）
+const SERVICE_PHONE = '13000000000'
 function openService() {
-  uni.showModal({
-    title: '在线客服',
-    content: '校园餐厅服务台 07:30–21:30。\n出餐、取餐码、退款等问题，可先在「订单记录」里查看订单状态。',
-    showCancel: false,
-    confirmText: '看订单',
-    success: () => uni.navigateTo({ url: '/pages/my-order/index' }),
+  uni.makePhoneCall({
+    phoneNumber: SERVICE_PHONE,
+    fail: (err) => {
+      console.log('[客服] 拨号未完成:', err)
+      uni.showToast({ title: '拨号已取消', icon: 'none' })
+    },
   })
 }
 function goLogin() {
