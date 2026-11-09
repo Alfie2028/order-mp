@@ -11,11 +11,6 @@
       </swiper>
       <view class="hero-top-spacer" :style="{ height: statusBarHeight + 'px' }" />
       <view class="hero-nav">
-        <view class="loc" @click="goStores">
-          <image class="loc-icon" src="/static/icon/local.png" mode="aspectFit" />
-          <text class="loc-text">{{ currentStore.shortName || currentStore.name }}</text>
-          <text class="loc-arrow">›</text>
-        </view>
         <view class="hero-status-chip">{{ currentStore.status === 'busy' ? '出餐繁忙' : '营业中' }} · {{ currentStore.hours }}</view>
       </view>
     </view>
@@ -406,12 +401,8 @@ function openProduct(id) {
 .hero-image{width:100%;height:100%}
 .hero-slide::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(6,16,40,.55) 0%,rgba(6,16,40,.22) 34%,rgba(6,16,40,0) 62%)}
 .hero-top-spacer{position:absolute;left:0;top:0;right:0;z-index:3;pointer-events:none}
-.hero-nav{position:absolute;z-index:3;left:0;top:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 26rpx}
+.hero-nav{position:absolute;z-index:3;left:0;top:0;right:0;display:flex;align-items:center;justify-content:flex-end;padding:0 26rpx}
 .hero-nav{padding-top:calc(env(safe-area-inset-top) + 12rpx)}
-.loc{display:flex;align-items:center;min-width:0}
-.loc-icon{width:26rpx;height:26rpx;margin-right:8rpx}
-.loc-text{max-width:300rpx;overflow:hidden;color:#fff;font-size:26rpx;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
-.loc-arrow{margin-left:6rpx;color:rgba(255,255,255,.8);font-size:24rpx}
 .hero-status-chip{padding:5rpx 14rpx;border-radius:20rpx;color:#fff;background:rgba(0,0,0,.28);font-size:19rpx}
 /* ---- 搜索栏 ---- */
 .search-dock{position:sticky;top:0;z-index:30;margin-top:0;padding:18rpx 24rpx 4rpx;background:var(--oat-50)}
