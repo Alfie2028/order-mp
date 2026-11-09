@@ -20,7 +20,7 @@
       </view>
     </view>
 
-    <!-- 搜索栏：吸顶，搜索真实可用 -->
+    <!-- 搜索栏：位于轮播图下方独立一行，吸顶，搜索真实可用 -->
     <view class="search-dock">
       <view class="search-bar">
         <view class="search-glyph" />
@@ -52,26 +52,6 @@
     </view>
 
     <template v-else>
-      <!-- 双模卡：商家配送 / 到店自取 -->
-      <view class="section">
-        <view class="channel-grid">
-          <view class="channel-card" :class="{ active: state.channel === 'delivery' }" @click="chooseChannel('delivery')">
-            <view class="channel-copy">
-              <text class="channel-title">商家配送</text>
-              <text class="channel-desc">校园地址固定，无需填写收货地址</text>
-            </view>
-            <view class="channel-icon">配</view>
-          </view>
-          <view class="channel-card" :class="{ active: state.channel === 'pickup' }" @click="chooseChannel('pickup')">
-            <view class="channel-copy">
-              <text class="channel-title">到店自取</text>
-              <text class="channel-desc">提前点单，到店即取，免排队</text>
-            </view>
-            <view class="channel-icon pickup">取</view>
-          </view>
-        </view>
-      </view>
-
       <!-- 金刚区：两行五列十格，分区口径按点单区 mock，点击进对应门店 -->
       <view class="section">
         <view class="diamond card">
@@ -251,7 +231,7 @@ import { useAppStore } from '@/store/app'
 import { formatDistance, formatMoney } from '@/utils/format'
 
 const store = useAppStore()
-const { state, currentStore, merchantCards, nearbyStores, setStall, setStore, setOrderMode, setChannel, claimCoupon, resolveImage, loadCatalog, loadStoreReviewSummary } = store
+const { state, currentStore, merchantCards, nearbyStores, setStall, setStore, setOrderMode, claimCoupon, resolveImage, loadCatalog, loadStoreReviewSummary } = store
 
 const statusBarHeight = (() => {
   try { const info = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync(); return (info && info.statusBarHeight) || 20 } catch (e) { return 20 }
@@ -423,7 +403,6 @@ async function onClaimCoupon() {
 }
 function goOrderFromPopup() { couponPopup.show = false; startOrder(state.selectedStallId) }
 
-function chooseChannel(channel) { setChannel(channel); uni.showToast({ title: channel === 'delivery' ? '校园内由门店配送，无需填地址' : '已切换为到店自取', icon: 'none' }) }
 function startOrder(stallId = '') { setOrderMode('pickup'); if (stallId) setStall(stallId); uni.switchTab({ url: '/pages/order/index' }) }
 function goStall(stallId) { setStall(stallId); uni.switchTab({ url: '/pages/order/index' }) }
 function goStores() { uni.switchTab({ url: '/pages/shop/index' }) }
@@ -455,7 +434,7 @@ function openProduct(id) {
 .loc-arrow{margin-left:6rpx;color:rgba(255,255,255,.8);font-size:24rpx}
 .hero-status-chip{padding:5rpx 14rpx;border-radius:20rpx;color:#fff;background:rgba(0,0,0,.28);font-size:19rpx}
 /* ---- 搜索栏 ---- */
-.search-dock{position:sticky;top:0;z-index:30;margin-top:-124rpx;padding:0 24rpx 10rpx}
+.search-dock{position:sticky;top:0;z-index:30;margin-top:0;padding:18rpx 24rpx 4rpx;background:var(--oat-50)}
 .search-bar{display:flex;align-items:center;height:80rpx;padding:0 10rpx 0 24rpx;border-radius:40rpx;background:#fff;box-shadow:0 10rpx 28rpx rgba(12,26,64,.14)}
 .search-glyph{position:relative;width:30rpx;height:30rpx;margin-right:14rpx;flex:0 0 30rpx}
 .search-glyph::before{content:'';position:absolute;left:0;top:0;width:22rpx;height:22rpx;border:3rpx solid #9aa0ac;border-radius:50%}
@@ -480,15 +459,6 @@ function openProduct(id) {
 .result-desc{display:block;margin-top:5rpx;overflow:hidden;color:var(--muted);font-size:19rpx;text-overflow:ellipsis;white-space:nowrap}
 .result-extra{margin-left:12rpx;color:var(--brand);font-size:22rpx;font-weight:700}
 .result-empty{padding:50rpx 0;text-align:center;color:var(--muted);font-size:22rpx}
-/* ---- 双模卡 ---- */
-.channel-grid{display:flex;margin-right:-12rpx}
-.channel-card{display:flex;align-items:center;width:calc(50% - 12rpx);margin-right:12rpx;padding:18rpx 18rpx;border:1rpx solid #e7eaf1;border-radius:20rpx;background:#fff}
-.channel-card.active{border-color:var(--brand);background:#f3f6ff;box-shadow:0 6rpx 18rpx rgba(6,55,201,.1)}
-.channel-copy{flex:1;min-width:0}
-.channel-title{display:block;font-size:25rpx;font-weight:800}
-.channel-desc{display:block;margin-top:5rpx;color:var(--muted);font-size:18rpx;line-height:1.35}
-.channel-icon{display:flex;align-items:center;justify-content:center;width:52rpx;height:52rpx;flex:0 0 52rpx;margin-left:8rpx;border-radius:16rpx;color:#fff;background:linear-gradient(145deg,#0b4ee7,#062b9e);font-size:21rpx;font-weight:800}
-.channel-icon.pickup{background:linear-gradient(145deg,#c99457,#8a5f2a)}
 /* ---- 金刚区：两行五列 ---- */
 .diamond{padding:20rpx 10rpx 18rpx}
 .diamond-grid{display:flex;flex-wrap:wrap}
