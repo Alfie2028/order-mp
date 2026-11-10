@@ -4,8 +4,10 @@ import { onShow } from '@dcloudio/uni-app'
 import EmptyState from '@/component/EmptyState.vue'
 import { useAppStore } from '@/store/app'
 import { formatDateTime, formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const currentTab = ref('all')
 const tabs = [{ id: 'all', name: '全部' }, { id: 'making', name: '制作中' }, { id: 'ready', name: '待取餐' }, { id: 'completed', name: '已完成' }]
 const orders = computed(() => currentTab.value === 'all' ? store.state.orders : store.state.orders.filter((order) => order.status === currentTab.value))
@@ -23,8 +25,8 @@ function goBack() {
 
 <template>
   <view class="page-shell orders-page">
-    <view class="page-header">
-      <button class="top-back" @click="goBack">‹</button>
+    <view class="page-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="goBack">‹</button>
       <text class="title">我的订单</text>
       <text class="subtitle">肥嘟嘟餐饮平台 · 订单记录与进度</text>
     </view>

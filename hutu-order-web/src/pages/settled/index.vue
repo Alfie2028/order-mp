@@ -4,8 +4,10 @@ import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
 import EmptyState from '@/component/EmptyState.vue'
 import { useAppStore } from '@/store/app'
 import { formatDateTime, formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const orderId = ref('')
 const order = computed(() => store.findOrder(orderId.value))
 const steps = [{ id: 'paid', name: '已支付' }, { id: 'making', name: '制作中' }, { id: 'ready', name: '待取餐' }, { id: 'completed', name: '已完成' }]
@@ -58,8 +60,8 @@ function goBack() {
 <template>
   <view class="page-shell settled-page">
     <template v-if="order">
-      <view class="status-hero" :class="order.status">
-        <button class="top-back" @click="goBack">‹</button>
+      <view class="status-hero" :class="order.status" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+        <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="goBack">‹</button>
         <text class="status-title">{{ statusTitle }}</text>
         <text class="status-copy">{{ statusCopy }}</text>
         <view class="pickup-code">

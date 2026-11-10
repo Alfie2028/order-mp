@@ -3,8 +3,10 @@ import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const filterStall = ref('')
 
 const products = computed(() => store.state.merchantProducts || [])
@@ -52,8 +54,8 @@ function back() {
 
 <template>
   <view class="page-shell merchant-sub">
-    <view class="sub-header">
-      <button class="top-back" @click="back">‹</button>
+    <view class="sub-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="back">‹</button>
       <text class="title">餐品管理</text>
       <text class="subtitle">上新品、下架、改价、编辑配料</text>
     </view>
@@ -85,7 +87,7 @@ function back() {
       </view>
     </view>
 
-    <view class="fab" hover-class="hover-dim" @click="add">＋ 新增餐品</view>
+    <view class="fab" :style="{ bottom: (navLayout.bottomSafe ? (navLayout.bottomSafe + 20) + 'px' : '') }" hover-class="hover-dim" @click="add">＋ 新增餐品</view>
   </view>
 </template>
 
@@ -119,5 +121,5 @@ function back() {
 .act { display: flex; align-items: center; justify-content: center; min-width: 92rpx; height: 52rpx; margin-bottom: 10rpx; padding: 0 16rpx; border-radius: 26rpx; background: #FFF9E6; color: #8C5E00; font-size: 21rpx; font-weight: 700; }
 .act.warn { background: #FFF0ED; color: #FF7700; }
 .act.danger { background: #FFEBEE; color: #FF4B3E; }
-.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: #FFC300; color: #222426; font-size: 28rpx; font-weight: 800; box-shadow: 0 8rpx 24rpx rgba(255, 195, 0, .45); }
+.fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(40rpx + constant(safe-area-inset-bottom)); bottom: calc(40rpx + env(safe-area-inset-bottom)); padding: 22rpx 60rpx; border-radius: 46rpx; background: #FFC300; color: #222426; font-size: 28rpx; font-weight: 800; box-shadow: 0 8rpx 24rpx rgba(255, 195, 0, .45); }
 </style>

@@ -3,8 +3,10 @@ import { computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import ProductCard from '@/component/ProductCard.vue'
 import { useAppStore } from '@/store/app'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const user = computed(() => store.state.user)
 const isCustomAvatar = computed(() => user.value && typeof user.value.avatar === 'string' && user.value.avatar.startsWith('data:'))
 const favorites = computed(() => (store.state.products || []).filter((product) => store.state.favoriteIds.includes(product.id)))
@@ -127,8 +129,8 @@ function logout() {
 <template>
   <view class="page-shell my-page">
     <!-- 黄色顶部个人中心 (FeiDooDoo Classic Yellow Profile Hero) -->
-    <view class="profile-hero">
-      <view class="brand-line">
+    <view class="profile-hero" :style="{ paddingTop: (navLayout.capsuleTop + 4) + 'px' }">
+      <view class="brand-line" :style="{ paddingRight: (navLayout.capsuleRight || 12) + 'px', minHeight: navLayout.capsuleHeight + 'px' }">
         <view class="header-logo-badge">
           <image class="header-kangaroo" src="/static/image/kangaroo.png" mode="aspectFit" />
           <text>肥嘟嘟会员</text>

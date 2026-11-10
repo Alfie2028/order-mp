@@ -4,8 +4,10 @@ import { onLoad } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { get } from '@/utils/request'
 import { formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const productId = ref('')
 const product = computed(() => store.state.products.find((item) => item.id === productId.value) || store.state.products[0])
 const selected = reactive({})
@@ -90,8 +92,8 @@ function goBack() {
     <view class="visual">
       <image v-if="!imageFailed" class="visual-image" :src="product.image" mode="aspectFit" @error="imageFailed = true" />
       <text v-else class="visual-fallback">{{ product.fallback }}</text>
-      <button class="back-button" @click="goBack">‹</button>
-      <button class="favorite-button" :class="{ active: favorite }" @click="store.toggleFavorite(product.id)">
+      <button class="back-button" :style="{ top: navLayout.capsuleTop + 'px' }" @click="goBack">‹</button>
+      <button class="favorite-button" :class="{ active: favorite }" :style="{ top: navLayout.capsuleTop + 'px', right: (navLayout.capsuleRight + 8) + 'px' }" @click="store.toggleFavorite(product.id)">
         <text class="heart-ico">{{ favorite ? '♥' : '♡' }}</text>
       </button>
       <view class="visual-glow" />
@@ -159,7 +161,7 @@ function goBack() {
     </view>
 
     <!-- 底部操作栏：圆形加减按钮 (Circular Stepper Buttons) -->
-    <view class="action-bar">
+    <view class="action-bar" :style="{ paddingBottom: (navLayout.bottomSafe ? (navLayout.bottomSafe + 8) + 'px' : '') }">
       <view class="stepper">
         <button class="circle-btn minus" @click="quantity = Math.max(1, quantity - 1)">
           <text class="btn-glyph">−</text>
@@ -176,7 +178,11 @@ function goBack() {
 </template>
 
 <style scoped lang="scss">
-.detail-page { padding-bottom: 180rpx; background: #F7F8FA; }
+.detail-page {
+  padding-bottom: calc(180rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
+  background: #F7F8FA;
+}
 .visual {
   height: 580rpx;
   position: relative;
@@ -325,6 +331,7 @@ function goBack() {
   z-index: 20;
   display: flex;
   align-items: center;
+  padding: 16rpx 24rpx calc(16rpx + constant(safe-area-inset-bottom));
   padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
   background: #fff;
   border-top: 1rpx solid #F0F0F2;

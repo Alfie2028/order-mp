@@ -1,8 +1,10 @@
 <script setup>
 import { CAMPUS } from '@/data/catalog'
 import { useAppStore } from '@/store/app'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 function reset() {
   uni.showModal({ title: '恢复默认设置', content: '购物车、订单和偏好将恢复初始状态。', confirmColor: '#FF4B3E', success: ({ confirm }) => {
     if (!confirm) return
@@ -19,8 +21,8 @@ function goBack() {
 
 <template>
   <view class="page-shell setting-page">
-    <view class="setting-header">
-      <button class="top-back" @click="goBack">‹</button>
+    <view class="setting-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="goBack">‹</button>
       <text class="header-title">系统设置</text>
       <text class="header-sub">肥嘟嘟餐饮平台 · 管理账户、通知与偏好</text>
     </view>

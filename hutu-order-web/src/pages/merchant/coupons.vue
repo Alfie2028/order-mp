@@ -2,8 +2,10 @@
 import { computed, reactive, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const yuan = (cents) => (cents / 100).toFixed(2).replace(/\.?0+$/, '')
 const coupons = computed(() => store.state.merchantCoupons || [])
 const editing = ref(false)
@@ -44,8 +46,8 @@ function back() {
 
 <template>
   <view class="page-shell merchant-sub">
-    <view class="sub-header">
-      <button class="top-back" @click="back">‹</button>
+    <view class="sub-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="back">‹</button>
       <text class="title">优惠券管理</text>
       <text class="subtitle">满减券创建与停用，用户端下单可选</text>
     </view>

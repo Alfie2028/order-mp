@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onUnmounted } from 'vue'
 import { useAppStore } from '@/store/app'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const mode = ref('login') // login / register / code-login
 const email = ref('')
 const password = ref('')
@@ -88,8 +90,8 @@ function goBack() {
 
 <template>
   <view class="page-shell login-page">
-    <view class="login-header">
-      <button class="top-back" @click="goBack">‹</button>
+    <view class="login-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="goBack">‹</button>
       <view class="mascot-wrap">
         <image class="mascot-img" src="/static/image/kangaroo.png" mode="aspectFit" />
       </view>

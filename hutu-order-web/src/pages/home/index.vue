@@ -2,22 +2,26 @@
   <view class="page-shell home-page">
     <!-- 顶部轮播：肥嘟嘟主题顶部 + 袋鼠Logo + 状态胶囊 -->
     <view class="hero">
-      <swiper class="hero-swiper" circular autoplay :interval="4000" :duration="500" indicator-dots indicator-color="rgba(255,255,255,.5)" indicator-active-color="#FFC300">
+      <swiper class="hero-swiper" :style="{ height: (navLayout.totalNavHeight + 170) + 'px' }" circular autoplay :interval="4000" :duration="500" indicator-dots indicator-color="rgba(255,255,255,.5)" indicator-active-color="#FFC300">
         <swiper-item v-for="banner in banners" :key="banner.id">
           <view class="hero-slide" @click="onBannerTap(banner)">
             <image class="hero-image" :src="resolveImage(banner.image)" mode="aspectFill" />
           </view>
         </swiper-item>
       </swiper>
-      <view class="hero-top-spacer" :style="{ height: statusBarHeight + 'px' }" />
-      <view class="hero-nav">
+      <view class="hero-nav" :style="{
+        top: navLayout.capsuleTop + 'px',
+        paddingRight: navLayout.capsuleRight + 'px',
+        minHeight: navLayout.capsuleHeight + 'px'
+      }">
         <view class="hero-brand">
           <image class="hero-logo" src="/static/image/kangaroo.png" mode="aspectFit" />
           <text class="hero-brand-name">肥嘟嘟餐饮</text>
         </view>
         <view class="hero-status-chip">
           <text class="status-dot" />
-          <text>{{ currentStore.status === 'busy' ? '出餐繁忙' : '营业中' }} · {{ currentStore.hours }}</text>
+          <text>{{ currentStore.status === 'busy' ? '出餐繁忙' : '营业中' }}</text>
+          <text class="status-hours"> · {{ currentStore.hours }}</text>
         </view>
       </view>
     </view>
@@ -240,13 +244,13 @@ import { computed, reactive, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { formatDistance, formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
 const { state, currentStore, merchantCards, nearbyStores, setStall, setStore, setOrderMode, claimCoupon, resolveImage, loadCatalog, loadStoreReviewSummary } = store
 
-const statusBarHeight = (() => {
-  try { const info = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync(); return (info && info.statusBarHeight) || 20 } catch (e) { return 20 }
-})()
+const navLayout = getNavLayout()
+const statusBarHeight = navLayout.statusBarHeight
 
 const keyword = ref('')
 const searching = ref(false)
@@ -472,13 +476,12 @@ function openProduct(id) {
   position: absolute;
   z-index: 3;
   left: 0;
-  top: 0;
   right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24rpx;
-  padding-top: calc(env(safe-area-inset-top) + 12rpx);
+  padding-left: 24rpx;
+  box-sizing: border-box;
 }
 .hero-brand {
   display: flex;
@@ -503,13 +506,23 @@ function openProduct(id) {
 .hero-status-chip {
   display: flex;
   align-items: center;
-  padding: 8rpx 18rpx;
+  padding: 6rpx 14rpx;
   border-radius: 24rpx;
   color: #222426;
   background: #FFC300;
   font-size: 20rpx;
   font-weight: 700;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, .15);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-hours {
+  white-space: nowrap;
+}
+@media screen and (max-width: 380px) {
+  .status-hours {
+    display: none;
+  }
 }
 .status-dot {
   width: 12rpx;

@@ -2,8 +2,10 @@
 import { reactive, computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const stalls = computed(() => store.state.merchantStalls || [])
 
 const form = reactive({
@@ -95,8 +97,8 @@ function back() {
 
 <template>
   <view class="page-shell merchant-sub">
-    <view class="sub-header">
-      <button class="top-back" @click="back">‹</button>
+    <view class="sub-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="back">‹</button>
       <text class="title">{{ form.id ? '编辑餐品' : '新增餐品' }}</text>
       <text class="subtitle">填写基本信息与配料规格，图片可选相册/拍照</text>
     </view>

@@ -3,8 +3,10 @@ import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const couponId = ref('')
 const note = ref('')
 const pickupTime = ref('尽快取餐')
@@ -55,8 +57,8 @@ function goBack() {
 
 <template>
   <view class="page-shell checkout-page">
-    <view class="checkout-header">
-      <button class="top-back" @click="goBack">‹</button>
+    <view class="checkout-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="goBack">‹</button>
       <text class="header-title">确认订单</text>
       <text class="header-subtitle">请核对餐品、取餐方式与支付金额</text>
       <view class="mode-switch card">
@@ -146,7 +148,7 @@ function goBack() {
     </view>
 
     <!-- 底部固定结算栏 -->
-    <view class="pay-bar">
+    <view class="pay-bar" :style="{ paddingBottom: (navLayout.bottomSafe ? navLayout.bottomSafe + 'px' : '') }">
       <view class="pay-bar-inner">
         <view class="pay-left">
           <text class="pay-label">实付 </text>
@@ -160,7 +162,8 @@ function goBack() {
 
 <style scoped lang="scss">
 .checkout-page {
-  padding-bottom: 180rpx;
+  padding-bottom: calc(180rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
   background: #F7F8FA;
 }
 .checkout-header {
@@ -394,6 +397,7 @@ function goBack() {
   background: #fff;
   border-top: 1rpx solid #F0F0F2;
   box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, .06);
+  padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
 }
 .pay-bar-inner {

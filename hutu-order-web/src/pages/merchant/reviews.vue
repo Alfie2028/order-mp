@@ -4,8 +4,10 @@ import { onShow } from '@dcloudio/uni-app'
 import EmptyState from '@/component/EmptyState.vue'
 import { useAppStore } from '@/store/app'
 import { formatDateTime } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const reviews = computed(() => store.state.merchantReviews || [])
 const avg = computed(() => reviews.value.length ? (reviews.value.reduce((s, r) => s + r.rating, 0) / reviews.value.length).toFixed(1) : '0.0')
 const goodRate = computed(() => reviews.value.length ? Math.round(reviews.value.filter((r) => r.rating >= 4).length / reviews.value.length * 100) : 0)
@@ -24,8 +26,8 @@ function back() {
 
 <template>
   <view class="page-shell merchant-sub">
-    <view class="sub-header">
-      <button class="top-back" @click="back">‹</button>
+    <view class="sub-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="back">‹</button>
       <text class="title">用户评价</text>
       <text class="subtitle">顾客评分与反馈，实时了解用餐口碑</text>
     </view>

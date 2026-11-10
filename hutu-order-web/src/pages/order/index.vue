@@ -1,7 +1,7 @@
 <template>
   <view class="page-shell order-page">
-    <view class="order-header">
-      <view class="header-top">
+    <view class="order-header" :style="{ paddingTop: (navLayout.capsuleTop + 4) + 'px' }">
+      <view class="header-top" :style="{ paddingRight: (navLayout.capsuleRight || 12) + 'px' }">
         <view class="mode-tabs">
           <text :class="{ active: state.orderMode === 'pickup' }" @click="setOrderMode('pickup')">自取</text>
           <text class="divider">|</text>
@@ -61,7 +61,7 @@
     </view>
 
     <!-- 现代外卖风悬浮购物车栏 -->
-    <view v-if="cartCount" class="cart-bar">
+    <view v-if="cartCount" class="cart-bar" :style="{ bottom: (navLayout.bottomSafe ? (navLayout.bottomSafe + 55) + 'px' : '') }">
       <view class="cart-round" @click="showCart = true">
         <image class="cart-icon-img" src="/static/image/home-shop.png" mode="aspectFit" />
         <text class="cart-count">{{ cartCount }}</text>
@@ -122,6 +122,9 @@ import ProductCard from '@/component/ProductCard.vue'
 import EmptyState from '@/component/EmptyState.vue'
 import { useAppStore } from '@/store/app'
 import { formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
+
+const navLayout = getNavLayout()
 
 const keyword = ref('')
 const showCart = ref(false)
@@ -167,7 +170,7 @@ const goStores = () => uni.switchTab({ url: '/pages/shop/index' })
 .order-header {
   position: relative;
   z-index: 8;
-  padding: calc(52rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 26rpx 18rpx;
+  padding: 18rpx 26rpx;
   background: #fff;
   border-bottom: 1rpx solid #F2F2F4;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .04);
@@ -394,6 +397,7 @@ const goStores = () => uni.switchTab({ url: '/pages/shop/index' })
   z-index: 20;
   left: 24rpx;
   right: 24rpx;
+  bottom: calc(110rpx + constant(safe-area-inset-bottom));
   bottom: calc(110rpx + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;

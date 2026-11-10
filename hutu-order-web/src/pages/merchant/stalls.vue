@@ -2,8 +2,10 @@
 import { computed, reactive, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const stalls = computed(() => store.state.merchantStalls || [])
 const editing = ref(false)
 const form = reactive({ id: '', name: '', shortName: '', description: '' })
@@ -37,8 +39,8 @@ function back() {
 
 <template>
   <view class="page-shell merchant-sub">
-    <view class="sub-header">
-      <button class="top-back" @click="back">‹</button>
+    <view class="sub-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="back">‹</button>
       <text class="title">档口管理</text>
       <text class="subtitle">档口上架后，用户端点单页可见</text>
     </view>

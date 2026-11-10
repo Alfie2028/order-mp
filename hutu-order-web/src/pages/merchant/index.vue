@@ -3,8 +3,10 @@ import { computed, ref } from 'vue'
 import { onShow, onUnload } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { formatDateTime, formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const currentTab = ref('paid')
 const tabs = [
   { id: 'paid', name: '待接单' },
@@ -58,8 +60,8 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 
 <template>
   <view class="page-shell merchant-page">
-    <view class="merchant-header">
-      <view class="header-top">
+    <view class="merchant-header" :style="{ paddingTop: (navLayout.capsuleTop + 4) + 'px' }">
+      <view class="header-top" :style="{ paddingRight: (navLayout.capsuleRight || 12) + 'px', minHeight: navLayout.capsuleHeight + 'px' }">
         <view class="header-brand-line">
           <image class="header-logo" src="/static/image/kangaroo.png" mode="aspectFit" />
           <text class="title">肥嘟嘟商家版</text>
