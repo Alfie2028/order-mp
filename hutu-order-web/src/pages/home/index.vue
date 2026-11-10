@@ -1,6 +1,6 @@
 <template>
   <view class="page-shell home-page">
-    <!-- 顶部常驻固定导航栏：安全区避让灵动岛与微信胶囊 -->
+    <!-- 顶部常驻固定导航栏：安全区避让灵动岛与微信胶囊，尺寸与下方750px完全一致居中 -->
     <view class="top-nav-bar" :style="{
       height: navLayout.totalNavHeight + 'px',
       paddingTop: navLayout.capsuleTop + 'px'
@@ -21,18 +21,20 @@
       </view>
     </view>
 
-    <!-- 顶部轮播：位于常驻导航栏下方 -->
-    <view class="hero" :style="{ paddingTop: navLayout.totalNavHeight + 'px' }">
-      <swiper class="hero-swiper" circular autoplay :interval="4000" :duration="500" indicator-dots indicator-color="rgba(255,255,255,.5)" indicator-active-color="#FFC300">
-        <swiper-item v-for="banner in banners" :key="banner.id">
-          <view class="hero-slide" @click="onBannerTap(banner)">
-            <image class="hero-image" :src="resolveImage(banner.image)" mode="aspectFill" />
-          </view>
-        </swiper-item>
-      </swiper>
+    <!-- 顶部轮播海报：位置向下移动留出呼吸感，卡片圆角完整展示店面照片 -->
+    <view class="hero-banner-wrap" :style="{ paddingTop: (navLayout.totalNavHeight + 14) + 'px' }">
+      <view class="hero-card">
+        <swiper class="hero-swiper" circular autoplay :interval="4000" :duration="500" indicator-dots indicator-color="rgba(255,255,255,.6)" indicator-active-color="#FFC300">
+          <swiper-item v-for="banner in banners" :key="banner.id">
+            <view class="hero-slide" @click="onBannerTap(banner)">
+              <image class="hero-image" :src="resolveImage(banner.image)" mode="aspectFill" />
+            </view>
+          </swiper-item>
+        </swiper>
+      </view>
     </view>
 
-    <!-- 暖黄搜索栏：吸顶折叠到固定顶部导航栏正下方，绝不遮挡顶部信息与胶囊 -->
+    <!-- 暖黄搜索栏：吸顶折叠到固定顶部导航栏正下方，与下方内容宽度严格对齐 -->
     <view class="search-dock" :style="{ top: navLayout.totalNavHeight + 'px' }">
       <view class="search-bar">
         <view class="search-glyph">
@@ -444,45 +446,14 @@ function openProduct(id) {
   padding-bottom: 30rpx;
 }
 
-/* ---- hero：顶部暖黄微渐变 + 轮播 + 袋鼠Logo与状态 ---- */
-.hero {
-  position: relative;
-  background: #FFC300;
-}
-.hero-swiper {
-  height: 380rpx;
-}
-.hero-slide {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-.hero-image {
-  width: 100%;
-  height: 100%;
-}
-.hero-slide::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(20, 20, 20, .45) 0%, rgba(20, 20, 20, .15) 30%, rgba(20, 20, 20, 0) 65%);
-}
-.hero-top-spacer {
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  z-index: 3;
-  pointer-events: none;
-}
+/* ---- 顶部常驻固定导航栏（尺寸与下方750px完全一致居中） ---- */
 .top-nav-bar {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 750px;
   z-index: 99;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .06);
@@ -493,8 +464,37 @@ function openProduct(id) {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  max-width: 750px;
   padding-left: 24rpx;
   box-sizing: border-box;
+}
+
+/* ---- 顶部轮播海报：位置下移、圆角卡片、去除黑遮罩完整展示照片 ---- */
+.hero-banner-wrap {
+  position: relative;
+  padding-left: 24rpx;
+  padding-right: 24rpx;
+  padding-bottom: 12rpx;
+  background: linear-gradient(180deg, #FFC300 0%, #FFE072 40%, #F7F8FA 100%);
+}
+.hero-card {
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, .08);
+  background: #fff;
+}
+.hero-swiper {
+  height: 420rpx;
+}
+.hero-slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.hero-image {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .hero-brand {
   display: flex;
@@ -545,10 +545,14 @@ function openProduct(id) {
   background: #07C160;
 }
 
-/* ---- 品质外卖风格搜索栏：折叠吸附在固定顶部栏正下方 ---- */
+/* ---- 品质外卖风格搜索栏：折叠吸附在固定顶部栏正下方，与下方750px完全对齐 ---- */
 .search-dock {
   position: sticky;
   z-index: 90;
+  max-width: 750px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
   padding: 14rpx 24rpx 12rpx;
   background: #F7F8FA;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .04);

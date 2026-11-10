@@ -325,8 +325,10 @@ function goBack() {
 /* ---- 底部操作栏 ---- */
 .action-bar {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 750px;
   bottom: 0;
   z-index: 20;
   display: flex;
@@ -336,6 +338,7 @@ function goBack() {
   background: #fff;
   border-top: 1rpx solid #F0F0F2;
   box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, .06);
+  box-sizing: border-box;
 }
 
 /* 圆形添加减少按钮 (Circular Stepper Buttons) */
