@@ -62,7 +62,7 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
       <view class="header-top">
         <view class="header-brand-line">
           <image class="header-logo" src="/static/image/kangaroo.png" mode="aspectFit" />
-          <text class="title">美团商家版</text>
+          <text class="title">肥嘟嘟商家版</text>
         </view>
         <button class="logout" @click="logout">退出登录</button>
       </view>
@@ -134,7 +134,7 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 <style scoped lang="scss">
 .merchant-page { min-height: 100vh; padding-bottom: 60rpx; background: #F7F8FA; }
 .merchant-header {
-  padding: calc(58rpx + env(safe-area-inset-top)) 30rpx 36rpx;
+  padding: calc(58rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 36rpx;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
   color: #222426;
 }
@@ -143,18 +143,25 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 .header-logo { width: 52rpx; height: 52rpx; margin-right: 12rpx; }
 .title { font-size: 44rpx; font-weight: 900; color: #222426; }
 .logout {
-  width: 140rpx;
-  height: 60rpx;
-  display: flex;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 144rpx;
+  height: 56rpx;
+  padding: 0 22rpx;
+  margin: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1rpx solid rgba(0, 0, 0, .15);
-  border-radius: 30rpx;
-  background: rgba(255, 255, 255, .35);
+  border: 1rpx solid rgba(0, 0, 0, .12);
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, .4);
   color: #222426;
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
+.logout::after { border: none; }
 
 .stats-row { display: flex; margin-top: 28rpx; }
 .stat-card {

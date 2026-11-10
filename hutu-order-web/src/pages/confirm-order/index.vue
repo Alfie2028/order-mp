@@ -71,7 +71,7 @@ function goBack() {
     <view class="section first-section">
       <view class="store-card card">
         <view class="store-icon">
-          <image class="store-mascot" src="/static/image/kangaroo.png" mode="aspectFit" />
+          <image class="store-mascot" src="/static/icon/store-shop.png" mode="aspectFit" />
         </view>
         <view class="store-main">
           <text class="store-name">{{ store.currentStore.value?.name }}</text>
@@ -106,7 +106,7 @@ function goBack() {
     <view class="section">
       <view class="form-card card">
         <view class="form-row coupon-row">
-          <text>美团神券</text>
+          <text>肥嘟嘟神券</text>
           <scroll-view scroll-x class="coupon-scroll" :show-scrollbar="false">
             <button class="coupon" :class="{ active: couponId === '' }" @click="couponId = ''">不使用</button>
             <button v-for="coupon in availableCoupons" :key="coupon.id" class="coupon" :class="{ active: couponId === coupon.id }" @click="couponId = coupon.id">
@@ -123,7 +123,12 @@ function goBack() {
 
     <view class="section">
       <view class="payment-card card">
-        <button v-for="(item, index) in [{id:'wechat',name:'微信支付'},{id:'alipay',name:'支付宝支付'},{id:'balance',name:'会员余额支付'}]" :key="item.id" class="payment-row" :class="{ last: index === 2 }" @click="payment = item.id">
+        <button v-for="(item, index) in [
+          {id:'wechat',name:'微信支付',icon:'/static/icon/pay-wechat.png'},
+          {id:'alipay',name:'支付宝支付',icon:'/static/icon/pay-alipay.png'},
+          {id:'balance',name:'会员余额支付',icon:'/static/icon/pay-balance.png'}
+        ]" :key="item.id" class="payment-row" :class="{ last: index === 2 }" @click="payment = item.id">
+          <image class="pay-method-icon" :src="item.icon" mode="aspectFit" />
           <text class="payment-name">{{ item.name }}</text>
           <view class="radio" :class="{ active: payment === item.id }">
             <text v-if="payment === item.id" class="radio-check">✓</text>
@@ -135,18 +140,20 @@ function goBack() {
     <view class="section">
       <view class="summary card">
         <view><text>餐品金额</text><text>{{ formatMoney(store.cartSubtotal.value) }}</text></view>
-        <view><text>美团立减 / 优惠券</text><text class="discount">{{ discount ? `-${formatMoney(discount)}` : formatMoney(0) }}</text></view>
+        <view><text>肥嘟嘟立减 / 优惠券</text><text class="discount">{{ discount ? `-${formatMoney(discount)}` : formatMoney(0) }}</text></view>
         <view class="summary-total"><text>应付合计</text><text class="summary-total-price">{{ formatMoney(total) }}</text></view>
       </view>
     </view>
 
     <!-- 底部固定结算栏 -->
     <view class="pay-bar">
-      <view class="pay-left">
-        <text class="pay-label">实付 </text>
-        <text class="pay-total">{{ formatMoney(total) }}</text>
+      <view class="pay-bar-inner">
+        <view class="pay-left">
+          <text class="pay-label">实付 </text>
+          <text class="pay-total">{{ formatMoney(total) }}</text>
+        </view>
+        <button class="pay-button" :class="{ disabled: !store.state.cart.length || submitting }" @click="submit">确认支付</button>
       </view>
-      <button class="pay-button" :class="{ disabled: !store.state.cart.length || submitting }" @click="submit">确认支付</button>
     </view>
   </view>
 </template>
@@ -158,14 +165,14 @@ function goBack() {
 }
 .checkout-header {
   position: relative;
-  padding: calc(64rpx + env(safe-area-inset-top)) 28rpx 70rpx;
+  padding: calc(64rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 28rpx 70rpx;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
   color: #222426;
 }
 .top-back {
   position: absolute;
   left: 26rpx;
-  top: calc(22rpx + env(safe-area-inset-top));
+  top: calc(22rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px));
   width: 66rpx;
   height: 66rpx;
   display: flex;
@@ -339,6 +346,12 @@ function goBack() {
   color: #222426;
 }
 .payment-row.last { border-bottom: 0; }
+.pay-method-icon {
+  width: 44rpx;
+  height: 44rpx;
+  margin-right: 18rpx;
+  flex: 0 0 44rpx;
+}
 .payment-name { flex: 1; text-align: left; font-weight: 700; }
 .radio {
   width: 40rpx;
@@ -378,23 +391,32 @@ function goBack() {
   right: 0;
   bottom: 0;
   z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16rpx 28rpx calc(16rpx + env(safe-area-inset-bottom));
   background: #fff;
   border-top: 1rpx solid #F0F0F2;
   box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, .06);
+  padding-bottom: env(safe-area-inset-bottom);
 }
-.pay-left { display: flex; align-items: baseline; }
+.pay-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 16rpx 28rpx;
+  box-sizing: border-box;
+}
+.pay-left { display: flex; align-items: baseline; flex: 1; }
 .pay-label { font-size: 22rpx; color: #8E929E; }
 .pay-total { margin-left: 10rpx; color: #FF4B3E; font-size: 40rpx; font-weight: 900; }
 .pay-button {
+  flex: 0 0 auto;
+  width: 280rpx;
+  height: 84rpx;
+  margin: 0 0 0 auto !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 280rpx;
-  height: 84rpx;
   border-radius: 42rpx;
   background: #FFC300;
   color: #222426;
@@ -402,9 +424,6 @@ function goBack() {
   font-weight: 800;
   box-shadow: 0 6rpx 18rpx rgba(255, 195, 0, .4);
 }
+.pay-button::after { border: none; }
 .pay-button.disabled { opacity: .45; }
-
-@media screen and (min-width: 760px) {
-  .pay-bar { max-width: 750px; margin: auto; }
-}
 </style>

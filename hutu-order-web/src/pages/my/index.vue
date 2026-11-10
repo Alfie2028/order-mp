@@ -80,7 +80,7 @@ const SERVICE_PHONE_TEXT = '400-800-1234'
 const SERVICE_HOURS = '07:30–21:30'
 function openService() {
   uni.showModal({
-    title: '美团校园客服中心',
+    title: '肥嘟嘟客服中心',
     content: `客服热线 ${SERVICE_PHONE_TEXT}\n受理时间 ${SERVICE_HOURS}（节假日正常）\n出餐、取餐码、退款等问题均可来电咨询。`,
     confirmText: '拨打',
     cancelText: '暂不',
@@ -126,12 +126,12 @@ function logout() {
 
 <template>
   <view class="page-shell my-page">
-    <!-- 美团经典黄色顶部个人中心 (Meituan Classic Yellow Profile Hero) -->
+    <!-- 黄色顶部个人中心 (FeiDooDoo Classic Yellow Profile Hero) -->
     <view class="profile-hero">
       <view class="brand-line">
         <view class="header-logo-badge">
           <image class="header-kangaroo" src="/static/image/kangaroo.png" mode="aspectFit" />
-          <text>美团会员</text>
+          <text>肥嘟嘟会员</text>
         </view>
         <button class="setting-btn" @click="uni.navigateTo({ url: '/pages/setting/index' })">设置</button>
       </view>
@@ -187,7 +187,7 @@ function logout() {
       </view>
       <view class="quick-item divider" @click="showFeature('优惠券可在提交订单时选择')">
         <text class="quick-number">{{ availableCoupons.length }}</text>
-        <text class="quick-text">美团神券</text>
+        <text class="quick-text">肥嘟嘟神券</text>
       </view>
       <view class="quick-item divider" @click="showFeature('收藏餐品可在本页下方查看')">
         <text class="quick-number">{{ favorites.length }}</text>
@@ -215,7 +215,7 @@ function logout() {
       </view>
     </view>
 
-    <!-- 吃货专享服务 (Meituan Style Exclusive Services) -->
+    <!-- 吃货专享服务 (FeiDooDoo Style Exclusive Services) -->
     <view class="section">
       <view class="section-heading">
         <text class="section-title">吃货专享服务</text>
@@ -223,23 +223,17 @@ function logout() {
       </view>
       <view class="service-grid card">
         <view class="service-cell" @click="openCalorie">
-          <view class="service-icon calorie">
-            <view class="service-glyph flame-glyph" />
-          </view>
+          <image class="service-icon-img" src="/static/icon/service-calorie.png" mode="aspectFit" />
           <text class="service-name">热量管家</text>
           <text class="service-desc">按订单估算摄入</text>
         </view>
         <view class="service-cell" @click="doCheckin">
-          <view class="service-icon checkin">
-            <view class="service-glyph gift-glyph" />
-          </view>
+          <image class="service-icon-img" src="/static/icon/service-checkin.png" mode="aspectFit" />
           <text class="service-name">签到领神券</text>
           <text class="service-desc">{{ user ? '每日签到 +20积分' : '登录后签到' }}</text>
         </view>
         <view class="service-cell" @click="openService">
-          <view class="service-icon service">
-            <view class="service-glyph phone-glyph" />
-          </view>
+          <image class="service-icon-img" src="/static/icon/service-service.png" mode="aspectFit" />
           <text class="service-name">在线客服</text>
           <text class="service-desc">{{ SERVICE_PHONE_TEXT }}</text>
         </view>
@@ -264,7 +258,7 @@ function logout() {
       <button class="logout-entry" @click="logout">退出登录</button>
     </view>
 
-    <view class="footer-mark">美团校园点餐 · 随时随地准时达</view>
+    <view class="footer-mark">肥嘟嘟外卖平台 · 随时随地准时达</view>
   </view>
 </template>
 
@@ -274,9 +268,9 @@ function logout() {
   background: #F7F8FA;
 }
 
-/* ---- 顶部美团黄个人信息区 ---- */
+/* ---- 顶部暖黄个人信息区 ---- */
 .profile-hero {
-  padding: calc(48rpx + env(safe-area-inset-top)) 30rpx 70rpx;
+  padding: calc(48rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 70rpx;
   color: #222426;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 60%, #FFAE00 100%);
   position: relative;
@@ -491,49 +485,11 @@ function logout() {
   width: 33.33%;
   padding: 6rpx 10rpx;
 }
-.service-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72rpx;
-  height: 72rpx;
+.service-icon-img {
+  width: 76rpx;
+  height: 76rpx;
   margin-bottom: 12rpx;
-  border-radius: 24rpx;
 }
-.service-icon.calorie {
-  background: linear-gradient(135deg, #FF7700, #FF5500);
-}
-.service-icon.checkin {
-  background: linear-gradient(135deg, #FFC300, #FFAA00);
-}
-.service-icon.service {
-  background: linear-gradient(135deg, #333333, #222222);
-}
-
-.service-glyph {
-  position: relative;
-}
-.flame-glyph {
-  width: 24rpx;
-  height: 32rpx;
-  background: #fff;
-  border-radius: 50% 50% 30% 30%;
-  transform: rotate(-10deg);
-}
-.gift-glyph {
-  width: 28rpx;
-  height: 28rpx;
-  border: 4rpx solid #222426;
-  border-radius: 6rpx;
-  background: #FFC300;
-}
-.phone-glyph {
-  width: 24rpx;
-  height: 30rpx;
-  border: 4rpx solid #fff;
-  border-radius: 6rpx;
-}
-
 .service-name { font-size: 24rpx; font-weight: 800; color: #222426; }
 .service-desc { margin-top: 6rpx; color: #8E929E; font-size: 18rpx; text-align: center; }
 

@@ -26,7 +26,7 @@ function goBack() {
     <view class="page-header">
       <button class="top-back" @click="goBack">‹</button>
       <text class="title">我的订单</text>
-      <text class="subtitle">美团校园点餐 · 订单记录与进度</text>
+      <text class="subtitle">肥嘟嘟外卖平台 · 订单记录与进度</text>
     </view>
     <scroll-view scroll-x class="tabs" :show-scrollbar="false">
       <view class="tabs-inner">
@@ -69,14 +69,14 @@ function goBack() {
 }
 .page-header {
   position: relative;
-  padding: calc(64rpx + env(safe-area-inset-top)) 30rpx 48rpx;
+  padding: calc(64rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 48rpx;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
   color: #222426;
 }
 .top-back {
   position: absolute;
   left: 26rpx;
-  top: calc(22rpx + env(safe-area-inset-top));
+  top: calc(22rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px));
   width: 66rpx;
   height: 66rpx;
   display: flex;

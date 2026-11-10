@@ -9,7 +9,7 @@
         </view>
         <view class="header-brand-badge">
           <image class="header-mascot" src="/static/image/kangaroo.png" mode="aspectFit" />
-          <text>美团点餐</text>
+          <text>肥嘟嘟点餐</text>
         </view>
       </view>
       <view class="store-line" @click="goStores">
@@ -60,7 +60,7 @@
       </scroll-view>
     </view>
 
-    <!-- 美团风悬浮购物车栏 -->
+    <!-- 现代外卖风悬浮购物车栏 -->
     <view v-if="cartCount" class="cart-bar">
       <view class="cart-round" @click="showCart = true">
         <image class="cart-icon-img" src="/static/image/home-shop.png" mode="aspectFit" />
@@ -167,7 +167,7 @@ const goStores = () => uni.switchTab({ url: '/pages/shop/index' })
 .order-header {
   position: relative;
   z-index: 8;
-  padding: calc(52rpx + env(safe-area-inset-top)) 26rpx 18rpx;
+  padding: calc(52rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 26rpx 18rpx;
   background: #fff;
   border-bottom: 1rpx solid #F2F2F4;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .04);
@@ -299,7 +299,7 @@ const goStores = () => uni.switchTab({ url: '/pages/shop/index' })
 /* ---- 左右菜单布局 ---- */
 .menu-shell {
   display: flex;
-  height: calc(100vh - 306rpx - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height: calc(100vh - 306rpx - var(--status-bar-height, 0px) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   min-height: 560rpx;
   background: #fff;
 }
@@ -388,7 +388,7 @@ const goStores = () => uni.switchTab({ url: '/pages/shop/index' })
 .group-title { font-size: 23rpx; font-weight: 800; color: #222426; }
 .group-note { margin-left: auto; color: #8E929E; font-size: 19rpx; }
 
-/* ---- 美团风格底部浮动购物车条 ---- */
+/* ---- 品质外卖风格底部浮动购物车条 ---- */
 .cart-bar {
   position: fixed;
   z-index: 20;

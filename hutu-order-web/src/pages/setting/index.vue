@@ -22,7 +22,7 @@ function goBack() {
     <view class="setting-header">
       <button class="top-back" @click="goBack">‹</button>
       <text class="header-title">系统设置</text>
-      <text class="header-sub">美团校园 · 管理账户、通知与偏好</text>
+      <text class="header-sub">肥嘟嘟外卖平台 · 管理账户、通知与偏好</text>
     </view>
     <view class="section">
       <view class="section-heading"><text class="section-title">基础设置</text></view>
@@ -53,7 +53,7 @@ function goBack() {
           <text class="arrow">›</text>
         </button>
         <button class="setting-row last" @click="toast('当前已是最新版本')">
-          <view><text class="row-title">关于我们</text><text class="row-copy">美团校园点餐 v3.2.0</text></view>
+          <view><text class="row-title">关于我们</text><text class="row-copy">肥嘟嘟外卖平台 v3.2.0</text></view>
           <text class="arrow">›</text>
         </button>
       </view>
@@ -69,14 +69,14 @@ function goBack() {
 .setting-page { padding-bottom: 60rpx; background: #F7F8FA; }
 .setting-header {
   position: relative;
-  padding: calc(64rpx + env(safe-area-inset-top)) 30rpx 56rpx;
+  padding: calc(64rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 56rpx;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
   color: #222426;
 }
 .top-back {
   position: absolute;
   left: 26rpx;
-  top: calc(22rpx + env(safe-area-inset-top));
+  top: calc(22rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px));
   width: 66rpx;
   height: 66rpx;
   display: flex;

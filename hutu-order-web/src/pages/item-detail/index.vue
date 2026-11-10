@@ -152,7 +152,7 @@ function goBack() {
       <view class="notice card">
         <view class="notice-side-bar" />
         <view>
-          <text class="notice-title">美团品质现制</text>
+          <text class="notice-title">肥嘟嘟品质现制</text>
           <text class="notice-copy">餐品将在下单后新鲜现做，请按预计出餐时间前往档口自取或等候配送。</text>
         </view>
       </view>
@@ -198,7 +198,7 @@ function goBack() {
 }
 .back-button, .favorite-button {
   position: fixed;
-  top: calc(24rpx + env(safe-area-inset-top));
+  top: calc(24rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px));
   z-index: 4;
   width: 72rpx;
   height: 72rpx;

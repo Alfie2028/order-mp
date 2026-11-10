@@ -87,7 +87,7 @@ const imageFailed = ref(false)
   letter-spacing: 2rpx;
 }
 .product-card.sold-out .product-image { opacity: .5; }
-.product-info { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.product-info { min-width: 0; width: 0; flex: 1; display: flex; flex-direction: column; }
 .product-name { font-size: 28rpx; font-weight: 800; color: #222426; }
 .product-desc {
   margin-top: 6rpx;
@@ -100,16 +100,19 @@ const imageFailed = ref(false)
   overflow: hidden;
 }
 .product-sales { margin-top: 6rpx; color: #A5A8B2; font-size: 18rpx; }
-.product-bottom { display: flex; align-items: flex-end; justify-content: space-between; margin-top: auto; }
+.product-bottom { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; margin-top: auto; }
 .price-wrap { display: flex; align-items: baseline; }
 .price { font-size: 32rpx; font-weight: 800; color: #FF4B3E; }
 .original { margin-left: 10rpx; color: #BBB; text-decoration: line-through; font-size: 20rpx; }
 
-/* 圆形添加按钮 (Meituan Style Round Add Button) */
+/* 圆形添加按钮 (Round Add Button - 靠右对齐) */
 .add-button {
   flex: 0 0 54rpx;
   width: 54rpx;
   height: 54rpx;
+  min-width: 54rpx;
+  max-width: 54rpx;
+  margin: 0 0 0 auto !important;
   padding: 0;
   display: flex;
   align-items: center;
@@ -123,6 +126,7 @@ const imageFailed = ref(false)
   line-height: 1;
   transition: transform .1s ease;
 }
+.add-button::after { border: none; }
 .add-button:active { transform: scale(.92); }
 .add-button.disabled { background: #E0E2E7; color: #9AA0A8; box-shadow: none; }
 .plus-icon { display: block; line-height: 1; font-weight: 900; transform: translateY(-1rpx); }

@@ -93,7 +93,7 @@ function goBack() {
       <view class="mascot-wrap">
         <image class="mascot-img" src="/static/image/kangaroo.png" mode="aspectFit" />
       </view>
-      <text class="title">{{ mode === 'login' ? '美团校园 · 登录' : mode === 'register' ? '美团校园 · 注册' : '验证码快捷登录' }}</text>
+      <text class="title">{{ mode === 'login' ? '肥嘟嘟外卖 · 登录' : mode === 'register' ? '肥嘟嘟外卖 · 注册' : '验证码快捷登录' }}</text>
       <text class="subtitle">{{ mode === 'register' ? '创建账户，开启美好校园生活' : '登录后同步订单、神券、收藏与购物车' }}</text>
     </view>
 
@@ -133,7 +133,7 @@ function goBack() {
     </view>
 
     <view class="tips">
-      <text class="tip-title">美团校园 · 演示说明</text>
+      <text class="tip-title">肥嘟嘟外卖平台 · 演示说明</text>
       <text class="tip-line">普通用户：test@example.com / 123456</text>
       <text class="tip-line">入驻商家：merchant@example.com / 123456</text>
       <text class="tip-line">验证码由系统代发，请留意邮件通知</text>
@@ -145,7 +145,7 @@ function goBack() {
 .login-page { padding-bottom: 60rpx; background: #F7F8FA; }
 .login-header {
   position: relative;
-  padding: calc(72rpx + env(safe-area-inset-top)) 30rpx 70rpx;
+  padding: calc(72rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 70rpx;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
   color: #222426;
   text-align: center;
@@ -153,7 +153,7 @@ function goBack() {
 .top-back {
   position: absolute;
   left: 26rpx;
-  top: calc(22rpx + env(safe-area-inset-top));
+  top: calc(22rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px));
   width: 68rpx;
   height: 68rpx;
   display: flex;

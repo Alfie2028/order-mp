@@ -52,8 +52,8 @@ function back() {
 
 <style scoped lang="scss">
 .merchant-sub { padding-bottom: 80rpx; background: #F7F8FA; }
-.sub-header { position: relative; padding: calc(64rpx + env(safe-area-inset-top)) 30rpx 40rpx; background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%); color: #222426; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0, 0, 0, .08); color: #222426; font-size: 46rpx; line-height: 1; }
+.sub-header { position: relative; padding: calc(64rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 40rpx; background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%); color: #222426; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0, 0, 0, .08); color: #222426; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
 .eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #8C5E00; }
 .title { margin-top: 12rpx; font-size: 42rpx; font-weight: 900; color: #222426; }

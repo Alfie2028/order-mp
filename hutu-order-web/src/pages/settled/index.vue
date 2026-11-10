@@ -11,7 +11,7 @@ const order = computed(() => store.findOrder(orderId.value))
 const steps = [{ id: 'paid', name: '已支付' }, { id: 'making', name: '制作中' }, { id: 'ready', name: '待取餐' }, { id: 'completed', name: '已完成' }]
 const activeIndex = computed(() => Math.max(0, steps.findIndex((step) => step.id === order.value?.status)))
 const statusTitle = computed(() => ({ paid: '已支付，等待商家接单', making: '档口正在精心制作中', ready: '餐品已备齐，请取餐', completed: '订单已完成' }[order.value?.status] || '订单处理中'))
-const statusCopy = computed(() => ({ paid: '商家接单后开始制作', making: `预计 ${store.currentStore.value?.waitMinutes || 15} 分钟出餐`, ready: '取餐时请向档口出示取餐码', completed: '感谢您选择美团校园点餐' }[order.value?.status] || ''))
+const statusCopy = computed(() => ({ paid: '商家接单后开始制作', making: `预计 ${store.currentStore.value?.waitMinutes || 15} 分钟出餐`, ready: '取餐时请向档口出示取餐码', completed: '感谢您选择肥嘟嘟外卖平台' }[order.value?.status] || ''))
 
 // ---- 评价 ----
 const rating = ref(0)
@@ -152,7 +152,7 @@ function goBack() {
 }
 .status-hero {
   position: relative;
-  padding: calc(72rpx + env(safe-area-inset-top)) 30rpx 90rpx;
+  padding: calc(72rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 90rpx;
   text-align: center;
   color: #222426;
   background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
@@ -168,7 +168,7 @@ function goBack() {
 .top-back {
   position: absolute;
   left: 26rpx;
-  top: calc(22rpx + env(safe-area-inset-top));
+  top: calc(22rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px));
   width: 66rpx;
   height: 66rpx;
   display: flex;

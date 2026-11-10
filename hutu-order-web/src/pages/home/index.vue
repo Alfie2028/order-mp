@@ -1,6 +1,6 @@
 <template>
   <view class="page-shell home-page">
-    <!-- 顶部轮播：美团主题顶部 + 袋鼠Logo + 状态胶囊 -->
+    <!-- 顶部轮播：肥嘟嘟主题顶部 + 袋鼠Logo + 状态胶囊 -->
     <view class="hero">
       <swiper class="hero-swiper" circular autoplay :interval="4000" :duration="500" indicator-dots indicator-color="rgba(255,255,255,.5)" indicator-active-color="#FFC300">
         <swiper-item v-for="banner in banners" :key="banner.id">
@@ -13,7 +13,7 @@
       <view class="hero-nav">
         <view class="hero-brand">
           <image class="hero-logo" src="/static/image/kangaroo.png" mode="aspectFit" />
-          <text class="hero-brand-name">校园外卖</text>
+          <text class="hero-brand-name">肥嘟嘟外卖</text>
         </view>
         <view class="hero-status-chip">
           <text class="status-dot" />
@@ -22,7 +22,7 @@
       </view>
     </view>
 
-    <!-- 美团黄搜索栏：吸顶独立一行 -->
+    <!-- 暖黄搜索栏：吸顶独立一行 -->
     <view class="search-dock">
       <view class="search-bar">
         <view class="search-glyph">
@@ -59,7 +59,7 @@
     </view>
 
     <template v-else>
-      <!-- 金刚区：仿美团P1风格，纯图标无Emoji，两行五列十格 -->
+      <!-- 金刚区：仿品质外卖P1风格，纯图标无Emoji，两行五列十格 -->
       <view class="section">
         <view class="diamond card">
           <view class="diamond-grid">
@@ -74,12 +74,12 @@
         </view>
       </view>
 
-      <!-- 美食节横幅：美团暖黄与鲜美食材结合风格 -->
+      <!-- 美食节横幅：暖黄与鲜美食材结合风格 -->
       <view class="section">
         <view class="festival" @click="startOrder('dumplings')">
           <view class="festival-copy">
             <view class="festival-brand">
-              <text class="brand-pill">美团专送</text>
+              <text class="brand-pill">肥嘟嘟专送</text>
               <text class="brand-sub">超级品牌日 · 校园精选鲜饺</text>
             </view>
             <view class="festival-title">鲜饺尝鲜 · 校园美食节</view>
@@ -95,21 +95,30 @@
         </view>
       </view>
 
-      <!-- 券卡 + 秒杀卡：美团黄色与红色双卡 -->
+      <!-- 券卡 + 秒杀卡：双卡区 -->
       <view class="section">
         <view class="promo-row">
           <view class="promo voucher" @click="claimOne(couponPack[0])">
             <view class="v-header">
-              <text class="v-tag">限时吃券</text>
-              <text class="v-badge-tip">美团专享</text>
+              <text class="v-tag">限时神券</text>
+              <text class="v-badge-tip">肥嘟嘟专享</text>
             </view>
-            <view class="v-title">吃货专属津贴券</view>
-            <view class="v-sub">最高狂省 ¥{{ voucherSave }}</view>
-            <view class="v-mid">
-              <text class="v-symbol">¥</text>
-              <text class="v-num">{{ voucherAmount }}</text>
+            <view class="v-ticket-body">
+              <view class="v-ticket-left">
+                <view class="v-price-row">
+                  <text class="v-symbol">¥</text>
+                  <text class="v-num">{{ voucherAmount }}</text>
+                </view>
+                <text class="v-ticket-type">津贴神券</text>
+              </view>
+              <view class="v-ticket-dash" />
+              <view class="v-ticket-right">
+                <text class="v-ticket-title">吃货专属红包</text>
+                <text class="v-ticket-limit">无门槛 / 满20可用</text>
+                <text class="v-ticket-save">最高狂省 ¥{{ voucherSave }}</text>
+              </view>
             </view>
-            <view class="v-btn" :class="{ claimed: voucherClaimed }">{{ voucherClaimed ? '已领取' : '一键领券' }}</view>
+            <view class="v-btn" :class="{ claimed: voucherClaimed }">{{ voucherClaimed ? '已存入钱包' : '立即抢券 ›' }}</view>
           </view>
           <view class="promo flash" @click="openProduct(deal.id)">
             <view class="flash-head">
@@ -136,7 +145,7 @@
         </view>
       </view>
 
-      <!-- 筛选栏：美团风标签分类 -->
+      <!-- 筛选栏 -->
       <view class="section">
         <scroll-view scroll-x class="filter-scroll" :show-scrollbar="false">
           <view class="filter-row">
@@ -179,7 +188,7 @@
               <text>{{ shop.productCount }} 款餐品</text>
             </view>
             <view class="shop-quote">
-              <text class="quote-tag">美团力荐</text>
+              <text class="quote-tag">肥嘟嘟力荐</text>
               <text class="quote-text">{{ shop.quote }}</text>
             </view>
           </view>
@@ -204,18 +213,6 @@
             </view>
           </view>
         </scroll-view>
-      </view>
-
-      <!-- 附近门店 -->
-      <view class="section">
-        <view class="section-heading"><text class="section-title">附近门店</text><text class="section-link" @click="goStores">地图查看 ›</text></view>
-        <view class="store-strip">
-          <view v-for="item in nearbyStores" :key="item.id" class="store-chip card" :class="{ current: item.id === currentStore.id }" @click="pickStore(item)">
-            <text class="store-chip-name">{{ item.name }}</text>
-            <text class="store-chip-meta">{{ formatDistance(item.distance) }} · 出餐约 {{ item.waitMinutes }} 分钟</text>
-            <text class="store-chip-meta">{{ item.stallCount ? item.stallCount + ' 家店铺' : '店铺筹备中' }}</text>
-          </view>
-        </view>
       </view>
     </template>
 
@@ -266,7 +263,7 @@ onShow(() => { loadCatalog().catch(() => {}); loadStoreReviewSummary().catch(() 
 
 const popularProducts = computed(() => state.products.filter((product) => product.featured))
 
-// 金刚区十格：使用美团P1提取的3D质感图标及同类配套图标，杜绝Emoji
+// 金刚区十格：使用P1提取的3D质感图标及同类配套图标，杜绝Emoji
 const categoryTabs = [
   { key: 'foreign', name: '异国料理', icon: '/static/category/foreign.png', badge: '热门', badgeClass: 'hot', stallId: 'stir-fry' },
   { key: 'snack', name: '小吃馆', icon: '/static/category/snack.png', stallId: 'drinks' },
@@ -437,7 +434,7 @@ function openProduct(id) {
   padding-bottom: 30rpx;
 }
 
-/* ---- hero：顶部美团黄微渐变 + 轮播 + 袋鼠Logo与状态 ---- */
+/* ---- hero：顶部暖黄微渐变 + 轮播 + 袋鼠Logo与状态 ---- */
 .hero {
   position: relative;
   background: #FFC300;
@@ -522,7 +519,7 @@ function openProduct(id) {
   background: #07C160;
 }
 
-/* ---- 美团风格搜索栏 ---- */
+/* ---- 品质外卖风格搜索栏 ---- */
 .search-dock {
   position: sticky;
   top: 0;
@@ -638,7 +635,7 @@ function openProduct(id) {
 .result-extra { margin-left: 14rpx; color: #FF4B3E; font-size: 24rpx; font-weight: 800; }
 .result-empty { padding: 50rpx 0; text-align: center; color: #8E929E; font-size: 22rpx; }
 
-/* ---- 金刚区：仿照P1，纯美团ICO食品图标 ---- */
+/* ---- 金刚区：仿照P1，纯ICO食品图标 ---- */
 .diamond {
   padding: 24rpx 8rpx 16rpx;
 }
@@ -775,7 +772,7 @@ function openProduct(id) {
   height: 100%;
 }
 
-/* ---- 券卡 + 秒杀卡 (美团双卡) ---- */
+/* ---- 券卡 + 秒杀卡 (全新设计外卖红包券) ---- */
 .promo-row {
   display: flex;
   margin-right: -16rpx;
@@ -787,9 +784,12 @@ function openProduct(id) {
   border-radius: 20rpx;
 }
 .voucher {
-  flex: 1.02;
-  background: linear-gradient(155deg, #FFF7E3 0%, #FFEFC4 100%);
-  border: 2rpx solid #FFDE8A;
+  flex: 1.05;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #FFF6F4 0%, #FFF0EB 60%, #FFE9E2 100%);
+  border: 2rpx solid #FFD4C8;
+  box-shadow: 0 4rpx 14rpx rgba(255, 75, 62, .08);
 }
 .v-header {
   display: flex;
@@ -800,55 +800,98 @@ function openProduct(id) {
   display: inline-block;
   padding: 4rpx 10rpx;
   border-radius: 6rpx;
-  color: #222426;
-  background: #FFC300;
+  color: #fff;
+  background: linear-gradient(90deg, #FF5B48, #FF3824);
   font-size: 18rpx;
   font-weight: 800;
+  box-shadow: 0 2rpx 8rpx rgba(255, 56, 36, .3);
 }
 .v-badge-tip {
-  color: #B37D00;
+  color: #FF5A45;
   font-size: 18rpx;
-  font-weight: 600;
+  font-weight: 700;
 }
-.v-title {
-  margin-top: 10rpx;
-  color: #332616;
-  font-size: 28rpx;
-  font-weight: 800;
-}
-.v-sub {
-  margin-top: 4rpx;
-  color: #947247;
-  font-size: 19rpx;
-}
-.v-mid {
+.v-ticket-body {
+  position: relative;
   display: flex;
-  align-items: flex-end;
-  margin-top: 10rpx;
+  align-items: center;
+  margin-top: 14rpx;
+  padding: 12rpx 14rpx;
+  border-radius: 12rpx;
+  background: #fff;
+  border: 1rpx dashed #FFCEC2;
+}
+.v-ticket-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 84rpx;
+}
+.v-price-row {
+  display: flex;
+  align-items: baseline;
 }
 .v-symbol {
-  margin-bottom: 6rpx;
-  color: #FF4B3E;
-  font-size: 24rpx;
+  color: #FF3824;
+  font-size: 22rpx;
   font-weight: 900;
 }
 .v-num {
-  margin-left: 6rpx;
-  color: #FF4B3E;
-  font-size: 58rpx;
+  margin-left: 2rpx;
+  color: #FF3824;
+  font-size: 44rpx;
   font-weight: 900;
-  line-height: .95;
+  line-height: 1;
+}
+.v-ticket-type {
+  margin-top: 4rpx;
+  color: #FF7700;
+  font-size: 17rpx;
+  font-weight: 700;
+}
+.v-ticket-dash {
+  width: 2rpx;
+  height: 56rpx;
+  margin: 0 10rpx;
+  background: repeating-linear-gradient(to bottom, #FFD0C4 0, #FFD0C4 6rpx, transparent 6rpx, transparent 12rpx);
+}
+.v-ticket-right {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.v-ticket-title {
+  color: #222426;
+  font-size: 22rpx;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v-ticket-limit {
+  margin-top: 4rpx;
+  color: #8E929E;
+  font-size: 17rpx;
+}
+.v-ticket-save {
+  margin-top: 2rpx;
+  color: #FF3824;
+  font-size: 17rpx;
+  font-weight: 700;
 }
 .v-btn {
-  margin-top: 14rpx;
-  padding: 13rpx 0;
+  margin-top: 16rpx;
+  padding: 12rpx 0;
   border-radius: 26rpx;
   text-align: center;
-  color: #222426;
-  background: #FFC300;
-  font-size: 23rpx;
+  color: #fff;
+  background: linear-gradient(90deg, #FF5B48, #FF3824);
+  font-size: 22rpx;
   font-weight: 800;
-  box-shadow: 0 4rpx 14rpx rgba(255, 195, 0, .4);
+  box-shadow: 0 4rpx 14rpx rgba(255, 56, 36, .35);
+  transition: all .15s ease;
 }
 .v-btn.claimed {
   background: #E8EAED;
