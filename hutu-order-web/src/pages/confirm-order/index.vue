@@ -1,45 +1,55 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { onShow } from '@dcloudio/uni-app'
+import { onLoad } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { formatMoney } from '@/utils/format'
 
 const store = useAppStore()
-const pickupTime = ref('尽快取餐')
-const remark = ref('')
 const couponId = ref('')
+const note = ref('')
+const pickupTime = ref('尽快取餐')
 const payment = ref('wechat')
-const paying = ref(false)
+const submitting = ref(false)
 
-onShow(() => { if (!store.state.cart.length) uni.showToast({ title: '购物车暂无餐品', icon: 'none' }) })
-
-const availableCoupons = computed(() => store.state.coupons.filter((coupon) => store.state.couponIds.includes(coupon.id) && store.cartSubtotal.value >= coupon.thresholdCents))
+const availableCoupons = computed(() => (store.state.coupons || []).filter((coupon) => store.state.couponIds.includes(coupon.id) && (!coupon.thresholdCents || store.cartSubtotal.value >= coupon.thresholdCents)))
 const chosenCoupon = computed(() => store.state.coupons.find((coupon) => coupon.id === couponId.value))
 const discount = computed(() => chosenCoupon.value?.discountCents || 0)
 const total = computed(() => Math.max(0, store.cartSubtotal.value - discount.value))
 
+onLoad(() => {
+  if (availableCoupons.value.length) couponId.value = availableCoupons.value[0].id
+})
+
 async function submit() {
-  if (!store.state.cart.length || paying.value) return
+  if (submitting.value) return
+  if (!store.state.cart.length) { uni.showToast({ title: '购物车为空', icon: 'none' }); return }
   if (!store.state.user) { uni.navigateTo({ url: '/pages/login/index' }); return }
-  paying.value = true
-  uni.showLoading({ title: '提交订单' })
+  submitting.value = true
+  uni.showLoading({ title: '创建订单中' })
   try {
-    const order = await store.createOrder({ couponId: couponId.value, remark: remark.value.trim(), pickupTime: pickupTime.value })
-    if (!order) { uni.hideLoading(); paying.value = false; return }
-    uni.showLoading({ title: '支付中' })
-    await store.payOrder(order.id)
+    const order = await store.createOrder({
+      couponId: couponId.value || undefined,
+      note: note.value.trim() || undefined,
+      pickupTime: pickupTime.value,
+      paymentMethod: payment.value,
+    })
     uni.hideLoading()
-    paying.value = false
-    uni.redirectTo({ url: `/pages/settled/index?id=${order.id}` })
+    if (order && order.id) {
+      uni.showToast({ title: '下单成功', icon: 'success' })
+      setTimeout(() => {
+        uni.redirectTo({ url: `/pages/settled/index?id=${order.id}` })
+      }, 350)
+    }
   } catch (e) {
     uni.hideLoading()
-    paying.value = false
+  } finally {
+    submitting.value = false
   }
 }
 
 function goBack() {
-  if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
-  else uni.switchTab({ url: '/pages/home/index' })
+  if (getCurrentPages().length > 1) uni.navigateBack()
+  else uni.switchTab({ url: '/pages/order/index' })
 }
 </script>
 
@@ -47,19 +57,8 @@ function goBack() {
   <view class="page-shell checkout-page">
     <view class="checkout-header">
       <button class="top-back" @click="goBack">‹</button>
-      <text class="header-title">确认订单</text><text class="header-subtitle">请确认餐品、取餐与支付信息</text>
-    </view>
-
-    <view class="section first-section">
-      <view class="store-card card">
-        <view class="store-icon">店</view>
-        <view class="store-main"><text class="store-name">{{ store.currentStore.value.name }}</text><text class="store-address">{{ store.currentStore.value.address }}</text></view>
-        <text class="store-time">约 {{ store.currentStore.value.waitMinutes }} 分钟</text>
-      </view>
-    </view>
-
-    <view class="section">
-      <view class="section-heading"><text class="section-title">取餐方式</text></view>
+      <text class="header-title">确认订单</text>
+      <text class="header-subtitle">请核对餐品、取餐方式与支付金额</text>
       <view class="mode-switch card">
         <button :class="{ active: store.state.orderMode === 'pickup' }" @click="store.setOrderMode('pickup')">到店自取</button>
         <button :class="{ active: store.state.orderMode === 'dineIn' }" @click="store.setOrderMode('dineIn')">档口堂食</button>
@@ -69,59 +68,343 @@ function goBack() {
       </view>
     </view>
 
+    <view class="section first-section">
+      <view class="store-card card">
+        <view class="store-icon">
+          <image class="store-mascot" src="/static/image/kangaroo.png" mode="aspectFit" />
+        </view>
+        <view class="store-main">
+          <text class="store-name">{{ store.currentStore.value?.name }}</text>
+          <text class="store-address">{{ store.currentStore.value?.address }}</text>
+        </view>
+        <text class="store-time">出餐约 {{ store.currentStore.value?.waitMinutes }} 分钟</text>
+      </view>
+    </view>
+
     <view class="section">
-      <view class="section-heading"><text class="section-title">餐品清单</text><text class="section-link">共 {{ store.cartCount.value }} 件</text></view>
+      <view class="section-heading">
+        <text class="section-title">餐品清单</text>
+        <text class="section-link">共 {{ store.cartCount.value }} 件</text>
+      </view>
       <view class="items card">
         <view v-for="(item, index) in store.state.cart" :key="item.key" class="item-row" :class="{ last: index === store.state.cart.length - 1 }">
-          <image class="item-fallback" :src="item.image" mode="aspectFill" />
-          <view class="item-info"><text class="item-name">{{ item.name }}</text><text class="item-stall">{{ item.stallName }}</text><text class="item-options">{{ item.selectedOptions.map(option => option.name).join(' · ') || '标准制作' }}</text></view>
-          <view class="item-price"><text class="item-price-value">{{ formatMoney(item.unitPriceCents) }}</text><text class="item-price-qty">× {{ item.quantity }}</text></view>
+          <image v-if="item.image" class="item-visual" :src="item.image" mode="aspectFill" />
+          <view v-else class="item-fallback">{{ item.fallback }}</view>
+          <view class="item-info">
+            <text class="item-name">{{ item.name }}</text>
+            <text class="item-stall">{{ item.stallName }}</text>
+            <text class="item-options">{{ item.selectedOptions.map((o) => o.name).join(' / ') || '标准制作' }}</text>
+          </view>
+          <view class="item-price">
+            <text class="price">{{ formatMoney(item.unitPriceCents * item.quantity) }}</text>
+            <text class="item-price-qty">x {{ item.quantity }}</text>
+          </view>
         </view>
       </view>
     </view>
 
     <view class="section">
-      <view class="section-heading"><text class="section-title">优惠与备注</text></view>
       <view class="form-card card">
         <view class="form-row coupon-row">
-          <text>优惠券</text>
-          <scroll-view scroll-x class="coupon-scroll">
+          <text>美团神券</text>
+          <scroll-view scroll-x class="coupon-scroll" :show-scrollbar="false">
             <button class="coupon" :class="{ active: couponId === '' }" @click="couponId = ''">不使用</button>
-            <button v-for="coupon in availableCoupons" :key="coupon.id" class="coupon" :class="{ active: couponId === coupon.id }" @click="couponId = coupon.id">{{ coupon.name }} -{{ formatMoney(coupon.discountCents) }}</button>
+            <button v-for="coupon in availableCoupons" :key="coupon.id" class="coupon" :class="{ active: couponId === coupon.id }" @click="couponId = coupon.id">
+              {{ coupon.name }} -{{ formatMoney(coupon.discountCents) }}
+            </button>
           </scroll-view>
         </view>
-        <view class="form-row last"><text>订单备注</text><input v-model="remark" maxlength="30" placeholder="口味偏好、取餐说明" /></view>
+        <view class="form-row last">
+          <text>备注要求</text>
+          <input v-model="note" placeholder="如：多放葱/少辣/不要香菜等" maxlength="50" />
+        </view>
       </view>
     </view>
 
     <view class="section">
-      <view class="section-heading"><text class="section-title">支付方式</text></view>
       <view class="payment-card card">
-        <button v-for="(item, index) in [{id:'wechat',name:'微信支付'},{id:'alipay',name:'支付宝'},{id:'balance',name:'会员余额'}]" :key="item.id" class="payment-row" :class="{ last: index === 2 }" @click="payment = item.id">
-          <text class="payment-name">{{ item.name }}</text><text class="radio" :class="{ active: payment === item.id }">{{ payment === item.id ? '✓' : '' }}</text>
+        <button v-for="(item, index) in [{id:'wechat',name:'微信支付'},{id:'alipay',name:'支付宝支付'},{id:'balance',name:'会员余额支付'}]" :key="item.id" class="payment-row" :class="{ last: index === 2 }" @click="payment = item.id">
+          <text class="payment-name">{{ item.name }}</text>
+          <view class="radio" :class="{ active: payment === item.id }">
+            <text v-if="payment === item.id" class="radio-check">✓</text>
+          </view>
         </button>
       </view>
     </view>
 
-    <view class="summary section card">
-      <view><text>餐品金额</text><text>{{ formatMoney(store.cartSubtotal.value) }}</text></view>
-      <view><text>优惠</text><text class="discount">{{ discount ? `-${formatMoney(discount)}` : formatMoney(0) }}</text></view>
-      <view class="summary-total"><text>合计</text><text>{{ formatMoney(total) }}</text></view>
+    <view class="section">
+      <view class="summary card">
+        <view><text>餐品金额</text><text>{{ formatMoney(store.cartSubtotal.value) }}</text></view>
+        <view><text>美团立减 / 优惠券</text><text class="discount">{{ discount ? `-${formatMoney(discount)}` : formatMoney(0) }}</text></view>
+        <view class="summary-total"><text>应付合计</text><text class="summary-total-price">{{ formatMoney(total) }}</text></view>
+      </view>
     </view>
 
+    <!-- 底部固定结算栏 -->
     <view class="pay-bar">
-      <view><text class="pay-label">实付</text><text class="pay-total">{{ formatMoney(total) }}</text></view>
-      <button class="pay-button" :class="{ disabled: !store.state.cart.length }" @click="submit">确认支付</button>
+      <view class="pay-left">
+        <text class="pay-label">实付 </text>
+        <text class="pay-total">{{ formatMoney(total) }}</text>
+      </view>
+      <button class="pay-button" :class="{ disabled: !store.state.cart.length || submitting }" @click="submit">确认支付</button>
     </view>
   </view>
 </template>
 
 <style scoped lang="scss">
-.checkout-page{padding-bottom:170rpx}.checkout-header{position:relative;padding:calc(92rpx + env(safe-area-inset-top)) 30rpx 78rpx;background:linear-gradient(145deg,#2f2019,#624432);color:white}.top-back{position:absolute;left:26rpx;top:calc(22rpx + env(safe-area-inset-top));width:66rpx;height:66rpx;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.12);color:white;font-size:48rpx;line-height:1}.eyebrow,.header-title,.header-subtitle{display:block}.eyebrow{font-size:19rpx;letter-spacing:5rpx;color:#dfbd91}.header-title{margin-top:14rpx;font-size:48rpx;font-weight:800}.header-subtitle{margin-top:10rpx;font-size:24rpx;color:rgba(255,255,255,.65)}.first-section{position:relative;z-index:2;margin-top:-38rpx}.store-card{display:flex;align-items:center;padding:24rpx}.store-icon{width:66rpx;height:66rpx;margin-right:18rpx;display:flex;align-items:center;justify-content:center;border-radius:20rpx;background:var(--oat-100);color:var(--brand-700);font-weight:800}.store-main{flex:1;min-width:0}.store-name,.store-address{display:block}.store-name{font-size:28rpx;font-weight:700}.store-address{margin-top:7rpx;color:var(--muted);font-size:21rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.store-time{font-size:22rpx;color:var(--green);margin-left:18rpx}
-.mode-switch{display:flex;padding:8rpx}.mode-switch button{display:flex;flex:1;align-items:center;justify-content:center;height:74rpx;border-radius:18rpx;color:var(--muted);font-size:25rpx}.mode-switch button.active{background:var(--brand-800);color:white;font-weight:700}.time-row{display:flex;margin-top:16rpx;overflow:auto}.time-chip{flex-shrink:0;margin-right:12rpx;padding:17rpx 22rpx;border-radius:30rpx;background:#fff;color:var(--muted);font-size:22rpx}.time-chip.active{background:var(--oat-100);color:var(--brand-800);font-weight:700}
-.items{padding:0 24rpx}.item-row{display:flex;align-items:center;padding:23rpx 0;border-bottom:1rpx solid var(--line)}.item-row.last{border-bottom:0}.item-fallback{width:82rpx;height:82rpx;margin-right:16rpx;display:flex;align-items:center;justify-content:center;border-radius:18rpx;background:var(--oat-100);font-size:42rpx}.item-info{flex:1;min-width:0}.item-name,.item-options,.item-price text{display:block}.item-name{font-weight:700;font-size:26rpx}.item-options{margin-top:7rpx;color:var(--muted);font-size:20rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-price{text-align:right;font-size:23rpx}.item-price .item-price-qty{margin-top:8rpx;color:var(--muted)}
-.form-card{padding:0 24rpx}.form-row{display:flex;align-items:center;min-height:92rpx;border-bottom:1rpx solid var(--line);font-size:25rpx}.form-row.last{border-bottom:0}.form-row>text{width:116rpx;margin-right:16rpx;font-weight:600}.form-row input{flex:1;text-align:right;font-size:23rpx}.coupon-row{align-items:flex-start;padding:20rpx 0}.coupon-row>text{padding-top:13rpx}.coupon-scroll{flex:1;white-space:nowrap}.coupon{display:inline-flex;margin-left:10rpx;padding:12rpx 18rpx;border-radius:24rpx;background:var(--oat-50);color:var(--muted);font-size:20rpx}.coupon.active{background:var(--brand-800);color:white}
-.payment-card{padding:0 24rpx}.payment-row{display:flex;align-items:center;width:100%;height:90rpx;border-bottom:1rpx solid var(--line);font-size:25rpx;color:var(--ink)}.payment-row.last{border-bottom:0}.payment-name{flex:1;text-align:left}.radio{width:38rpx;height:38rpx;display:flex;align-items:center;justify-content:center;border:2rpx solid #d8cec2;border-radius:50%;font-size:20rpx}.radio.active{border-color:var(--brand-700);background:var(--brand-700);color:white}.summary{padding:20rpx 24rpx}.summary>view{display:flex;justify-content:space-between;padding:11rpx 0;color:var(--muted);font-size:23rpx}.summary .discount{color:var(--danger)}.summary .summary-total{margin-top:8rpx;padding-top:20rpx;border-top:1rpx solid var(--line);color:var(--brand-900);font-size:29rpx;font-weight:800}
-.pay-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18rpx 26rpx calc(18rpx + env(safe-area-inset-bottom));background:white;box-shadow:0 -8rpx 30rpx rgba(17,36,91,.08)}.pay-label{font-size:21rpx;color:var(--muted)}.pay-total{margin-left:10rpx;color:var(--danger);font-size:35rpx;font-weight:800}.pay-button{display:flex;align-items:center;justify-content:center;width:260rpx;height:82rpx;border-radius:20rpx;background:var(--brand);color:white;font-size:27rpx;font-weight:700}.pay-button.disabled{opacity:.4}.checkout-header{background:linear-gradient(145deg,#0637c9,#071a62)}.eyebrow{color:#edcf91}.store-icon{background:var(--brand-soft);color:var(--brand)}@media screen and (min-width:760px){.pay-bar{max-width:750px;margin:auto}}
-.item-stall{display:block;margin-top:5rpx;color:var(--brand);font-size:18rpx}
+.checkout-page {
+  padding-bottom: 180rpx;
+  background: #F7F8FA;
+}
+.checkout-header {
+  position: relative;
+  padding: calc(64rpx + env(safe-area-inset-top)) 28rpx 70rpx;
+  background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
+  color: #222426;
+}
+.top-back {
+  position: absolute;
+  left: 26rpx;
+  top: calc(22rpx + env(safe-area-inset-top));
+  width: 66rpx;
+  height: 66rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .08);
+  color: #222426;
+  font-size: 48rpx;
+  line-height: 1;
+}
+.header-title {
+  margin-top: 14rpx;
+  font-size: 44rpx;
+  font-weight: 900;
+  display: block;
+}
+.header-subtitle {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: rgba(34, 36, 38, .75);
+  display: block;
+}
+
+.mode-switch {
+  display: flex;
+  padding: 8rpx;
+  margin-top: 24rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, .8);
+}
+.mode-switch button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  height: 74rpx;
+  border-radius: 16rpx;
+  color: #666;
+  font-size: 25rpx;
+  font-weight: 600;
+}
+.mode-switch button.active {
+  background: #222426;
+  color: #FFC300;
+  font-weight: 800;
+}
+
+.time-row {
+  display: flex;
+  margin-top: 18rpx;
+  overflow: auto;
+}
+.time-chip {
+  flex-shrink: 0;
+  margin-right: 12rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, .7);
+  color: #222426;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+.time-chip.active {
+  background: #222426;
+  color: #FFC300;
+  font-weight: 800;
+}
+
+.first-section {
+  position: relative;
+  z-index: 2;
+  margin-top: -36rpx;
+}
+.store-card {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+}
+.store-icon {
+  width: 72rpx;
+  height: 72rpx;
+  margin-right: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #FFF7DB;
+}
+.store-mascot {
+  width: 48rpx;
+  height: 48rpx;
+}
+.store-main { flex: 1; min-width: 0; }
+.store-name { font-size: 28rpx; font-weight: 800; color: #222426; display: block; }
+.store-address { margin-top: 6rpx; color: #8E929E; font-size: 20rpx; display: block; }
+.store-time { font-size: 21rpx; color: #07C160; margin-left: 18rpx; font-weight: 700; }
+
+.items { padding: 4rpx 24rpx; }
+.item-row {
+  display: flex;
+  align-items: center;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #F0F0F2;
+}
+.item-row.last { border-bottom: 0; }
+.item-visual {
+  width: 90rpx;
+  height: 90rpx;
+  margin-right: 16rpx;
+  border-radius: 14rpx;
+  background: #F4F5F8;
+}
+.item-fallback {
+  width: 90rpx;
+  height: 90rpx;
+  margin-right: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14rpx;
+  background: #FFF9E6;
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #B37D00;
+}
+.item-info { flex: 1; min-width: 0; }
+.item-name { font-weight: 800; font-size: 26rpx; color: #222426; display: block; }
+.item-stall { margin-top: 4rpx; color: #B37D00; font-size: 19rpx; font-weight: 600; display: block; }
+.item-options { margin-top: 4rpx; color: #8E929E; font-size: 20rpx; display: block; }
+.item-price { text-align: right; font-size: 24rpx; }
+.item-price .item-price-qty { margin-top: 6rpx; color: #8E929E; font-size: 20rpx; display: block; }
+
+.form-card { padding: 4rpx 24rpx; }
+.form-row {
+  display: flex;
+  align-items: center;
+  min-height: 94rpx;
+  border-bottom: 1rpx solid #F0F0F2;
+  font-size: 25rpx;
+}
+.form-row.last { border-bottom: 0; }
+.form-row > text { width: 130rpx; font-weight: 700; color: #222426; flex-shrink: 0; }
+.form-row input { flex: 1; text-align: right; font-size: 24rpx; color: #222426; }
+.coupon-row { align-items: center; }
+.coupon-scroll { flex: 1; white-space: nowrap; }
+.coupon {
+  display: inline-flex;
+  margin-left: 12rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 24rpx;
+  background: #F4F5F8;
+  color: #666;
+  font-size: 21rpx;
+  font-weight: 600;
+}
+.coupon.active {
+  background: #FFC300;
+  color: #222426;
+  font-weight: 800;
+}
+
+.payment-card { padding: 4rpx 24rpx; }
+.payment-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 96rpx;
+  border-bottom: 1rpx solid #F0F0F2;
+  font-size: 26rpx;
+  color: #222426;
+}
+.payment-row.last { border-bottom: 0; }
+.payment-name { flex: 1; text-align: left; font-weight: 700; }
+.radio {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #D5D8DE;
+  border-radius: 50%;
+}
+.radio.active {
+  border-color: #FFC300;
+  background: #FFC300;
+}
+.radio-check {
+  font-size: 24rpx;
+  font-weight: 900;
+  color: #222426;
+}
+
+.summary { padding: 22rpx 24rpx; }
+.summary > view { display: flex; justify-content: space-between; padding: 10rpx 0; color: #8E929E; font-size: 24rpx; }
+.summary .discount { color: #FF4B3E; font-weight: 700; }
+.summary .summary-total {
+  margin-top: 10rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #F0F0F2;
+  color: #222426;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+.summary-total-price { color: #FF4B3E; font-size: 34rpx; font-weight: 900; }
+
+.pay-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 28rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1rpx solid #F0F0F2;
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, .06);
+}
+.pay-left { display: flex; align-items: baseline; }
+.pay-label { font-size: 22rpx; color: #8E929E; }
+.pay-total { margin-left: 10rpx; color: #FF4B3E; font-size: 40rpx; font-weight: 900; }
+.pay-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 280rpx;
+  height: 84rpx;
+  border-radius: 42rpx;
+  background: #FFC300;
+  color: #222426;
+  font-size: 28rpx;
+  font-weight: 800;
+  box-shadow: 0 6rpx 18rpx rgba(255, 195, 0, .4);
+}
+.pay-button.disabled { opacity: .45; }
+
+@media screen and (min-width: 760px) {
+  .pay-bar { max-width: 750px; margin: auto; }
+}
 </style>

@@ -20,7 +20,7 @@
   ],
   "globalStyle": { "navigationBarTextStyle": "black", "navigationBarTitleText": "校园点餐", "navigationBarBackgroundColor": "#ffffff", "backgroundColor": "#f6f7f9" },
   "tabBar": {
-    "color": "#777b84", "selectedColor": "#0637c9", "borderStyle": "white", "backgroundColor": "#ffffff",
+    "color": "#8E929E", "selectedColor": "#222426", "borderStyle": "white", "backgroundColor": "#ffffff",
     "list": [
       { "pagePath": "pages/home/index", "iconPath": "static/image/home.png", "selectedIconPath": "static/image/home-selected.png", "text": "首页" },
       { "pagePath": "pages/order/index", "iconPath": "static/image/home-shop.png", "selectedIconPath": "static/image/home-shop.png", "text": "点单" },

@@ -12,13 +12,12 @@ const tabs = [
   { id: 'ready', name: '待取餐' },
   { id: 'completed', name: '已完成' },
 ]
-// 功能入口：压缩成一行 4 个「图标 + 短标签」，把纵向空间还给订单列表
-// 「营业看板」不再单独占入口，改为点击头部「今日订单 / 今日流水」进入
+
 const entries = [
-  { key: 'products', short: '餐品', icon: '餐', color: '#0637c9', url: '/pages/merchant/products' },
-  { key: 'stalls', short: '档口', icon: '档', color: '#0f8b8d', url: '/pages/merchant/stalls' },
-  { key: 'coupons', short: '优惠券', icon: '券', color: '#d99000', url: '/pages/merchant/coupons' },
-  { key: 'reviews', short: '评价', icon: '评', color: '#7a4fd0', url: '/pages/merchant/reviews' },
+  { key: 'products', short: '餐品管理', icon: '餐', color: '#FFC300', iconColor: '#222426', url: '/pages/merchant/products' },
+  { key: 'stalls', short: '档口信息', icon: '档', color: '#FFA000', iconColor: '#222426', url: '/pages/merchant/stalls' },
+  { key: 'coupons', short: '神券配置', icon: '券', color: '#FF7700', iconColor: '#fff', url: '/pages/merchant/coupons' },
+  { key: 'reviews', short: '顾客评价', icon: '评', color: '#222426', iconColor: '#FFC300', url: '/pages/merchant/reviews' },
 ]
 let timer = null
 
@@ -61,8 +60,11 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
   <view class="page-shell merchant-page">
     <view class="merchant-header">
       <view class="header-top">
-        <view><text class="title">商家工作台</text></view>
-        <button class="logout" @click="logout">退出</button>
+        <view class="header-brand-line">
+          <image class="header-logo" src="/static/image/kangaroo.png" mode="aspectFit" />
+          <text class="title">美团商家版</text>
+        </view>
+        <button class="logout" @click="logout">退出登录</button>
       </view>
 
       <view class="stats-row">
@@ -82,21 +84,25 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 
       <view class="open-toggle" :class="{ closed: !isOpen }" @click="toggleOpen">
         <text class="dot" />
-        <text class="open-text">{{ isOpen ? '营业中' : '已打烊' }}</text>
+        <text class="open-text">{{ isOpen ? '档口正常营业中' : '档口已打烊' }}</text>
         <text class="open-action">{{ isOpen ? '点击打烊' : '点击开张' }}</text>
       </view>
 
-      <text class="poll-hint">订单每 3 秒自动刷新，请保持页面开启</text>
+      <text class="poll-hint">订单每 3 秒自动轮询，出餐请点击出餐完成</text>
     </view>
 
     <view class="entry-row">
       <view v-for="entry in entries" :key="entry.key" class="entry-item" hover-class="entry-item--tap" @click="goEntry(entry.url)">
-        <view class="entry-icon" :style="{ background: entry.color }">{{ entry.icon }}</view>
+        <view class="entry-icon" :style="{ background: entry.color, color: entry.iconColor }">{{ entry.icon }}</view>
         <text class="entry-label">{{ entry.short }}</text>
       </view>
     </view>
 
-    <scroll-view scroll-x class="tabs"><view class="tabs-inner"><button v-for="tab in tabs" :key="tab.id" :class="{ active: currentTab === tab.id }" @click="currentTab = tab.id">{{ tab.name }}</button></view></scroll-view>
+    <scroll-view scroll-x class="tabs" :show-scrollbar="false">
+      <view class="tabs-inner">
+        <button v-for="tab in tabs" :key="tab.id" :class="{ active: currentTab === tab.id }" @click="currentTab = tab.id">{{ tab.name }}</button>
+      </view>
+    </scroll-view>
 
     <view v-if="orders.length" class="order-list">
       <view v-for="order in orders" :key="order.id" class="order-card card">
@@ -126,59 +132,139 @@ function logout() { store.logout(); uni.redirectTo({ url: '/pages/login/index' }
 </template>
 
 <style scoped lang="scss">
-.merchant-page { min-height: 100vh; padding-bottom: 60rpx; }
-.merchant-header { padding: calc(58rpx + env(safe-area-inset-top)) 30rpx 34rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.header-top { display: flex; align-items: flex-start; justify-content: space-between; }
-.eyebrow, .title { display: block; }
-.eyebrow { font-size: 18rpx; letter-spacing: 5rpx; color: #edcf91; }
-.title { margin-top: 12rpx; font-size: 44rpx; font-weight: 800; }
-.logout { width: 130rpx; height: 60rpx; display: flex; align-items: center; justify-content: center; border: 1rpx solid rgba(255,255,255,.3); border-radius: 30rpx; background: transparent; color: #fff; font-size: 22rpx; }
-.stats-row { display: flex; margin-top: 30rpx; }
-.stat-card { flex: 1; display: flex; flex-direction: column; margin-right: 18rpx; padding: 22rpx 20rpx; border-radius: 18rpx; background: rgba(255,255,255,.1); }
-.stat-card.last { margin-right: 0; }
-.stat-number { margin-bottom: 6rpx; font-size: 40rpx; font-weight: 800; line-height: 1; }
-.stat-label { font-size: 20rpx; color: rgba(255,255,255,.7); }
-.open-toggle { display: flex; align-items: center; margin-top: 20rpx; padding: 20rpx 24rpx; border-radius: 18rpx; background: rgba(255,255,255,.12); }
-.open-toggle.closed { background: rgba(240, 75, 47, .25); }
-.dot { width: 16rpx; height: 16rpx; margin-right: 12rpx; border-radius: 50%; background: #6ee7a0; }
-.open-toggle.closed .dot { background: #fbb8ab; }
-.open-text { font-size: 26rpx; font-weight: 700; }
-.open-action { margin-left: auto; font-size: 22rpx; color: rgba(255,255,255,.75); }
-.poll-hint { display: block; margin-top: 16rpx; font-size: 18rpx; color: rgba(255,255,255,.5); }
+.merchant-page { min-height: 100vh; padding-bottom: 60rpx; background: #F7F8FA; }
+.merchant-header {
+  padding: calc(58rpx + env(safe-area-inset-top)) 30rpx 36rpx;
+  background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
+  color: #222426;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; }
+.header-brand-line { display: flex; align-items: center; }
+.header-logo { width: 52rpx; height: 52rpx; margin-right: 12rpx; }
+.title { font-size: 44rpx; font-weight: 900; color: #222426; }
+.logout {
+  width: 140rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid rgba(0, 0, 0, .15);
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, .35);
+  color: #222426;
+  font-size: 22rpx;
+  font-weight: 700;
+}
 
-/* 功能入口：一行 4 个，紧凑排列，不再每个占半屏 */
-.entry-row { display: flex; margin: 22rpx 24rpx 4rpx; padding: 24rpx 6rpx 20rpx; background: #fff; border-radius: 20rpx; }
+.stats-row { display: flex; margin-top: 28rpx; }
+.stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-right: 16rpx;
+  padding: 22rpx 20rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, .9);
+  color: #222426;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, .05);
+}
+.stat-card.last { margin-right: 0; }
+.stat-number { margin-bottom: 6rpx; font-size: 38rpx; font-weight: 900; line-height: 1; }
+.stat-label { font-size: 20rpx; color: #666; font-weight: 600; }
+
+.open-toggle {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+  padding: 18rpx 24rpx;
+  border-radius: 20rpx;
+  background: #222426;
+  color: #fff;
+}
+.open-toggle.closed { background: #FF4B3E; }
+.dot { width: 16rpx; height: 16rpx; margin-right: 12rpx; border-radius: 50%; background: #07C160; }
+.open-toggle.closed .dot { background: #fff; }
+.open-text { font-size: 25rpx; font-weight: 800; }
+.open-action { margin-left: auto; font-size: 21rpx; color: #FFC300; font-weight: 700; }
+.open-toggle.closed .open-action { color: #fff; }
+
+.poll-hint { display: block; margin-top: 14rpx; font-size: 19rpx; color: rgba(34, 36, 38, .75); font-weight: 600; }
+
+.entry-row {
+  display: flex;
+  margin: 22rpx 24rpx 10rpx;
+  padding: 24rpx 8rpx 20rpx;
+  background: #fff;
+  border-radius: 22rpx;
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, .04);
+}
 .entry-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
 .entry-item--tap { opacity: .7; }
-.entry-icon { width: 78rpx; height: 78rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-size: 30rpx; font-weight: 700; }
-.entry-label { margin-top: 12rpx; font-size: 22rpx; color: #41506e; }
+.entry-icon {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 30rpx;
+  font-weight: 900;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, .08);
+}
+.entry-label { margin-top: 12rpx; font-size: 22rpx; font-weight: 700; color: #222426; }
 
-.tabs { white-space: nowrap; background: #fff; border-bottom: 1rpx solid var(--line); }
+.tabs { white-space: nowrap; background: #fff; border-bottom: 1rpx solid #F0F0F2; }
 .tabs-inner { display: flex; padding: 16rpx 22rpx; }
-.tabs button { display: flex; align-items: center; justify-content: center; min-width: 128rpx; height: 62rpx; margin-right: 10rpx; padding: 0 20rpx; border-radius: 31rpx; color: var(--muted); font-size: 23rpx; }
-.tabs button.active { background: var(--brand-800); color: #fff; font-weight: 700; }
-.order-list { padding: 22rpx 28rpx; }
+.tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 128rpx;
+  height: 64rpx;
+  margin-right: 12rpx;
+  padding: 0 24rpx;
+  border-radius: 32rpx;
+  color: #8E929E;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+.tabs button.active { background: #222426; color: #FFC300; font-weight: 800; }
+
+.order-list { padding: 22rpx 24rpx; }
 .order-card { margin-bottom: 20rpx; padding: 24rpx; }
-.order-head { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 18rpx; border-bottom: 1rpx solid var(--line); }
-.order-no, .order-time { display: block; }
-.order-no { font-size: 25rpx; font-weight: 700; }
-.order-time { margin-top: 6rpx; font-size: 19rpx; color: var(--muted); }
-.status { padding: 8rpx 14rpx; border-radius: 12rpx; background: #eee9e4; color: var(--muted); font-size: 21rpx; }
-.status.paid { background: #f7ead7; color: #98642f; }
-.status.making { background: #f7ead7; color: #98642f; }
-.status.ready { background: #e3eee4; color: var(--green); }
-.status.completed { background: #eee9e4; color: var(--muted); }
+.order-head { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 18rpx; border-bottom: 1rpx solid #F0F0F2; }
+.order-no { font-size: 26rpx; font-weight: 800; color: #222426; display: block; }
+.order-time { margin-top: 6rpx; font-size: 20rpx; color: #8E929E; display: block; }
+.status { padding: 6rpx 14rpx; border-radius: 10rpx; background: #F3F4F7; color: #8E929E; font-size: 21rpx; font-weight: 700; }
+.status.paid { background: #FFF9E6; color: #B37D00; }
+.status.making { background: #FFF9E6; color: #B37D00; }
+.status.ready { background: #E6F8EE; color: #07C160; }
+.status.completed { background: #F3F4F7; color: #8E929E; }
+
 .items { padding: 14rpx 0; }
 .item-row { display: flex; align-items: center; padding: 12rpx 0; }
-.item-name { flex: 1; margin-right: 14rpx; font-size: 24rpx; font-weight: 600; }
-.item-options { margin-right: 14rpx; color: var(--muted); font-size: 19rpx; }
-.item-qty { font-size: 22rpx; }
-.order-foot { display: flex; align-items: center; padding-top: 16rpx; border-top: 1rpx solid var(--line); }
+.item-name { flex: 1; margin-right: 14rpx; font-size: 25rpx; font-weight: 700; color: #222426; }
+.item-options { margin-right: 14rpx; color: #8E929E; font-size: 20rpx; }
+.item-qty { font-size: 23rpx; font-weight: 700; color: #222426; }
+
+.order-foot { display: flex; align-items: center; padding-top: 18rpx; border-top: 1rpx solid #F0F0F2; }
 .pickup { display: flex; flex-direction: column; margin-right: 16rpx; }
-.pickup-label { font-size: 18rpx; color: var(--muted); }
-.pickup-code { margin-top: 4rpx; font-size: 40rpx; font-weight: 800; color: var(--brand-900); letter-spacing: 4rpx; }
-.amount { flex: 1; text-align: right; font-size: 30rpx; font-weight: 800; color: var(--brand-900); }
-.actions { margin-left: 16rpx; }
-.actions .primary { min-width: 130rpx; height: 66rpx; display: flex; align-items: center; justify-content: center; border-radius: 33rpx; background: var(--brand); color: #fff; font-size: 24rpx; font-weight: 700; }
-.empty { padding: 120rpx 30rpx; text-align: center; color: var(--muted); font-size: 24rpx; }
+.pickup-label { font-size: 18rpx; color: #8E929E; }
+.pickup-code { margin-top: 4rpx; font-size: 42rpx; font-weight: 900; color: #222426; letter-spacing: 4rpx; }
+.amount { flex: 1; text-align: right; font-size: 32rpx; font-weight: 900; color: #FF4B3E; }
+.actions { margin-left: 18rpx; }
+.actions .primary {
+  min-width: 140rpx;
+  height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 34rpx;
+  background: #FFC300;
+  color: #222426;
+  font-size: 25rpx;
+  font-weight: 800;
+  box-shadow: 0 4rpx 12rpx rgba(255, 195, 0, .35);
+}
+.empty { padding: 120rpx 30rpx; text-align: center; color: #8E929E; font-size: 24rpx; }
 </style>

@@ -14,6 +14,10 @@ const parseDate = (str) => {
   if (m.length < 6) return Date.now()
   return Date.UTC(+m[0], +m[1] - 1, +m[2], +m[3] || 0, +m[4] || 0, +m[5] || 0)
 }
+// 提前声明 state：initialState() 构建期间就会调用 resolveImage 读取 imageVersion，
+// 若此处用 const 声明，typeof 检查会命中暂时性死区并抛 ReferenceError，导致整个应用挂载失败
+let state
+
 // 图片地址解析：静态资源走原样；上传图片（/uploads/）拼 BASE_URL，兼容内网穿透换域名；
 // 统一附加 imageVersion 版本号参数，图片加载失败后置位即可强制重绘重试
 function resolveImage(src) {
@@ -113,7 +117,7 @@ const initialState = () => ({
   user: null,
 })
 
-const state = reactive(initialState())
+state = reactive(initialState())
 
 function persist() {
   if (!state.initialized) return

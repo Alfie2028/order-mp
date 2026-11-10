@@ -1,29 +1,30 @@
 :root, page {
-  --brand: #0637c9;
-  --brand-dark: #06268f;
-  --brand-soft: #edf2ff;
-  --brand-950: #071a62;
-  --brand-900: #0b247f;
-  --brand-800: #143ca8;
-  --brand-700: #2458c8;
-  --brand-600: #5274b9;
-  --caramel-500: #c79545;
-  --caramel-300: #edcf91;
-  --oat-100: #f1f3f7;
-  --oat-50: #f6f7f9;
+  --brand: #FFC300;
+  --brand-dark: #F5B000;
+  --brand-soft: #FFF9E6;
+  --brand-contrast: #222426;
+  --brand-950: #222426;
+  --brand-900: #333333;
+  --brand-800: #555555;
+  --brand-700: #FF9900;
+  --brand-600: #FFAA00;
+  --caramel-500: #FF7700;
+  --caramel-300: #FFE194;
+  --oat-100: #F3F4F7;
+  --oat-50: #F7F8FA;
   --paper: #ffffff;
-  --ink: #25272d;
-  --muted: #8b8e97;
-  --line: #e9ebef;
-  --green: #0637c9;
-  --danger: #f04b2f;
+  --ink: #222426;
+  --muted: #8E929E;
+  --line: #EEEEEE;
+  --green: #07C160;
+  --danger: #FF4B3E;
 }
 
 page {
   min-height: 100%;
   background: var(--oat-50);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 }
 
 view, text, image, button, input, scroll-view, textarea, picker, swiper, map { box-sizing: border-box; }
@@ -37,39 +38,39 @@ button::after, uni-button::after { border: none !important; }
   background: var(--oat-50);
 }
 
-.section { padding: 0 28rpx; margin-top: 36rpx; }
+.section { padding: 0 24rpx; margin-top: 28rpx; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20rpx; }
-.section-title { font-size: 34rpx; font-weight: 700; letter-spacing: .5rpx; }
-.section-link { font-size: 24rpx; color: var(--brand-600); }
+.section-title { font-size: 34rpx; font-weight: 800; letter-spacing: .5rpx; color: var(--ink); }
+.section-link { font-size: 24rpx; color: #666; display: flex; align-items: center; }
 
 .card {
   background: var(--paper);
-  border: 1rpx solid rgba(13, 32, 96, .055);
+  border: 1rpx solid rgba(0, 0, 0, .03);
   border-radius: 24rpx;
-  box-shadow: 0 10rpx 30rpx rgba(20, 39, 89, .065);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .04);
 }
 
 .primary-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 92rpx;
+  min-height: 88rpx;
   padding: 0 34rpx;
-  border-radius: 46rpx;
-  color: white;
-  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  border-radius: 44rpx;
+  color: #222426;
+  background: linear-gradient(135deg, #FFD101, #FFC300);
   font-size: 30rpx;
-  font-weight: 700;
-  box-shadow: 0 12rpx 26rpx rgba(6, 55, 201, .22);
+  font-weight: 800;
+  box-shadow: 0 8rpx 20rpx rgba(255, 195, 0, .32);
 }
 
 .primary-button:active { transform: scale(.985); }
 .primary-button.disabled { opacity: .45; }
-.chip { display: inline-flex; align-items: center; min-height: 48rpx; padding: 0 18rpx; border-radius: 24rpx; background: var(--oat-100); color: var(--brand-700); font-size: 22rpx; }
-.price { color: var(--danger); font-weight: 700; }
+.chip { display: inline-flex; align-items: center; min-height: 48rpx; padding: 0 18rpx; border-radius: 24rpx; background: var(--brand-soft); color: #B37D00; font-size: 22rpx; font-weight: 600; }
+.price { color: var(--danger); font-weight: 800; }
 .muted { color: var(--muted); }
 .hover-dim { opacity: .85; }
 
 @media screen and (min-width: 760px) {
-  .page-shell { max-width: 750px; margin: 0 auto; box-shadow: 0 0 50px rgba(53, 35, 27, .08); }
+  .page-shell { max-width: 750px; margin: 0 auto; box-shadow: 0 0 50px rgba(0, 0, 0, .08); }
 }

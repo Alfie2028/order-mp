@@ -167,13 +167,13 @@ function back() {
 </template>
 
 <style scoped lang="scss">
-.merchant-sub { padding-bottom: 160rpx; }
-.sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
+.merchant-sub { padding-bottom: 160rpx; background: #F7F8FA; }
+.sub-header { position: relative; padding: calc(64rpx + env(safe-area-inset-top)) 30rpx 40rpx; background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%); color: #222426; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0, 0, 0, .08); color: #222426; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
-.eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
-.title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
-.subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(255,255,255,.65); }
+.eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #8C5E00; }
+.title { margin-top: 12rpx; font-size: 42rpx; font-weight: 900; color: #222426; }
+.subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(34, 36, 38, .75); }
 .form { margin: -30rpx 28rpx 0; padding: 12rpx 26rpx; position: relative; }
 .field { display: flex; align-items: center; min-height: 92rpx; border-bottom: 1rpx solid var(--line); }
 .field.last { border-bottom: 0; }
