@@ -48,6 +48,10 @@ export function getNavLayout() {
     // #endif
 
     // #ifndef MP-WEIXIN
+    statusBarHeight = 0
+    capsuleTop = 8
+    capsuleHeight = 34
+    navBarHeight = 44
     capsuleRight = 12
     // #endif
   } catch (e) {

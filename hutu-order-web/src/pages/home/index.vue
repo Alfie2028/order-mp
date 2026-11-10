@@ -32,8 +32,8 @@
       </swiper>
     </view>
 
-    <!-- 暖黄搜索栏：自然文档流随页面滚动，绝不吸顶遮挡顶部信息与胶囊 -->
-    <view class="search-dock">
+    <!-- 暖黄搜索栏：吸顶折叠到固定顶部导航栏正下方，绝不遮挡顶部信息与胶囊 -->
+    <view class="search-dock" :style="{ top: navLayout.totalNavHeight + 'px' }">
       <view class="search-bar">
         <view class="search-glyph">
           <view class="search-icon-circle" />
@@ -545,12 +545,13 @@ function openProduct(id) {
   background: #07C160;
 }
 
-/* ---- 品质外卖风格搜索栏 ---- */
+/* ---- 品质外卖风格搜索栏：折叠吸附在固定顶部栏正下方 ---- */
 .search-dock {
-  position: relative;
-  z-index: 10;
-  padding: 16rpx 24rpx 10rpx;
+  position: sticky;
+  z-index: 90;
+  padding: 14rpx 24rpx 12rpx;
   background: #F7F8FA;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .04);
 }
 .search-bar {
   display: flex;
