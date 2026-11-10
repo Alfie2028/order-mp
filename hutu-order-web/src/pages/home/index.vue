@@ -1,18 +1,13 @@
 <template>
   <view class="page-shell home-page">
-    <!-- 顶部轮播：肥嘟嘟主题顶部 + 袋鼠Logo + 状态胶囊 -->
-    <view class="hero">
-      <swiper class="hero-swiper" :style="{ height: (navLayout.totalNavHeight + 170) + 'px' }" circular autoplay :interval="4000" :duration="500" indicator-dots indicator-color="rgba(255,255,255,.5)" indicator-active-color="#FFC300">
-        <swiper-item v-for="banner in banners" :key="banner.id">
-          <view class="hero-slide" @click="onBannerTap(banner)">
-            <image class="hero-image" :src="resolveImage(banner.image)" mode="aspectFill" />
-          </view>
-        </swiper-item>
-      </swiper>
-      <view class="hero-nav" :style="{
-        top: navLayout.capsuleTop + 'px',
-        paddingRight: navLayout.capsuleRight + 'px',
-        minHeight: navLayout.capsuleHeight + 'px'
+    <!-- 顶部常驻固定导航栏：安全区避让灵动岛与微信胶囊 -->
+    <view class="top-nav-bar" :style="{
+      height: navLayout.totalNavHeight + 'px',
+      paddingTop: navLayout.capsuleTop + 'px'
+    }">
+      <view class="top-nav-inner" :style="{
+        height: navLayout.capsuleHeight + 'px',
+        paddingRight: navLayout.capsuleRight + 'px'
       }">
         <view class="hero-brand">
           <image class="hero-logo" src="/static/image/kangaroo.png" mode="aspectFit" />
@@ -26,7 +21,18 @@
       </view>
     </view>
 
-    <!-- 暖黄搜索栏：吸顶独立一行 -->
+    <!-- 顶部轮播：位于常驻导航栏下方 -->
+    <view class="hero" :style="{ paddingTop: navLayout.totalNavHeight + 'px' }">
+      <swiper class="hero-swiper" circular autoplay :interval="4000" :duration="500" indicator-dots indicator-color="rgba(255,255,255,.5)" indicator-active-color="#FFC300">
+        <swiper-item v-for="banner in banners" :key="banner.id">
+          <view class="hero-slide" @click="onBannerTap(banner)">
+            <image class="hero-image" :src="resolveImage(banner.image)" mode="aspectFill" />
+          </view>
+        </swiper-item>
+      </swiper>
+    </view>
+
+    <!-- 暖黄搜索栏：自然文档流随页面滚动，绝不吸顶遮挡顶部信息与胶囊 -->
     <view class="search-dock">
       <view class="search-bar">
         <view class="search-glyph">
@@ -472,14 +478,21 @@ function openProduct(id) {
   z-index: 3;
   pointer-events: none;
 }
-.hero-nav {
-  position: absolute;
-  z-index: 3;
+.top-nav-bar {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
+  z-index: 99;
+  background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .06);
+  box-sizing: border-box;
+}
+.top-nav-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   padding-left: 24rpx;
   box-sizing: border-box;
 }
@@ -534,9 +547,8 @@ function openProduct(id) {
 
 /* ---- 品质外卖风格搜索栏 ---- */
 .search-dock {
-  position: sticky;
-  top: 0;
-  z-index: 30;
+  position: relative;
+  z-index: 10;
   padding: 16rpx 24rpx 10rpx;
   background: #F7F8FA;
 }
