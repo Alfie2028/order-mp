@@ -258,7 +258,7 @@ function logout() {
       <button class="logout-entry" @click="logout">退出登录</button>
     </view>
 
-    <view class="footer-mark">肥嘟嘟外卖平台 · 随时随地准时达</view>
+    <view class="footer-mark">肥嘟嘟餐饮平台 · 随时随地准时达</view>
   </view>
 </template>
 

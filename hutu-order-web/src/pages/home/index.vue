@@ -13,7 +13,7 @@
       <view class="hero-nav">
         <view class="hero-brand">
           <image class="hero-logo" src="/static/image/kangaroo.png" mode="aspectFit" />
-          <text class="hero-brand-name">肥嘟嘟外卖</text>
+          <text class="hero-brand-name">肥嘟嘟餐饮</text>
         </view>
         <view class="hero-status-chip">
           <text class="status-dot" />

@@ -22,7 +22,7 @@ function goBack() {
     <view class="setting-header">
       <button class="top-back" @click="goBack">‹</button>
       <text class="header-title">系统设置</text>
-      <text class="header-sub">肥嘟嘟外卖平台 · 管理账户、通知与偏好</text>
+      <text class="header-sub">肥嘟嘟餐饮平台 · 管理账户、通知与偏好</text>
     </view>
     <view class="section">
       <view class="section-heading"><text class="section-title">基础设置</text></view>
@@ -53,7 +53,7 @@ function goBack() {
           <text class="arrow">›</text>
         </button>
         <button class="setting-row last" @click="toast('当前已是最新版本')">
-          <view><text class="row-title">关于我们</text><text class="row-copy">肥嘟嘟外卖平台 v3.2.0</text></view>
+          <view><text class="row-title">关于我们</text><text class="row-copy">肥嘟嘟餐饮平台 v3.2.0</text></view>
           <text class="arrow">›</text>
         </button>
       </view>

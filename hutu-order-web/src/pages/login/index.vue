@@ -93,7 +93,7 @@ function goBack() {
       <view class="mascot-wrap">
         <image class="mascot-img" src="/static/image/kangaroo.png" mode="aspectFit" />
       </view>
-      <text class="title">{{ mode === 'login' ? '肥嘟嘟外卖 · 登录' : mode === 'register' ? '肥嘟嘟外卖 · 注册' : '验证码快捷登录' }}</text>
+      <text class="title">{{ mode === 'login' ? '肥嘟嘟餐饮 · 登录' : mode === 'register' ? '肥嘟嘟餐饮 · 注册' : '验证码快捷登录' }}</text>
       <text class="subtitle">{{ mode === 'register' ? '创建账户，开启美好校园生活' : '登录后同步订单、神券、收藏与购物车' }}</text>
     </view>
 
@@ -133,7 +133,7 @@ function goBack() {
     </view>
 
     <view class="tips">
-      <text class="tip-title">肥嘟嘟外卖平台 · 演示说明</text>
+      <text class="tip-title">肥嘟嘟餐饮平台 · 演示说明</text>
       <text class="tip-line">普通用户：test@example.com / 123456</text>
       <text class="tip-line">入驻商家：merchant@example.com / 123456</text>
       <text class="tip-line">验证码由系统代发，请留意邮件通知</text>

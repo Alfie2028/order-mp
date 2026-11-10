@@ -26,7 +26,7 @@ function goBack() {
     <view class="page-header">
       <button class="top-back" @click="goBack">‹</button>
       <text class="title">我的订单</text>
-      <text class="subtitle">肥嘟嘟外卖平台 · 订单记录与进度</text>
+      <text class="subtitle">肥嘟嘟餐饮平台 · 订单记录与进度</text>
     </view>
     <scroll-view scroll-x class="tabs" :show-scrollbar="false">
       <view class="tabs-inner">

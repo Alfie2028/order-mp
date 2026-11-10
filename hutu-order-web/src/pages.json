@@ -18,7 +18,7 @@
     { "path": "pages/merchant/dashboard", "style": { "navigationStyle": "custom" } },
     { "path": "pages/merchant/reviews", "style": { "navigationStyle": "custom" } }
   ],
-  "globalStyle": { "navigationBarTextStyle": "black", "navigationBarTitleText": "肥嘟嘟外卖平台", "navigationBarBackgroundColor": "#ffffff", "backgroundColor": "#f6f7f9" },
+  "globalStyle": { "navigationBarTextStyle": "black", "navigationBarTitleText": "肥嘟嘟餐饮平台", "navigationBarBackgroundColor": "#ffffff", "backgroundColor": "#f6f7f9" },
   "tabBar": {
     "color": "#8E929E", "selectedColor": "#222426", "borderStyle": "white", "backgroundColor": "#ffffff",
     "list": [
