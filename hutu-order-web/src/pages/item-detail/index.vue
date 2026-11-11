@@ -4,8 +4,10 @@ import { onLoad } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { get } from '@/utils/request'
 import { formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const productId = ref('')
 const product = computed(() => store.state.products.find((item) => item.id === productId.value) || store.state.products[0])
 const selected = reactive({})
@@ -90,15 +92,17 @@ function goBack() {
     <view class="visual">
       <image v-if="!imageFailed" class="visual-image" :src="product.image" mode="aspectFit" @error="imageFailed = true" />
       <text v-else class="visual-fallback">{{ product.fallback }}</text>
-      <button class="back-button" @click="goBack">‹</button>
-      <button class="favorite-button" :class="{ active: favorite }" @click="store.toggleFavorite(product.id)">{{ favorite ? '♥' : '♡' }}</button>
+      <button class="back-button" :style="{ top: navLayout.capsuleTop + 'px' }" @click="goBack">‹</button>
+      <button class="favorite-button" :class="{ active: favorite }" :style="{ top: navLayout.capsuleTop + 'px', right: (navLayout.capsuleRight + 8) + 'px' }" @click="store.toggleFavorite(product.id)">
+        <text class="heart-ico">{{ favorite ? '♥' : '♡' }}</text>
+      </button>
       <view class="visual-glow" />
     </view>
 
     <view class="content">
       <view class="headline">
         <view class="headline-main">
-          <text class="badge">{{ product.badge }}</text>
+          <text v-if="product.badge" class="badge">{{ product.badge }}</text>
           <text class="title">{{ product.name }}</text>
           <text class="subtitle">{{ product.subtitle }}</text>
         </view>
@@ -147,12 +151,25 @@ function goBack() {
         <view v-else class="review-empty">这个档口还没有评价，等你来写第一条</view>
       </view>
 
-      <view class="notice card"><view><text class="notice-title">档口现制</text><text class="notice-copy">餐品将在下单后开始制作，请按预计出餐时间到档口取餐。</text></view></view>
+      <view class="notice card">
+        <view class="notice-side-bar" />
+        <view>
+          <text class="notice-title">肥嘟嘟品质现制</text>
+          <text class="notice-copy">餐品将在下单后新鲜现做，请按预计出餐时间前往档口自取或等候配送。</text>
+        </view>
+      </view>
     </view>
 
-    <view class="action-bar">
+    <!-- 底部操作栏：圆形加减按钮 (Circular Stepper Buttons) -->
+    <view class="action-bar" :style="{ paddingBottom: (navLayout.bottomSafe ? (navLayout.bottomSafe + 8) + 'px' : '') }">
       <view class="stepper">
-        <button @click="quantity = Math.max(1, quantity - 1)">−</button><text>{{ quantity }}</text><button @click="quantity += 1">＋</button>
+        <button class="circle-btn minus" @click="quantity = Math.max(1, quantity - 1)">
+          <text class="btn-glyph">−</text>
+        </button>
+        <text class="stepper-count">{{ quantity }}</text>
+        <button class="circle-btn plus" @click="quantity += 1">
+          <text class="btn-glyph">＋</text>
+        </button>
       </view>
       <button class="secondary-action" @click="add(false)">加入购物车</button>
       <button class="primary-action" @click="add(true)">去结算 · {{ formatMoney(totalPrice) }}</button>
@@ -161,24 +178,238 @@ function goBack() {
 </template>
 
 <style scoped lang="scss">
-.detail-page { padding-bottom: 170rpx; }
-.visual { height:600rpx;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 44%,#fff 0,#f0f4ff 52%,#d9e4ff 100%) }
-.visual-image { width:88%;height:88%;position:relative;z-index:2 }
-.visual-fallback { position: relative; z-index: 2; font-size: 230rpx; }
-.visual-glow { position:absolute;width:380rpx;height:90rpx;bottom:58rpx;border-radius:50%;background:rgba(6,55,201,.12) }
-.back-button,.favorite-button { position: fixed; top: calc(24rpx + env(safe-area-inset-top)); z-index: 4; width: 72rpx; height: 72rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.9); color: var(--brand-900); box-shadow: 0 8rpx 24rpx rgba(53,35,27,.12); }
-.back-button { left: 26rpx; font-size: 54rpx; line-height: 1; }
-.favorite-button { right: 26rpx; font-size: 42rpx; }.favorite-button.active{color:var(--danger)}
-.content { position: relative; z-index: 3; margin-top: -44rpx; padding: 36rpx 28rpx 0; border-radius: 40rpx 40rpx 0 0; background: var(--oat-50); }
-.headline { display:flex; justify-content:space-between; }.headline-main{flex:1;min-width:0}
-.badge { display:inline-block;margin-bottom:14rpx;padding:7rpx 14rpx;border-radius:7rpx;background:var(--brand);color:#fff;font-size:20rpx;font-weight:700 }
-.title,.subtitle,.sales,.notice-title,.notice-copy { display:block; }.title{font-size:44rpx;font-weight:800;color:var(--brand-950)}.subtitle{margin-top:12rpx;color:#5a5f68;font-size:25rpx;line-height:1.6}
-.price-block{text-align:right;padding-top:34rpx}.price{font-size:34rpx}.sales{margin-top:8rpx;font-size:20rpx;color:var(--muted)}
-.option-card{margin-top:32rpx;padding:8rpx 26rpx}.option-group{padding:26rpx 0;border-bottom:1rpx solid var(--line)}.option-group.last{border-bottom:0}.option-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:18rpx}.option-title{font-weight:700;font-size:29rpx}.option-tip{font-size:21rpx;color:var(--muted)}
-.option-grid{display:flex;flex-wrap:wrap;margin-right:-14rpx}.option{width:calc(50% - 14rpx);margin-right:14rpx;margin-bottom:14rpx;display:flex;align-items:center;justify-content:center;min-height:74rpx;padding:0 16rpx;border:1rpx solid var(--line);border-radius:16rpx;color:var(--ink);background:#fff;font-size:25rpx}.option.selected{border-color:var(--brand-700);background:var(--oat-100);color:var(--brand-800);font-weight:700}.option-extra{margin-left:6rpx;font-size:19rpx;color:var(--muted)}
-.review-card{margin-top:22rpx;padding:26rpx}.review-head{display:flex;align-items:center;padding-bottom:20rpx;border-bottom:1rpx solid var(--line)}.review-score{display:flex;flex-direction:column;align-items:center;margin-right:26rpx;padding-right:26rpx;border-right:1rpx solid var(--line)}.review-score-value{font-size:48rpx;font-weight:800;line-height:1;color:var(--brand-900)}.review-score-label{margin-top:8rpx;font-size:18rpx;color:var(--muted)}.review-head-main{flex:1}.review-stars{font-size:30rpx;letter-spacing:2rpx;color:var(--caramel-500)}.review-stars.small{font-size:22rpx}.review-sub{display:block;margin-top:8rpx;font-size:20rpx;color:var(--muted)}.review-list{margin-top:6rpx}.review-item{padding:18rpx 0;border-bottom:1rpx solid var(--line)}.review-item:last-child{padding-bottom:0;border-bottom:0}.review-item-head{display:flex;align-items:center;justify-content:space-between}.review-user{font-size:24rpx;font-weight:700}.review-content{display:block;margin-top:10rpx;font-size:23rpx;line-height:1.6;color:#4a5160}.review-date{display:block;margin-top:8rpx;font-size:18rpx;color:var(--muted)}.review-empty{padding:24rpx 0;text-align:center;font-size:22rpx;color:var(--muted)}
-.notice{display:flex;margin-top:22rpx;padding:24rpx;border-left:5rpx solid var(--caramel-500)}.notice-title{font-size:25rpx;font-weight:700}.notice-copy{margin-top:6rpx;font-size:22rpx;color:var(--muted);line-height:1.5}
-.action-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;padding:18rpx 24rpx calc(18rpx + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);box-shadow:0 -10rpx 30rpx rgba(53,35,27,.08)}
-.stepper{display:flex;align-items:center;margin-right:12rpx}.stepper button{width:52rpx;height:52rpx;margin-right:8rpx;padding:0;display:flex;align-items:center;justify-content:center;border:1rpx solid var(--line);border-radius:50%;font-size:27rpx;line-height:1}.stepper text{min-width:28rpx;margin-right:8rpx;text-align:center;font-weight:700}.secondary-action,.primary-action{display:flex;align-items:center;justify-content:center;height:78rpx;padding:0 22rpx;border-radius:20rpx;font-size:24rpx;font-weight:700}.secondary-action{border:1rpx solid var(--brand);color:var(--brand);margin-right:12rpx}.primary-action{flex:1;background:var(--brand);color:white;white-space:nowrap}
-@media screen and (min-width:760px){.action-bar{max-width:750px;margin:0 auto}}
+.detail-page {
+  padding-bottom: calc(180rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
+  background: #F7F8FA;
+}
+.visual {
+  height: 580rpx;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 44%, #FFFFFF 0%, #FFF9EB 55%, #FFEEC4 100%);
+}
+.visual-image { width: 86%; height: 86%; position: relative; z-index: 2; }
+.visual-fallback { position: relative; z-index: 2; font-size: 220rpx; }
+.visual-glow {
+  position: absolute;
+  width: 380rpx;
+  height: 80rpx;
+  bottom: 50rpx;
+  border-radius: 50%;
+  background: rgba(255, 195, 0, .25);
+}
+.back-button, .favorite-button {
+  position: fixed;
+  top: calc(24rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px));
+  z-index: 4;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .92);
+  color: #222426;
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, .1);
+}
+.back-button { left: 26rpx; font-size: 48rpx; line-height: 1; }
+.favorite-button { right: 26rpx; }
+.heart-ico { font-size: 38rpx; color: #8E929E; }
+.favorite-button.active .heart-ico { color: #FF4B3E; }
+
+.content {
+  position: relative;
+  z-index: 3;
+  margin-top: -40rpx;
+  padding: 34rpx 24rpx 0;
+  border-radius: 36rpx 36rpx 0 0;
+  background: #F7F8FA;
+}
+.headline { display: flex; justify-content: space-between; }
+.headline-main { flex: 1; min-width: 0; }
+.badge {
+  display: inline-block;
+  margin-bottom: 12rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 8rpx;
+  background: linear-gradient(135deg, #FF6040, #FF3824);
+  color: #fff;
+  font-size: 19rpx;
+  font-weight: 800;
+}
+.title { font-size: 40rpx; font-weight: 900; color: #222426; display: block; }
+.subtitle { margin-top: 10rpx; color: #8E929E; font-size: 23rpx; line-height: 1.5; display: block; }
+
+.price-block { text-align: right; padding-top: 28rpx; }
+.price { font-size: 36rpx; font-weight: 900; color: #FF4B3E; }
+.sales { margin-top: 6rpx; font-size: 19rpx; color: #B37D00; font-weight: 600; display: block; }
+
+.option-card { margin-top: 26rpx; padding: 10rpx 26rpx; }
+.option-group { padding: 24rpx 0; border-bottom: 1rpx solid #F0F0F2; }
+.option-group.last { border-bottom: 0; }
+.option-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18rpx; }
+.option-title { font-weight: 800; font-size: 28rpx; color: #222426; }
+.option-tip { font-size: 20rpx; color: #8E929E; }
+.option-grid { display: flex; flex-wrap: wrap; margin-right: -14rpx; }
+.option {
+  width: calc(50% - 14rpx);
+  margin-right: 14rpx;
+  margin-bottom: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76rpx;
+  padding: 0 16rpx;
+  border: 2rpx solid #EBECEF;
+  border-radius: 18rpx;
+  color: #222426;
+  background: #fff;
+  font-size: 24rpx;
+  transition: all .12s ease;
+}
+.option.selected {
+  border-color: #FFC300;
+  background: #FFF9E6;
+  color: #222426;
+  font-weight: 800;
+}
+.option-extra { margin-left: 6rpx; font-size: 19rpx; color: #FF4B3E; }
+
+.review-card { margin-top: 22rpx; padding: 24rpx; }
+.review-head { display: flex; align-items: center; padding-bottom: 20rpx; border-bottom: 1rpx solid #F0F0F2; }
+.review-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 24rpx;
+  padding-right: 24rpx;
+  border-right: 1rpx solid #F0F0F2;
+}
+.review-score-value { font-size: 46rpx; font-weight: 900; line-height: 1; color: #FF7700; }
+.review-score-label { margin-top: 6rpx; font-size: 18rpx; color: #8E929E; }
+.review-head-main { flex: 1; }
+.review-stars { font-size: 28rpx; letter-spacing: 2rpx; color: #FF9900; }
+.review-stars.small { font-size: 20rpx; }
+.review-sub { display: block; margin-top: 8rpx; font-size: 20rpx; color: #8E929E; }
+.review-list { margin-top: 6rpx; }
+.review-item { padding: 18rpx 0; border-bottom: 1rpx solid #F5F6F8; }
+.review-item:last-child { border-bottom: 0; }
+.review-item-head { display: flex; align-items: center; justify-content: space-between; }
+.review-user { font-size: 23rpx; font-weight: 800; color: #222426; }
+.review-content { display: block; margin-top: 8rpx; font-size: 22rpx; line-height: 1.5; color: #555; }
+.review-date { display: block; margin-top: 6rpx; font-size: 18rpx; color: #8E929E; }
+.review-empty { padding: 24rpx 0; text-align: center; font-size: 22rpx; color: #8E929E; }
+
+.notice {
+  display: flex;
+  margin-top: 22rpx;
+  padding: 24rpx;
+  position: relative;
+  overflow: hidden;
+}
+.notice-side-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8rpx;
+  background: #FFC300;
+}
+.notice-title { font-size: 25rpx; font-weight: 800; color: #222426; display: block; }
+.notice-copy { margin-top: 6rpx; font-size: 21rpx; color: #8E929E; line-height: 1.5; display: block; }
+
+/* ---- 底部操作栏 ---- */
+.action-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 750px;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx calc(16rpx + constant(safe-area-inset-bottom));
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1rpx solid #F0F0F2;
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, .06);
+  box-sizing: border-box;
+}
+
+/* 圆形添加减少按钮 (Circular Stepper Buttons) */
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-right: 18rpx;
+}
+.circle-btn {
+  width: 52rpx;
+  height: 52rpx;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  line-height: 1;
+  transition: transform .1s ease;
+}
+.circle-btn:active { transform: scale(.92); }
+.circle-btn.minus {
+  border: 2rpx solid #FFC300;
+  background: #fff;
+  color: #222426;
+}
+.circle-btn.plus {
+  background: #FFC300;
+  color: #222426;
+  box-shadow: 0 4rpx 10rpx rgba(255, 195, 0, .4);
+}
+.btn-glyph {
+  font-size: 30rpx;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateY(-1rpx);
+}
+.stepper-count {
+  min-width: 44rpx;
+  padding: 0 8rpx;
+  text-align: center;
+  font-weight: 800;
+  font-size: 28rpx;
+  color: #222426;
+}
+
+.secondary-action, .primary-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 25rpx;
+  font-weight: 800;
+}
+.secondary-action {
+  padding: 0 26rpx;
+  border: 2rpx solid #FFC300;
+  background: #FFFDF5;
+  color: #8C5E00;
+  margin-right: 14rpx;
+}
+.primary-action {
+  flex: 1;
+  background: #FFC300;
+  color: #222426;
+  white-space: nowrap;
+  box-shadow: 0 4rpx 16rpx rgba(255, 195, 0, .35);
+}
+
+@media screen and (min-width: 760px) {
+  .action-bar { max-width: 750px; margin: 0 auto; }
+}
 </style>

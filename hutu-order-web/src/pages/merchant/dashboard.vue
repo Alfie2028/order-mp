@@ -3,8 +3,10 @@ import { computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAppStore } from '@/store/app'
 import { formatMoney } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const d = computed(() => store.state.dashboard || {})
 
 function load() { store.loadDashboard().catch(() => {}) }
@@ -15,10 +17,10 @@ onShow(() => {
 
 const cards = computed(() => [
   { label: '待支付', value: d.value.pending_count || 0, color: '#8b8e97' },
-  { label: '待接单', value: d.value.paid_count || 0, color: '#98642f' },
-  { label: '制作中', value: d.value.making_count || 0, color: '#2458c8' },
-  { label: '待取餐', value: d.value.ready_count || 0, color: '#0637c9' },
-  { label: '已完成', value: d.value.completed_count || 0, color: '#2f8f4e' },
+  { label: '待接单', value: d.value.paid_count || 0, color: '#FF7700' },
+  { label: '制作中', value: d.value.making_count || 0, color: '#FF9900' },
+  { label: '待取餐', value: d.value.ready_count || 0, color: '#07C160' },
+  { label: '已完成', value: d.value.completed_count || 0, color: '#222426' },
 ])
 function back() {
   if (getCurrentPages().length > 1) uni.navigateBack({ fail: () => { uni.switchTab({ url: '/pages/home/index' }) } })
@@ -28,8 +30,8 @@ function back() {
 
 <template>
   <view class="page-shell merchant-sub">
-    <view class="sub-header">
-      <button class="top-back" @click="back">‹</button>
+    <view class="sub-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="back">‹</button>
       <text class="title">营业看板</text>
       <text class="subtitle">今日营业概览与订单状态分布</text>
     </view>
@@ -57,13 +59,13 @@ function back() {
 </template>
 
 <style scoped lang="scss">
-.merchant-sub { padding-bottom: 80rpx; }
-.sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
+.merchant-sub { padding-bottom: 80rpx; background: #F7F8FA; }
+.sub-header { position: relative; padding: calc(64rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 40rpx; background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%); color: #222426; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0, 0, 0, .08); color: #222426; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
-.eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
-.title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
-.subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(255,255,255,.65); }
+.eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #8C5E00; }
+.title { margin-top: 12rpx; font-size: 42rpx; font-weight: 900; color: #222426; }
+.subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(34, 36, 38, .75); }
 .hero { display: flex; margin: -30rpx 28rpx 0; }
 .hero-card { flex: 1; display: flex; flex-direction: column; margin-right: 20rpx; padding: 34rpx 28rpx; }
 .hero-card.last { margin-right: 0; }

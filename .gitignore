@@ -31,3 +31,5 @@ logs/
 
 # 临时工作目录
 .tmp-*/
+
+.workbuddy/

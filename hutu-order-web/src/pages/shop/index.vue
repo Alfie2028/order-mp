@@ -44,7 +44,7 @@ const markers = computed(() => state.stores.map((store, index) => {
     iconPath: isSelected ? '/static/icon/shop-location-selected.png' : '/static/icon/shop-location.png',
     width: isSelected ? 32 : 27,
     height: isSelected ? 32 : 27,
-    callout: { content: store.name, display: isSelected ? 'ALWAYS' : 'BYCLICK', padding: 7, borderRadius: 5, color: '#35231b', bgColor: '#ffffff' },
+    callout: { content: store.name, display: isSelected ? 'ALWAYS' : 'BYCLICK', padding: 7, borderRadius: 5, color: '#222426', bgColor: '#ffffff' },
   }
 }))
 
@@ -85,7 +85,7 @@ function renderPins(left, top) {
     const isCampus = i === 0
     const selected = p.store && p.store.id === state.currentStoreId
     const size = isCampus ? 18 : selected ? 16 : 12
-    const color = isCampus ? '#0637c9' : '#0637c9'
+    const color = isCampus ? '#FF4B3E' : selected ? '#FFC300' : '#222426'
     const pin = document.createElement('div')
     pin.style.cssText = `position:absolute;left:${px - size / 2}px;top:${py - size / 2}px;width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);cursor:pointer`
     if (p.store) pin.addEventListener('click', () => { if (!dragState.moved) select(p.store) })
@@ -93,7 +93,7 @@ function renderPins(left, top) {
     if (isCampus || selected) {
       const label = document.createElement('div')
       label.textContent = p.title
-      label.style.cssText = `position:absolute;left:${px}px;top:${py - size / 2 - 20}px;transform:translateX(-50%);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(255,255,255,.95);color:#35231b;font-size:11px;line-height:1;padding:3px 6px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.2)`
+      label.style.cssText = `position:absolute;left:${px}px;top:${py - size / 2 - 20}px;transform:translateX(-50%);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(255,255,255,.95);color:#222426;font-size:11px;font-weight:700;line-height:1;padding:4px 8px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.15)`
       pinsEl.appendChild(label)
     }
   })
@@ -175,7 +175,7 @@ function buildVanillaMap() {
   mapEl.style.position = 'relative'
   mapEl.style.cursor = 'grab'
   tilesEl = document.createElement('div')
-  tilesEl.style.cssText = 'position:absolute;inset:0;overflow:hidden;background:#e6ebf6'
+  tilesEl.style.cssText = 'position:absolute;inset:0;overflow:hidden;background:#f5f6f8'
   pinsEl = document.createElement('div')
   pinsEl.style.cssText = 'position:absolute;inset:0;overflow:hidden'
   mapEl.appendChild(tilesEl)
@@ -207,7 +207,7 @@ function select(store) {
     // #endif
   }
   if (state.cart.length && state.currentStoreId !== store.id) {
-    uni.showModal({ title: '切换门店', content: '切换门店将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
+    uni.showModal({ title: '切换门店', content: '切换门店将清空当前购物车，是否继续？', confirmColor: '#222426', success: ({ confirm }) => confirm && apply() })
   } else apply()
 }
 
@@ -230,7 +230,7 @@ function goOrder() { uni.switchTab({ url: '/pages/order/index' }) }
 function enterStore(store) {
   const apply = () => { setStore(store.id); goOrder() }
   if (state.cart.length && state.currentStoreId !== store.id) {
-    uni.showModal({ title: '切换门店', content: '切换门店将清空当前购物车，是否继续？', confirmColor: '#0637c9', success: ({ confirm }) => confirm && apply() })
+    uni.showModal({ title: '切换门店', content: '切换门店将清空当前购物车，是否继续？', confirmColor: '#222426', success: ({ confirm }) => confirm && apply() })
   } else apply()
 }
 </script>
@@ -266,25 +266,51 @@ function enterStore(store) {
         <view class="sheet-handle" />
       </view>
       <view class="sheet-heading">
-        <view><text class="sheet-title">选择门店</text></view>
-        <view class="service-status"><text class="status-dot"></text><text>营业中</text></view>
+        <view><text class="sheet-title">选择就近门店</text></view>
+        <view class="service-status">
+          <text class="status-dot" />
+          <text>全城配送中</text>
+        </view>
       </view>
-      <view class="search-box"><text class="search-symbol">⌕</text><input v-model="keyword" placeholder="搜索门店名称或地址" confirm-type="search" /><text v-if="keyword" class="clear" @click="keyword = ''">×</text></view>
-      <view class="result-title"><text>附近门店</text><text class="result-count">{{ filteredStores.length }} 家</text></view>
+      <view class="search-box">
+        <view class="search-ico-small">
+          <view class="ico-c" />
+          <view class="ico-s" />
+        </view>
+        <input v-model="keyword" placeholder="搜索门店名称或地址" confirm-type="search" />
+        <text v-if="keyword" class="clear" @click="keyword = ''">×</text>
+      </view>
+      <view class="result-title">
+        <text>附近门店列表</text>
+        <text class="result-count">{{ filteredStores.length }} 家门店</text>
+      </view>
       <scroll-view scroll-y class="store-list">
         <view v-for="store in filteredStores" :key="store.id" class="store-item card" :class="{ selected: store.id === state.currentStoreId }" @click="select(store)">
           <image class="store-cover" :src="store.image" mode="aspectFill" />
           <view class="store-main">
-            <view class="store-row"><view class="store-name-wrap"><text class="store-name">{{ store.name }}</text></view><text class="store-distance">{{ formatDistance(store.distance) }}</text></view>
+            <view class="store-row">
+              <view class="store-name-wrap">
+                <text class="store-name">{{ store.name }}</text>
+              </view>
+              <text class="store-distance">{{ formatDistance(store.distance) }}</text>
+            </view>
             <text class="store-address">{{ store.address }}</text>
-            <view class="store-meta"><text :class="store.status">{{ store.status === 'open' ? '营业中' : '客流较多' }}</text><text>约 {{ store.waitMinutes }} 分钟</text></view>
+            <view class="store-meta">
+              <text class="open-status">{{ store.status === 'open' ? '营业中' : '客流较多' }}</text>
+              <text>约 {{ store.waitMinutes }} 分钟出餐</text>
+            </view>
             <text class="store-hours">{{ store.hours }}</text>
             <view class="store-footer">
-              <view class="service-row"><text v-for="service in store.services" :key="service" class="chip">{{ service }}</text></view>
+              <view class="service-row">
+                <text v-for="service in store.services" :key="service" class="chip">{{ service }}</text>
+              </view>
               <text class="enter-btn" @click.stop="enterStore(store)">进店点餐 ›</text>
             </view>
           </view>
-          <text v-if="store.id === state.currentStoreId" class="selected-mark">✓ 已选择</text>
+          <view v-if="store.id === state.currentStoreId" class="selected-mark">
+            <text class="check-glyph">✓</text>
+            <text>已选择</text>
+          </view>
         </view>
       </scroll-view>
     </view>
@@ -292,12 +318,227 @@ function enterStore(store) {
 </template>
 
 <style scoped lang="scss">
-.shop-page{height:100vh;overflow:hidden;padding:0;background:var(--oat-50);display:flex;flex-direction:column}
-.map-wrap{position:relative;flex:0 0 auto;overflow:hidden;background:#e6ebf6}.map-box{width:100%;height:100%}.vanilla-map{overflow:hidden}
-.zoom-control{position:absolute;z-index:3;right:24rpx;top:24rpx;display:flex;flex-direction:column}.zoom-btn{width:60rpx;height:60rpx;margin-bottom:8rpx;display:flex;align-items:center;justify-content:center;border:1rpx solid rgba(6,55,201,.12);border-radius:14rpx;background:#fff;box-shadow:0 6rpx 18rpx rgba(16,38,111,.16);color:#0637c9;font-size:32rpx;line-height:1;font-weight:700}
-.recenter-button{position:absolute;z-index:3;right:24rpx;bottom:32rpx;width:68rpx;height:68rpx;padding:0;display:flex;align-items:center;justify-content:center;border:1rpx solid rgba(6,55,201,.1);border-radius:50%;background:#fff;box-shadow:0 8rpx 24rpx rgba(16,38,111,.17)}.recenter-button image{width:32rpx;height:32rpx}
-.shop-content{position:relative;z-index:4;flex:1 1 auto;min-height:0;margin-top:-26rpx;padding:12rpx 28rpx calc(24rpx + env(safe-area-inset-bottom));border-radius:32rpx 32rpx 0 0;background:var(--oat-50);box-shadow:0 -10rpx 35rpx rgba(34,48,42,.08);display:flex;flex-direction:column}.store-list{flex:1;min-height:0}.drag-zone{flex:0 0 auto;display:flex;align-items:center;justify-content:center;height:52rpx}.sheet-handle{width:68rpx;height:7rpx;border-radius:5rpx;background:#d6d2ca}.sheet-heading{display:flex;align-items:center;justify-content:space-between;margin:0 2rpx 19rpx}.sheet-heading text{display:block}.sheet-title{font-size:31rpx;font-weight:700}.service-status{display:flex;align-items:center;padding:10rpx 15rpx;border-radius:24rpx;color:var(--brand);background:var(--brand-soft);font-size:19rpx;font-weight:600}.status-dot{width:10rpx;height:10rpx;margin-right:8rpx;border-radius:50%;background:var(--brand)}
-.search-box{display:flex;align-items:center;height:76rpx;padding:0 23rpx;border:1rpx solid var(--line);border-radius:22rpx;background:#fff;box-shadow:0 6rpx 20rpx rgba(16,38,111,.04)}.search-box input{flex:1;margin-right:14rpx;font-size:23rpx}.search-symbol{margin-right:14rpx;font-size:24rpx;color:var(--brand)}.clear{font-size:34rpx;color:var(--muted)}
-.result-title{display:flex;justify-content:space-between;margin:24rpx 2rpx 14rpx;font-size:27rpx;font-weight:700}.result-count{color:var(--muted);font-size:20rpx;font-weight:400}
-.store-item{position:relative;display:flex;margin-bottom:14rpx;padding:18rpx;border-radius:22rpx;box-shadow:0 12rpx 32rpx rgba(16,38,111,.1)}.store-item.selected{border:1rpx solid rgba(6,55,201,.28);background:linear-gradient(135deg,#fff 60%,#edf2ff)}.store-cover{width:138rpx;height:166rpx;margin-right:18rpx;flex:0 0 138rpx;border-radius:17rpx;background:#e6e9f1}.store-main{min-width:0;flex:1}.store-row{display:flex;justify-content:space-between;align-items:center}.store-name-wrap{display:flex;align-items:center;min-width:0;flex:1}.store-name{min-width:0;font-size:24rpx;font-weight:700;line-height:1.3}.tag-badge{margin-left:12rpx;padding:2rpx 10rpx;font-size:18rpx;border-radius:8rpx;font-weight:600;white-space:nowrap;flex:none}.tag-badge.inside{background:#edf2ff;color:#0637c9;border:1rpx solid rgba(6,55,201,.2)}.tag-badge.outside{background:#fff4ea;color:#d96a00;border:1rpx solid rgba(217,106,0,.2)}.store-distance{flex:none;color:var(--brand);font-size:19rpx;font-weight:600}.store-address{display:block;margin-top:7rpx;color:var(--muted);font-size:18rpx;line-height:1.35}.store-meta{display:flex;margin-top:9rpx;color:var(--muted);font-size:17rpx}.store-meta text{margin-right:13rpx}.store-meta .open{color:var(--brand);font-weight:700}.store-meta .busy{color:var(--danger);font-weight:700}.store-hours{display:block;margin-top:5rpx;color:#858891;font-size:16rpx}.store-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12rpx}.service-row{display:flex}.service-row .chip{min-height:32rpx;margin-right:7rpx;padding:0 9rpx;color:#40527d;background:#f0f3fa;font-size:15rpx}.enter-btn{flex:none;padding:9rpx 18rpx;border-radius:26rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:700;box-shadow:0 6rpx 14rpx rgba(6,55,201,.2)}.selected-mark{position:absolute;left:20rpx;top:20rpx;padding:8rpx 16rpx;border-radius:14rpx;color:#fff;background:var(--brand);font-size:20rpx;font-weight:800;box-shadow:0 6rpx 16rpx rgba(6,55,201,.3)}
+.shop-page {
+  height: 100vh;
+  overflow: hidden;
+  padding: 0;
+  background: #F7F8FA;
+  display: flex;
+  flex-direction: column;
+}
+.map-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: #ECEEF2;
+}
+.map-box { width: 100%; height: 100%; }
+.vanilla-map { overflow: hidden; }
+
+.zoom-control {
+  position: absolute;
+  z-index: 3;
+  right: 24rpx;
+  top: 24rpx;
+  display: flex;
+  flex-direction: column;
+}
+.zoom-btn {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, .15);
+  color: #222426;
+  font-size: 32rpx;
+  line-height: 1;
+  font-weight: 900;
+}
+.recenter-button {
+  position: absolute;
+  z-index: 3;
+  right: 24rpx;
+  bottom: 32rpx;
+  width: 72rpx;
+  height: 72rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, .18);
+}
+.recenter-button image { width: 36rpx; height: 36rpx; }
+
+.shop-content {
+  position: relative;
+  z-index: 4;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: -26rpx;
+  padding: 12rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+  border-radius: 32rpx 32rpx 0 0;
+  background: #F7F8FA;
+  box-shadow: 0 -8rpx 30rpx rgba(0, 0, 0, .08);
+  display: flex;
+  flex-direction: column;
+}
+.store-list { flex: 1; min-height: 0; }
+.drag-zone {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48rpx;
+}
+.sheet-handle {
+  width: 72rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #D8DADF;
+}
+.sheet-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 2rpx 18rpx;
+}
+.sheet-title { font-size: 32rpx; font-weight: 900; color: #222426; }
+.service-status {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  color: #8C5E00;
+  background: #FFF7DB;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+.status-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-right: 8rpx;
+  border-radius: 50%;
+  background: #07C160;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  height: 74rpx;
+  padding: 0 24rpx;
+  border: 2rpx solid #E5E6EB;
+  border-radius: 37rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, .03);
+}
+.search-ico-small {
+  position: relative;
+  width: 26rpx;
+  height: 26rpx;
+  margin-right: 14rpx;
+}
+.ico-c {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18rpx;
+  height: 18rpx;
+  border: 3rpx solid #222426;
+  border-radius: 50%;
+}
+.ico-s {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 9rpx;
+  height: 3rpx;
+  transform: rotate(45deg);
+  background: #222426;
+}
+.search-box input { flex: 1; font-size: 24rpx; color: #222426; }
+.clear { font-size: 32rpx; color: #8E929E; }
+
+.result-title {
+  display: flex;
+  justify-content: space-between;
+  margin: 22rpx 4rpx 14rpx;
+  font-size: 28rpx;
+  font-weight: 900;
+  color: #222426;
+}
+.result-count { color: #8E929E; font-size: 20rpx; font-weight: 400; }
+
+.store-item {
+  position: relative;
+  display: flex;
+  margin-bottom: 16rpx;
+  padding: 20rpx;
+  border-radius: 22rpx;
+  border: 2rpx solid transparent;
+  transition: all .15s ease;
+}
+.store-item.selected {
+  border: 2rpx solid #FFC300;
+  background: linear-gradient(135deg, #ffffff 60%, #FFFDF5 100%);
+}
+.store-cover {
+  width: 140rpx;
+  height: 170rpx;
+  margin-right: 18rpx;
+  flex: 0 0 140rpx;
+  border-radius: 18rpx;
+  background: #F2F3F5;
+}
+.store-main { min-width: 0; flex: 1; }
+.store-row { display: flex; justify-content: space-between; align-items: center; }
+.store-name-wrap { display: flex; align-items: center; min-width: 0; flex: 1; }
+.store-name { min-width: 0; font-size: 26rpx; font-weight: 900; color: #222426; line-height: 1.3; }
+.store-distance { flex: none; color: #B37D00; font-size: 20rpx; font-weight: 700; margin-left: 10rpx; }
+.store-address { display: block; margin-top: 6rpx; color: #8E929E; font-size: 19rpx; line-height: 1.35; }
+.store-meta { display: flex; margin-top: 8rpx; color: #666; font-size: 18rpx; }
+.store-meta text { margin-right: 14rpx; }
+.open-status { color: #07C160; font-weight: 700; }
+.store-hours { display: block; margin-top: 6rpx; color: #8E929E; font-size: 17rpx; }
+.store-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14rpx; }
+.service-row { display: flex; }
+.service-row .chip {
+  min-height: 34rpx;
+  margin-right: 8rpx;
+  padding: 0 10rpx;
+  color: #8C5E00;
+  background: #FFF7DB;
+  font-size: 16rpx;
+  font-weight: 700;
+}
+.enter-btn {
+  flex: none;
+  padding: 10rpx 24rpx;
+  border-radius: 28rpx;
+  color: #222426;
+  background: #FFC300;
+  font-size: 21rpx;
+  font-weight: 800;
+  box-shadow: 0 4rpx 12rpx rgba(255, 195, 0, .35);
+}
+.selected-mark {
+  position: absolute;
+  left: 20rpx;
+  top: 20rpx;
+  display: flex;
+  align-items: center;
+  padding: 6rpx 14rpx;
+  border-radius: 12rpx;
+  color: #222426;
+  background: #FFC300;
+  font-size: 19rpx;
+  font-weight: 800;
+  box-shadow: 0 4rpx 12rpx rgba(255, 195, 0, .4);
+}
+.check-glyph { margin-right: 4rpx; font-weight: 900; }
 </style>

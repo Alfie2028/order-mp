@@ -4,8 +4,10 @@ import { onShow } from '@dcloudio/uni-app'
 import EmptyState from '@/component/EmptyState.vue'
 import { useAppStore } from '@/store/app'
 import { formatDateTime } from '@/utils/format'
+import { getNavLayout } from '@/utils/nav'
 
 const store = useAppStore()
+const navLayout = getNavLayout()
 const reviews = computed(() => store.state.merchantReviews || [])
 const avg = computed(() => reviews.value.length ? (reviews.value.reduce((s, r) => s + r.rating, 0) / reviews.value.length).toFixed(1) : '0.0')
 const goodRate = computed(() => reviews.value.length ? Math.round(reviews.value.filter((r) => r.rating >= 4).length / reviews.value.length * 100) : 0)
@@ -24,8 +26,8 @@ function back() {
 
 <template>
   <view class="page-shell merchant-sub">
-    <view class="sub-header">
-      <button class="top-back" @click="back">‹</button>
+    <view class="sub-header" :style="{ paddingTop: (navLayout.capsuleTop + 44) + 'px' }">
+      <button class="top-back" :style="{ top: navLayout.capsuleTop + 'px' }" @click="back">‹</button>
       <text class="title">用户评价</text>
       <text class="subtitle">顾客评分与反馈，实时了解用餐口碑</text>
     </view>
@@ -51,24 +53,24 @@ function back() {
 </template>
 
 <style scoped lang="scss">
-.merchant-sub { padding-bottom: 80rpx; }
-.sub-header { padding: calc(70rpx + env(safe-area-inset-top)) 30rpx 36rpx; background: linear-gradient(145deg, #0637c9, #071a62); color: #fff; }
-.top-back { position: absolute; left: 26rpx; top: calc(24rpx + env(safe-area-inset-top)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 46rpx; line-height: 1; }
+.merchant-sub { padding-bottom: 80rpx; background: #F7F8FA; }
+.sub-header { position: relative; padding: calc(64rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)) 30rpx 40rpx; background: linear-gradient(135deg, #FFD21E 0%, #FFC300 70%, #FFAE00 100%); color: #222426; }
+.top-back { position: absolute; left: 26rpx; top: calc(24rpx + var(--status-bar-height, 0px) + env(safe-area-inset-top, 0px)); width: 62rpx; height: 62rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0, 0, 0, .08); color: #222426; font-size: 46rpx; line-height: 1; }
 .eyebrow, .title, .subtitle { display: block; }
-.eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #edcf91; }
-.title { margin-top: 12rpx; font-size: 42rpx; font-weight: 800; }
-.subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(255,255,255,.65); }
+.eyebrow { font-size: 17rpx; letter-spacing: 5rpx; color: #8C5E00; }
+.title { margin-top: 12rpx; font-size: 42rpx; font-weight: 900; color: #222426; }
+.subtitle { margin-top: 8rpx; font-size: 21rpx; color: rgba(34, 36, 38, .75); }
 .summary { display: flex; margin: -30rpx 28rpx 0; }
 .sum-card { flex: 1; display: flex; flex-direction: column; margin-right: 20rpx; padding: 32rpx 20rpx; }
 .sum-card.last { margin-right: 0; }
-.sum-number { margin-bottom: 10rpx; font-size: 46rpx; font-weight: 800; color: var(--brand-900); }
-.sum-label { font-size: 21rpx; color: var(--muted); }
+.sum-number { margin-bottom: 10rpx; font-size: 46rpx; font-weight: 900; color: #222426; }
+.sum-label { font-size: 21rpx; color: #8E929E; }
 .review-list { padding: 26rpx 28rpx; }
 .review-card { margin-bottom: 20rpx; padding: 24rpx; }
 .review-head { display: flex; align-items: flex-start; justify-content: space-between; }
 .user-line { display: flex; flex-direction: column; }
-.user-name { margin-bottom: 8rpx; font-size: 26rpx; font-weight: 700; }
-.stars { font-size: 26rpx; color: #f7b731; letter-spacing: 3rpx; }
+.user-name { margin-bottom: 8rpx; font-size: 26rpx; font-weight: 800; color: #222426; }
+.stars { font-size: 26rpx; color: #FFAA00; letter-spacing: 3rpx; }
 .time { font-size: 19rpx; color: var(--muted); }
 .content { display: block; margin-top: 16rpx; font-size: 24rpx; color: var(--ink); line-height: 1.6; }
 .order-no { display: block; margin-top: 12rpx; padding-top: 14rpx; border-top: 1rpx solid var(--line); font-size: 19rpx; color: var(--muted); }
